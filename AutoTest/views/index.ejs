@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html ng-app="autotestApp">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="stylesheets/main.css">
+    <!-- JQuery-->
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-route/angular-route.js"></script>
+    <script src="bower_components/angular-animate/angular-animate.js"></script>
+    <script src="bower_components/ng-file-upload/angular-file-upload-shim.min.js"></script> 
+    <script src="bower_components/ng-file-upload/angular-file-upload.min.js"></script> 
+
+    <script src="javascripts/angularApp.js"></script>
+    <script src="javascripts/services/dataService.js"></script>
+    <script src="javascripts/directives/toastDialog.js"></script>
+    <script src="javascripts/controllers/editorController.js"></script>
+    <script src="javascripts/controllers/guideController.js"></script>
+    <script src="javascripts/controllers/manageController.js"></script>
+    <script src="javascripts/controllers/parameterController.js"></script>
+    <script src="javascripts/controllers/reportManageController.js"></script>
+    <script src="javascripts/controllers/uploaderController.js"></script>
+    <script src="javascripts/controllers/appManageController.js"></script>
+    <title>自动化测试控制台</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#/">自动化测试控制台</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav" ng-init="appContext.tabSelect=1">
+            <li ng-class="{'active' : appContext.tabSelect==1}"><a href="#/">脚本编辑</a></li>
+            <li ng-class="{'active' : appContext.tabSelect==2}"><a href="#manage">脚本管理</a></li>
+            <li ng-class="{'active' : appContext.tabSelect==3}"><a href="#parameter">脚本参数</a></li>
+            <li ng-class="{'active' : appContext.tabSelect==4}"><a href="#app_manage">测试包管理</a></li>
+            <li ng-class="{'active' : appContext.tabSelect==5}"><a href="#report_manage">报告管理</a></li>
+            <li ng-class="{'active' : appContext.tabSelect==6}"><a href="#guide">使用手册</a></li>
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+
+    <div id="viewRoot" ng-view></div>
+
+    <div toast-dialog></div>
+  </body>
+</html>
