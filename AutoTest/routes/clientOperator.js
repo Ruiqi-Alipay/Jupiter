@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var path = require('path');
 var fs = require('fs');
 
 module.exports = {
@@ -10,7 +11,7 @@ module.exports = {
 	  });
 	},
 	getVersion: function (req, res, next) {
-	  fs.readFile('../AutoTest/environment/verison.json', function(err, data) {
+	  fs.readFile(path.join(__dirname, '..', 'environment', 'verison.json'), function(err, data) {
 	    if (err) {
 	      console.log(err);
 	      return next(err);
