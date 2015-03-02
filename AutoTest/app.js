@@ -37,7 +37,6 @@ app.use(cookieParser());
 app.use('/api', routes);
 app.use('/reporter', express.static(path.join(__dirname, '/public')));
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
-app.use('/environment', express.static(path.join(__dirname, '/environment')));
 app.use('/reporter/reports', express.static(path.join(__dirname, '/reports')));
 app.use('/', express.static(path.join(__dirname, '/public')));
 

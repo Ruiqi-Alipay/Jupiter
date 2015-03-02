@@ -1,6 +1,13 @@
+require('../models/TestScript');
+require('../models/TestScriptFolder');
+require('../models/ScriptParameter');
+
 var mongoose = require('mongoose');
 var path = require('path');
 var fs = require('fs');
+var TestScript = mongoose.model('TestScript');
+var TestScriptFolder = mongoose.model('TestScriptFolder');
+var ScriptParameter = mongoose.model('ScriptParameter');
 
 module.exports = {
 	getSystemConfigs: function (req, res, next) {
