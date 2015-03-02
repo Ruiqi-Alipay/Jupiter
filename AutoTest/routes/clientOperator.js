@@ -11,7 +11,7 @@ module.exports = {
 	  });
 	},
 	getVersion: function (req, res, next) {
-	  fs.readFile(path.join(__dirname, '..', 'environment', 'verison.json'), function(err, data) {
+	  fs.readFile(path.join(__dirname, '..', 'environment', 'version.json'), function(err, data) {
 	    if (err) {
 	      console.log(err);
 	      return next(err);
