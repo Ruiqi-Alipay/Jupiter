@@ -17,6 +17,7 @@ app.use('/', root);
 app.use('/autotest', autoTest);
 app.use('/sdkeditor', adkEditor);
 app.use('/bower_components',  express.static(path.join(__dirname, '/bower_components')));
+app.use('/environment', express.static(path.join(__dirname, '..', 'AutoTest', 'environment')));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
