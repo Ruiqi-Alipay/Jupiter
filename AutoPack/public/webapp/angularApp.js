@@ -1,0 +1,1 @@
+var app = angular.module('autopackApp', ['btford.socket-io']);
