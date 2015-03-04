@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 var debug = require('debug')('autopack-server');
 var app = require('../app');
+var socket = require('../routes/socket.js');
 
 app.set('port', process.env.PORT || 8080);
 
-var server = app.listen(app.get('port'), function() {
-  debug('Autopack server listening on port ' + server.address().port);
+socket.http.listen(app.get('port'), function() {
+  console.log('Autopack server listening on port ' + app.get('port'));
 });

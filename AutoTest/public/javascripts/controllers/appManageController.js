@@ -35,7 +35,7 @@ autotestApp.controller("appManageController", function($scope, $rootScope, $uplo
 
 		$rootScope.$broadcast('toastMessage', '报告上传中...');
 		$upload.upload({
-		  url: '/api/testapp',
+		  url: './api/testapp',
 		  method: 'POST',
 		  data: {
 		  	description: $scope.app.description,

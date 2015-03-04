@@ -16,8 +16,10 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+console.log('FFFF: ' + path.join(__dirname, 'uploads'));
+
 app.use(multer({
-    dest: './uploads/',
+    dest: path.join(__dirname, 'uploads'),
     rename: function(fieldname, filename) {
         return filename;
     },
@@ -81,5 +83,10 @@ app.use(function(err, req, res, next) {
     });
 });
 
-
-module.exports = app;
+if (require.main === module) {
+    app.listen(80, function(){
+        console.info('Express server listening on port ' + 80);
+    });
+} else {
+    module.exports = app;
+}

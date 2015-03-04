@@ -1,15 +1,74 @@
+var mongoose = require('mongoose');
+var path = require('path');
+var exec = require('child_process').exec;
+var Task = mongoose.model('Task', mongoose.Schema({
+  name: String,
+  state: String,
+  date: Date,
+  retry: {type: Number, default: 0}
+}));
 
 module.exports = {
-	newTask: function () {
-		db.task.insert({
+	taskId: function (req, res, next, taskId) {
+	  Task.findById(taskId).exec(function (err, item){
+	    if (err) { return next(err); }
+	    if (!item) { return next(new Error("can't find item")); }
+
+	    req.task = item;
+	    return next();
+	  });
+	},
+	newTask: function (req, res, next) {
+		var newTask = new Task({
 			date: new Date(),
-			retry: 0,
+			name: 'Test',
+			state: 'Pennding'
+		});
+		newTask.save(function(err, newTask){
+			if (err) return next(new Error('Insert new task failed!'));
+
+		    res.json(newTask);
 		});
 	},
-	deleteTask: function () {
+	startTask: function (req, res, next) {
+		if (req.task.state != 'Pennding') return next(new Error('Task state not correct! ' + req.task.state));
 
+	    var io = require('../routes/socket.js').io;
+
+		var originPath = process.cwd();
+		var distPath = path.join(originPath, 'ali01516027_CP_20141128_android_phone_cashier', 'internation_sdk', 'autopack');
+		process.chdir(distPath)
+		var child = exec('java -Dfile.encoding=UTF-8 -jar pack.jar',
+				function (error, stdout, stderr){
+		    if(error){
+		      console.log('exec error: ' + error);
+		    }
+		});
+		process.chdir(originPath);
+
+		child.stdout.on('data', function (data) {
+			console.log('data: ' + data);
+			io.emit('message', data);
+		});
+		child.on('close', function (code) {
+		    console.log('child process finished: ' + code);
+		});
 	},
-	listTasks: function () {
-		
+	deleteTask: function (req, res, next) {
+	  req.task.remove(function(err, item){
+	    if (err) { return next(err); }
+
+	    res.json(item);
+	  });
+	},
+	getTasks: function (req, res, next) {
+	    Task.find(function(err, items){
+	      if(err){ return next(err); }
+
+	      res.json(items);
+	    });
+	},
+	getTaskById: function (req, res, next) {
+	    res.json(req.task);
 	}
 };

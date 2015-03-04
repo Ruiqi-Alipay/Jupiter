@@ -1,20 +1,23 @@
 var express = require('express');
 var app = express();
 var path = require('path');
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
 
+/* DB connection */
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/autopack');
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function (callback) {
+  console.log('DB connection success!');
+});
+
+var clientInterface = require('./routes/clientInterface');
+
+app.use('/api', clientInterface);
 app.use('/', express.static(path.join(__dirname, 'public')));
 
 app.get('/', function(req, res){
 	res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-io.on('connection', function(socket){
-  console.log('a user connected');
-  socket.on('disconnect', function(){
-    console.log('user disconnected');
-  });
 });
 
 module.exports = app;

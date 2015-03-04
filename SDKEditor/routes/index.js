@@ -6,7 +6,7 @@ var protocolOperator = require('./protocolOperator.js')
 
 router.param('scriptId', scriptOperator.scriptId);
 router.get('/scripts', scriptOperator.getScripts);
-router.get('/scripts/:scriptId', scriptOperator.getScripts);
+router.get('/scripts/:scriptId', scriptOperator.getScriptById);
 router.post('/scripts', scriptOperator.newScript);
 router.post('/scripts/:scriptId', scriptOperator.updateScript);
 router.delete('/scripts/:scriptId', scriptOperator.deleteScript);

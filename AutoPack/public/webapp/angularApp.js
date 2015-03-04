@@ -1,1 +1,1 @@
-var app = angular.module('autopackApp', ['btford.socket-io']);
+var app = angular.module('autopackApp', ['ngMaterial', 'socket-console', 'task-list']);
