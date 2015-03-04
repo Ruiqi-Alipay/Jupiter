@@ -6,6 +6,7 @@ var logger = require('morgan');
 var root = require('./routes/rootIndex')
 var autoTest = require('../AutoTest/app.js');
 var adkEditor = require('../SDKEditor/app.js');
+var autoPack = require('../AutoPack/app.js');
 
 var app = express();
 
@@ -16,6 +17,7 @@ app.set('view engine', 'ejs');
 app.use('/', root);
 app.use('/autotest', autoTest);
 app.use('/sdkeditor', adkEditor);
+app.use('/autopack', autoPack);
 app.use('/bower_components',  express.static(path.join(__dirname, '/bower_components')));
 app.use('/environment', express.static(path.join(__dirname, '..', 'AutoTest', 'environment')));
 
