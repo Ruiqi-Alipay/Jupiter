@@ -7,6 +7,7 @@
 
     <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Roboto:400,700'>
     <link rel="stylesheet" href="bower_components/angular-material/angular-material.css">
+    <link rel="stylesheet" href="webapp/socket-console/vtortola.ng-terminal.css">
 
     <script src="bower_components/socket.io-client/socket.io.js"></script>
     <script src="bower_components/angular/angular.js"></script>
@@ -19,6 +20,7 @@
     <script src="webapp/socket-console/socket-console.js"></script>
     <script src="webapp/task-list/task-list.js"></script>
     <script src="webapp/backend-service/backend-service.js"></script>
+    <script src="webapp/socket-console/vtortola.ng-terminal.js"></script>
   </head>
   <body ng-app="autopackApp">
       <md-toolbar>
@@ -29,7 +31,7 @@
       <br>
       <div layout="row" layout-margin layout-padding>
         <task-list flex="30" flex-order="1"></task-list>
-        <socket-console flex="70" flex-order="2"></socket-console>
+        <socket-console flex="68" flex-order="2"></socket-console>
       </div>
   </body>
 </html>

@@ -16,7 +16,9 @@ taskList.directive("taskList", function($rootScope, backendService) {
             scope.onItemClicked = function (item) {
                 $rootScope.$broadcast('task:selected', item);
             };
-            scope.onStart
+            scope.onStartTask = function (item) {
+                $rootScope.$broadcast('task:start', item);
+            }
 	    }
   	};
 });

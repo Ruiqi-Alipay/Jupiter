@@ -1,23 +1,42 @@
-var socketConsole = angular.module('socket-console', ['btford.socket-io']);
+var socketConsole = angular.module('socket-console', ['vtortola.ng-terminal']);
 
-socketConsole.factory('backendSocket', function (socketFactory) {
-  return socketFactory();
-});
-
-socketConsole.directive("socketConsole", function($rootScope, backendSocket) {
+socketConsole.directive("socketConsole", function($rootScope, backendService) {
   	return {
     	restrict: "E",
     	replace: true,
-        scope: true,
+      scope: true,
     	templateUrl: "webapp/socket-console/socket-console.html",
     	link: function (scope, element, attr) {
-    		backendSocket.on('message', function(data) {
-                console.log(data);
+        var socket = io();
+        var currentTask;
+
+        scope.$on('terminal-input', function (e, consoleInput) {
+            var cmd = consoleInput[0];
+            socket.emit('userInput', {
+              id: currentTask._id,
+              cmd: cmd.command
+            });
+        });
+
+        $rootScope.$on('task:selected', function (event, data) {
+            currentTask = data;
+        });
+        $rootScope.$on('task:start', function (event, data) {
+            currentTask = data;
+            socket.on(data._id, function(data) {
+              scope.$broadcast('terminal-output', {
+                  output: true,
+                  text: [data],
+                  breakLine: true
+              });
             });
 
-            $rootScope.$on('task:selected', function (event, data) {
-                console.log(data);
+            backendService.startTask(data._id, function (newData) {
+                $rootScope.$broadcast('task:stateChange', newData);
+            }, function (newData) {
+
             });
+        });
 	    }
   	};
 });

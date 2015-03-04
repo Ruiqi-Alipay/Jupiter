@@ -14,15 +14,15 @@
 		        </p>
 		      </div>
 		      <div class="md-tile-right">
-				<div ng-switch="item.state">
-				  <div ng-switch-when="Pennding">
-			      	<md-button class="md-fab" aria-label="Eat cake">
+<!-- 				<div ng-switch="item.state">
+				  <div ng-switch-when="Pennding"> -->
+			      	<md-button class="md-fab" aria-label="Eat cake" ng-click="onStartTask(item)">
 	            		<md-icon md-svg-icon="core:alarm-add" style="color:#000;" alt="Add"></md-icon>
 	        		</md-button>
-				  </div>
+<!-- 				  </div>
 				  <div ng-switch-default>
 				  </div>
-				</div>
+				</div> -->
 		      </div>
 		      <div class="md-ripple-container"></div>
 		    </md-item-content>

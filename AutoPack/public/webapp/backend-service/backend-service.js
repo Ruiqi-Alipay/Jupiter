@@ -7,6 +7,13 @@ backendService.factory('backendService', function ($http) {
 		  	}).error(function(data, status, headers, config) {
 		  		error(data);
 		  	});
+		},
+		startTask: function (taskId, success, error) {
+			$http.get('./api/start/' + taskId).success(function(data){
+		    	success(data);
+		  	}).error(function(data, status, headers, config) {
+		  		error(data);
+		  	});
 		}
 	};
 });

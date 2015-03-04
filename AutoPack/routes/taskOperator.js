@@ -1,6 +1,5 @@
 var mongoose = require('mongoose');
 var path = require('path');
-var exec = require('child_process').exec;
 var Task = mongoose.model('Task', mongoose.Schema({
   name: String,
   state: String,
@@ -31,27 +30,12 @@ module.exports = {
 		});
 	},
 	startTask: function (req, res, next) {
-		if (req.task.state != 'Pennding') return next(new Error('Task state not correct! ' + req.task.state));
+		if (req.task.state == 'Finished') return next(new Error('Task state not correct! ' + req.task.state));
 
-	    var io = require('../routes/socket.js').io;
-
-		var originPath = process.cwd();
-		var distPath = path.join(originPath, 'ali01516027_CP_20141128_android_phone_cashier', 'internation_sdk', 'autopack');
-		process.chdir(distPath)
-		var child = exec('java -Dfile.encoding=UTF-8 -jar pack.jar',
-				function (error, stdout, stderr){
-		    if(error){
-		      console.log('exec error: ' + error);
-		    }
-		});
-		process.chdir(originPath);
-
-		child.stdout.on('data', function (data) {
-			console.log('data: ' + data);
-			io.emit('message', data);
-		});
-		child.on('close', function (code) {
-		    console.log('child process finished: ' + code);
+		require('../routes/channel.js').newChannel(req.task, function (runningTask) {
+			res.json(runningTask);
+		}, function (error) {
+			next(error);
 		});
 	},
 	deleteTask: function (req, res, next) {
