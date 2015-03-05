@@ -27,6 +27,8 @@ router.post('/feedback', function (req, res, next) {
 			}
 
 			var args = encodeURIComponent(JSON.stringify(req.body));
+
+			console.log("FFFF:" + args);
 			exec('java -Dfile.encoding=UTF-8 -jar ' + path.join(__dirname, '..', 'libs', 'feedback.jar') + ' ' + args,
 				function (error, stdout, stderr){
 				console.log('stdout:');

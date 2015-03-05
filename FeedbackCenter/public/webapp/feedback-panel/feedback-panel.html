@@ -21,6 +21,50 @@
 	        <label>附加信息</label>
 	        <input ng-model="feedback.extra">
 	    </md-input-container>
+	      <div layout layout-sm="column">
+	        <md-input-container flex>
+	          <label>客户端版本号</label>
+	          <input ng-model="appInfo.appVersion">
+	        </md-input-container>
+	        <md-input-container flex>
+	          <label>OS版本号</label>
+	          <input ng-model="appInfo.osVersion">
+	        </md-input-container>
+	        <md-input-container flex>
+	          <label>机型</label>
+	          <input ng-model="appInfo.device">
+	        </md-input-container>
+	        <md-input-container flex>
+	          <label>当前城市</label>
+	          <input ng-model="appInfo.city">
+	        </md-input-container>
+	        <md-input-container flex>
+	          <label>当前网络环境</label>
+	          <input ng-model="appInfo.network">
+	        </md-input-container>
+	      </div>
+	      <div layout layout-sm="column">
+	        <md-input-container flex>
+	          <label>客户端分辨率</label>
+	          <input ng-model="appInfo.screen">
+	        </md-input-container>
+	        <md-input-container flex>
+	          <label>DNS IP</label>
+	          <input ng-model="appInfo.ip">
+	        </md-input-container>
+	        <md-input-container flex>
+	          <label>产品模块名</label>
+	          <input ng-model="appInfo.module">
+	        </md-input-container>
+	        <md-input-container flex>
+	          <label>浏览器</label>
+	          <input ng-model="appInfo.browser">
+	        </md-input-container>
+	        <md-input-container flex>
+	          <label>设备唯一标识</label>
+	          <input ng-model="appInfo.micaddress">
+	        </md-input-container>
+	      </div>
 	    <md-button class="md-primary md-fab md-fab-bottom-right" ng-click="onSubmit()" ng-disabled="!feedback.title || !feedback.content || !feedback.semanticCategory">
 	    	提交
 	    </md-button>
