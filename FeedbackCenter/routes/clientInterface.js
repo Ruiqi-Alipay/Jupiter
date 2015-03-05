@@ -7,14 +7,9 @@ var exec = require('child_process').exec;
 router.post('/feedback', function (req, res, next) {
 	if (!req.body) return next(new Error('Request body is empty!'));
 	
-	var split = '%0A';
-	var params = 'q='
-	for (var key in req.body) {
-		params += (req.body[key] + split);
-	}
-	params = params.slice(0, params.length - 3);
+	var params = 'q=' + req.body.title + '%0A' + req.body.content;
 
-	request.post({url:'http://openapi.baidu.com/public/2.0/bmt/translate', form: 'client_id=kaGTr93fmLAhwGxibsbiFd7y&' + params + '&from=auto&to=zh'},
+	request.post({url:'http://openapi.baidu.com/public/2.0/bmt/translate', form: 'client_id=kaGTr93fmLAhwGxibsbiFd7y&' + params + '&from=en&to=zh'},
 		function(err, httpResponse, body){
 			if (err) return next(err);
 
@@ -31,10 +26,8 @@ router.post('/feedback', function (req, res, next) {
 				});
 			}
 
-			var params = ' ' + req.body.title + ' ' + req.body.content;
-			console.log('params: ' + params);
-
-			exec('java -Dfile.encoding=UTF-8 -jar ' + path.join(__dirname, '..', 'libs', 'feedback.jar') + params,
+			var args = encodeURIComponent(JSON.stringify(req.body));
+			exec('java -Dfile.encoding=UTF-8 -jar ' + path.join(__dirname, '..', 'libs', 'feedback.jar') + ' ' + args,
 				function (error, stdout, stderr){
 				console.log('stdout:');
 				console.log(stdout);
