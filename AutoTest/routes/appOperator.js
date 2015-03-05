@@ -19,8 +19,10 @@ module.exports = {
 	    var newItem = new TestApp();
 	    newItem.name = file.name;
 	    newItem.path = file.path;
-	    newItem.type = req.body.type;
-	    newItem.description = req.body.description;
+
+	    var data = JSON.parse(req.body.data);
+	    newItem.type = data.type;
+	    newItem.description = data.description;
 	    newItem.save(function(err, item){
 	      if(err){ return next(err); }
 	      res.json(item);
