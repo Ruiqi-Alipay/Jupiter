@@ -1,0 +1,30 @@
+<!doctype html>
+<html ng-app="feedbackApp">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Feedback Termainal</title>
+
+    <link rel='stylesheet' href='http://fonts.googleapis.com/css?family=Roboto:400,700'>
+    <link rel="stylesheet" href="bower_components/angular-material/angular-material.css">
+
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-animate/angular-animate.js"></script>
+    <script src="bower_components/angular-aria/angular-aria.js"></script>
+    <script src="bower_components/angular-material/angular-material.js"></script>
+
+    <script src="webapp/angularApp.js"></script>
+    <script src="webapp/feedback-panel/feedback-panel.js"></script>
+  </head>
+  <body ng-controller="toastController">
+      <md-toolbar>
+        <h2 class="md-toolbar-tools">
+          <span>用户反馈收集台</span>
+        </h2>
+      </md-toolbar>
+      <br>
+      <div layout="row" layout-align="center center">
+        <feedback-panel style="width: 600px; height: 500px;"></feedback-panel>
+      </div>
+  </body>
+</html>

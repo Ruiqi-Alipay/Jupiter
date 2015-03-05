@@ -10,7 +10,8 @@ io.on('connection', function(socket){
   socket.on('userInput', function(msg){
     var child = channelMap[msg.id];
     if (child) {
-    	child.stdin.write(msg.cmd + '\r\n');
+    	console.log('USER INPUT: ' + msg.cmd + String.fromCharCode(13));
+    	child.stdin.write(msg.cmd + String.fromCharCode(13));
     }
   });
 });

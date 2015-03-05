@@ -1,0 +1,15 @@
+<md-card layout="column">
+	<md-content class="md-padding" layout-fill>
+	    <md-input-container>
+	        <label>标题</label>
+	        <input ng-model="feedback.title">
+	    </md-input-container>
+	    <md-input-container>
+	        <label>内容</label>
+	        <input ng-model="feedback.content">
+	    </md-input-container>
+	    <md-button class="md-primary md-fab md-fab-bottom-right" ng-click="onSubmit()">
+	    	提交
+	    </md-button>
+	</md-content>
+</md-card>

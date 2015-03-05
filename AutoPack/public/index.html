@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html ng-app="autopackApp">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
@@ -22,7 +22,7 @@
     <script src="webapp/backend-service/backend-service.js"></script>
     <script src="webapp/socket-console/vtortola.ng-terminal.js"></script>
   </head>
-  <body ng-app="autopackApp">
+  <body ng-controller="toastController">
       <md-toolbar>
         <h2 class="md-toolbar-tools">
           <span>Toolbar</span>
@@ -30,7 +30,7 @@
       </md-toolbar>
       <br>
       <div layout="row" layout-margin layout-padding>
-        <task-list flex="30" flex-order="1"></task-list>
+        <task-list flex="30" flex-order="1" style="height: 520px;"></task-list>
         <socket-console flex="68" flex-order="2"></socket-console>
       </div>
   </body>

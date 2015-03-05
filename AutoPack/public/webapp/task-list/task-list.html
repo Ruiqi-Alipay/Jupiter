@@ -1,22 +1,22 @@
-<md-card >
-	<md-content layout="column">
+<md-card layout="column">
+	<md-content flex-order="1">
+		<md-button class="md-raised md-primary" ng-click="onNewTask()">新建打包任务</md-button>
+	</md-content>
+	<md-content flex-order="2">
 		<md-list >
-		  <md-item ng-repeat="item in todos">
+		  <md-item ng-repeat="item in todos | orderBy: 'date': true">
 		    <md-item-content ng-click="onItemClicked(item)">
-		      <div class="md-tile-left">
-		          <img ng-src="{{item.face}}" class="face" alt="{{item.who}}">
-		      </div>
 		      <div class="md-tile-content">
-		        <h3>{{item.name}}</h3>
+		        <h3>{{item.date | date:'yyyy-MM-dd HH:mm:ss'}}</h3>
 		        <h4>{{item.state}}</h4>
-		        <p>
-		          {{item.date}}
-		        </p>
 		      </div>
 		      <div class="md-tile-right">
+		      	<md-button class="md-fab md-primary" aria-label="Eat cake" ng-click="onDeleteTask(item)">
+            		<md-icon md-svg-icon="core:alarm-add" style="color:#000;" alt="Add"></md-icon>
+        		</md-button>
 <!-- 				<div ng-switch="item.state">
 				  <div ng-switch-when="Pennding"> -->
-			      	<md-button class="md-fab" aria-label="Eat cake" ng-click="onStartTask(item)">
+			      	<md-button class="md-fab md-primary" aria-label="Eat cake" ng-click="onStartTask(item)">
 	            		<md-icon md-svg-icon="core:alarm-add" style="color:#000;" alt="Add"></md-icon>
 	        		</md-button>
 <!-- 				  </div>
@@ -28,6 +28,5 @@
 		    </md-item-content>
 		  </md-item>
 		</md-list>
-		<md-button class="md-raised md-primary">新建打包任务</md-button>
 	</md-content>
 </md-card>

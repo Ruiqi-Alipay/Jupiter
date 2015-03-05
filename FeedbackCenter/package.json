@@ -1,0 +1,17 @@
+{
+  "name": "FeedbackCenter",
+  "version": "1.0.0",
+  "description": "Feedback terminal",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ruiqi",
+  "license": "ISC",
+  "dependencies": {
+    "debug": "^2.1.2",
+    "express": "^4.12.1",
+    "mongodb": "^1.4.33",
+    "mongoose": "^3.8.24"
+  }
+}
