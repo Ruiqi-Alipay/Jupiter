@@ -1,6 +1,6 @@
 var feedbackPanel = angular.module('feedback-panel', ['backend-service']);
 
-feedbackPanel.directive("feedbackPanel", function($rootScope, backendService) {
+feedbackPanel.directive("feedbackPanel", function($rootScope, $window, backendService) {
   	return {
     	restrict: "E",
     	replace: true,

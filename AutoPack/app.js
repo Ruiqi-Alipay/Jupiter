@@ -25,5 +25,7 @@ if (require.main === module) {
         console.info('Express server listening on port ' + 80);
     });
 } else {
+	var channel = require('./routes/channel.js');
+	channel.start(app)
     module.exports = app;
 }

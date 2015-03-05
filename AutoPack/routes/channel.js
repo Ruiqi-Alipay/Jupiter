@@ -1,28 +1,34 @@
-var app = require('../app');
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
-var path = require('path');
-var exec = require('child_process').exec;
-
-var channelMap = {};
-
-io.on('connection', function(socket){
-  socket.on('userInput', function(msg){
-    var child = channelMap[msg.id];
-    if (child) {
-    	console.log('USER INPUT: ' + msg.cmd + String.fromCharCode(13));
-    	child.stdin.write(msg.cmd + String.fromCharCode(13));
-    }
-  });
-});
 
 module.exports = {
-	start: function (port) {
-		http.listen(port, function() {
-		  console.log('Autopack server started! listening on port ' + port);
+	start: function (app, port) {
+		var http = require('http').Server(app);
+		var io = require('socket.io')(http);
+		var path = require('path');
+
+		var channelMap = {};
+
+		io.on('connection', function(socket){
+		  socket.on('userInput', function(msg){
+		    var child = channelMap[msg.id];
+		    if (child) {
+		    	console.log('USER INPUT: ' + msg.cmd + String.fromCharCode(13));
+		    	child.stdin.write(msg.cmd + String.fromCharCode(13));
+		    }
+		  });
 		});
+
+		if (port) {
+			http.listen(port, function() {
+			  console.log('Autopack server started! listening on port ' + port);
+			});
+		}
 	},
 	newChannel: function (task, success, error) {
+		var app = require('../app');
+		var http = require('http').Server(app);
+		var io = require('socket.io')(http);
+		var exec = require('child_process').exec;
+
 		if (task._id in channelMap || task.state == 'Finished') {
 			console.log('Channel exist !');
 			success(task); 
