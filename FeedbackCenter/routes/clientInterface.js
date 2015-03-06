@@ -51,14 +51,19 @@ var saveToMPop = function (array, callback) {
 			exec('java -jar ' + path.join(__dirname, '..', 'libs', 'feedback.jar') + ' ' + args
 				, function (error, stdout, stderr){
 				console.log('Save feedback finished! ');
-				console.log('error:');
-				console.log(error);
-				console.log('stdout:');
-				console.log(stdout);
-				console.log('stderr:');
-				console.log(stderr);
+				console.log('stdout: ' + stdout);
+
+				if (stdout.indexOf('retCode-SUCCESS') > 0) {
+					callback({
+						result: true
+					});
+				} else {
+					callback({
+						result: false,
+						msg: stdout
+					});
+				}
 			});
-			callback(array);
 		}
 	);
 };
@@ -67,7 +72,7 @@ router.post('/feedback', function (req, res, next) {
 	if (!req.body) return next(new Error('Request body is empty!'));
 
 	saveToMPop([req.body], function (result) {
-		res.json(result[0]);
+		res.json(result);
 	});
 });
 
@@ -134,10 +139,8 @@ router.post('/upload', function (req, res, next) {
         }
     }
 
-	saveToMPop([req.body], function (result) {
-	    res.json({
-	    	count: result.length
-	    });
+	saveToMPop(feedbacks, function (result) {
+	    res.json(result);
 	});
 });
 

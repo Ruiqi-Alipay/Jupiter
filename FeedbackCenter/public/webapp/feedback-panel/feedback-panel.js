@@ -8,6 +8,7 @@ feedbackPanel.directive("feedbackPanel", function($rootScope, backendService) {
     	templateUrl: "webapp/feedback-panel/feedback-panel.html",
     	link: function (scope, element, attr) {
             scope.appInfo = {};
+            scope.running = false;
             
     		scope.onSubmit = function () {
                 var info = scope.appInfo;
@@ -23,10 +24,13 @@ feedbackPanel.directive("feedbackPanel", function($rootScope, backendService) {
                     (info.browser ? info.browser : '') + ':' +
                     (info.micaddress ? info.micaddress : '') + ':';
 
+                scope.running = true;
+                $rootScope.$broadcast('toast:show', '反馈创建中...');
     			backendService.newFeedback(scope.feedback, function (data) {
-                    scope.feedback = data;
+                    scope.running = false;
     				$rootScope.$broadcast('toast:show', '创建成功');
     			}, function (error) {
+                    scope.running = false;
     				$rootScope.$broadcast('toast:show', '创建失败：' + error);
     			});
     		};
