@@ -14,12 +14,46 @@ taskList.directive("taskList", function($rootScope, $mdDialog, backendService) {
 
                 });
             };
+            var refreshProjects = function () {
+                backendService.getProjects(function(projects) {
+                    scope.projects = projects;
+                }, function(error) {
+
+                });
+            };
+            var showProjectDialog = function (ev, project) {
+                $mdDialog.show({
+                  controller: function (scope, $mdDialog) {
+                      scope.project = angular.copy(project);
+
+                      scope.hide = function() {
+                        $mdDialog.hide();
+                      };
+                      scope.cancel = function() {
+                        $mdDialog.cancel();
+                      };
+                      scope.newEditProject = function(project) {
+                        backendService.newEditProject(project, function (data) {
+                          refreshProjects();
+                        }, function (error) {
+                          
+                        });
+                        $mdDialog.hide();
+                      };
+                  },
+                  templateUrl: 'webapp/dash-board/project-dialog.html',
+                  targetEvent: ev,
+                });
+            };
+
+            var selectProject;
 
             scope.pannel = {
                 page: 'project'
             };
 
             scope.onNewTask = function () {
+                task.project = selectProject._id;
                 backendService.newTask(function(task) {
                     refreshList();
                     $rootScope.$broadcast('toast:show', '新建任务成功，点击开始按钮开始执行');
@@ -42,30 +76,28 @@ taskList.directive("taskList", function($rootScope, $mdDialog, backendService) {
                 });
             };
             scope.showCreateProejctDialog = function(ev) {
-                $mdDialog.show({
-                  controller: function (scope, $mdDialog) {
-                      scope.hide = function() {
-                        $mdDialog.hide();
-                      };
-                      scope.cancel = function() {
-                        $mdDialog.cancel();
-                      };
-                      scope.createProject = function(project) {
-                        
-                        $mdDialog.hide();
-                      };
-                  },
-                  templateUrl: 'webapp/dash-board/project-dialog.html',
-                  targetEvent: ev,
-                })
-                .then(function(answer) {
-                  scope.alert = 'You said the information was "' + answer + '".';
-                }, function() {
-                  scope.alert = 'You cancelled the dialog.';
+                showProjectDialog(ev);
+            };
+            scope.onEditProject = function (ev, project) {
+                showProjectDialog(ev, project);
+            };
+            scope.onDeleteProject = function (project) {
+                backendService.deleteProject(project._id, function(data) {
+                    refreshProjects();
+                    $rootScope.$broadcast('toast:show', '删除成功');
+                }, function(error) {
+                    $rootScope.$broadcast('toast:show', '删除失败：' + error);
                 });
-              };
+            };
+            scope.onProjectClicked = function (project) {
+                selectProject = project;
+                scope.pannel.page = "task";
+            };
+            scope.onBack = function () {
+                scope.pannel.page = "project";
+            };
 
-            refreshList();
+            refreshProjects();
 	    }
   	};
 });

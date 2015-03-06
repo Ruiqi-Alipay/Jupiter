@@ -37,8 +37,8 @@
     <md-button flex="30" ng-click="hide()">
       取消
     </md-button>
-    <md-button flex="30" ng-click="createProject(project)" class="md-primary" ng-disabled="!projectForm.$valid">
-      创建
+    <md-button flex="30" ng-click="newEditProject(project)" class="md-primary" ng-disabled="!projectForm.$valid">
+      {{project._id ? '修改' : '创建'}}
     </md-button>
   </div>
 </md-dialog>

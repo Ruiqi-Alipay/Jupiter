@@ -4,19 +4,40 @@
 			<md-content flex="10" layout="column" layout-align="center">
 				<md-button class="md-raised md-primary" ng-click="showCreateProejctDialog($event)">新建工程</md-button>
 			</md-content>
+			<md-content flex="90">
+				<md-list >
+				  <md-item ng-repeat="item in projects | orderBy: 'date': true">
+				    <md-item-content ng-click="onProjectClicked(item)">
+				      <div class="md-tile-content">
+				        <h3>{{item.name}}</h3>
+				        <h4>{{item.state}}</h4>
+				        <p>{{item.date | date:'yyyy-MM-dd HH:mm:ss'}}</p>
+				      </div>
+				      <div class="md-tile-right">
+				      	<md-button class="md-fab md-primary md-hue-3" aria-label="Edit project" ng-click="onEditProject($event, item)" style="width: 40px; height: 40px;">
+				      		E
+		        		</md-button>
+				      	<md-button class="md-fab md-warn" aria-label="Delete project" ng-click="onDeleteProject(item)" style="width: 40px; height: 40px;">
+				      		D
+		        		</md-button>
+				      </div>
+				    </md-item-content>
+				  </md-item>
+				</md-list>
+			</md-content>
 		</div>
 		<div ng-switch-when="task">
-			<md-content flex="10">
+			<md-item-content flex="10">
 				<div class="md-tile-left">
-					<md-button class="md-raised md-primary" ng-click="onNewTask($event)">新建打包任务</md-button>
+					<md-button class="md-primary" ng-click="onBack($event)">返回</md-button>
 				</div>
 				<div class="md-tile-content">
 				</div>
 				<div class="md-tile-right">
-					
+					<md-button class="md-raised md-primary" ng-click="onNewTask($event)">新建打包任务</md-button>
 				</div>
-			</md-content>
-			<md-content flex-order="2" flex="90">
+			</md-item-content>
+			<md-content flex="90">
 				<md-list >
 				  <md-item ng-repeat="item in todos | orderBy: 'date': true">
 				    <md-item-content ng-click="onItemClicked(item)">

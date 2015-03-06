@@ -6,7 +6,7 @@ var Project = mongoose.model('Project', mongoose.Schema({
   date: Date,
   svn: String,
   auth: String,
-  packAddress: String
+  packPath: String
 }));
 
 module.exports = {
@@ -21,7 +21,7 @@ module.exports = {
 	},
 	newProject: function (req, res, next) {
 		req.body.date = new Date();
-		req.body.state = 'Preparing!';
+		req.body.state = 'Preparing';
 
 		var project = new Project(req.body);
 		project.save(function(err, item){
@@ -31,9 +31,19 @@ module.exports = {
 		});
 	},
 	editProject: function (req, res, next) {
+		req.project.date = new Date();
+		req.project.name = req.body.name;
+		req.project.svn = req.body.svn;
+		req.project.auth = req.body.auth;
+		req.project.packPath = req.body.packPath;
 
+		req.project.save(function(err, item){
+			if (err) return next(new Error('Update project failed!'));
+
+		    res.json(item);
+		});
 	},
-	deleteTask: function (req, res, next) {
+	deleteProject: function (req, res, next) {
 	  req.project.remove(function(err, item){
 	    if (err) { return next(err); }
 

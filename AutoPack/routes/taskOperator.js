@@ -4,6 +4,7 @@ var Task = mongoose.model('Task', mongoose.Schema({
   name: String,
   state: String,
   date: Date,
+  project: String,
   retry: {type: Number, default: 0}
 }));
 
@@ -21,7 +22,8 @@ module.exports = {
 		var newTask = new Task({
 			date: new Date(),
 			name: 'Test',
-			state: 'Pennding'
+			state: 'Pennding',
+			project: req.body.project
 		});
 		newTask.save(function(err, newTask){
 			if (err) return next(new Error('Insert new task failed!'));
@@ -46,6 +48,8 @@ module.exports = {
 	  });
 	},
 	getTasks: function (req, res, next) {
+		console.log('Query: ');
+		console.log(req.query);
 	    Task.find(function(err, items){
 	      if(err){ return next(err); }
 
