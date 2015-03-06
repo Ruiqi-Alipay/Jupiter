@@ -50,7 +50,7 @@ module.exports = {
 	getTasks: function (req, res, next) {
 		console.log('Query: ');
 		console.log(req.query);
-	    Task.find(function(err, items){
+	    Task.find({}, function(err, items){
 	      if(err){ return next(err); }
 
 	      res.json(items);

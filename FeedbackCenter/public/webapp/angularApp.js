@@ -1,4 +1,4 @@
-var app = angular.module('feedbackApp', ['ngMaterial', 'feedback-panel']);
+var app = angular.module('feedbackApp', ['ngMaterial', 'feedback-panel', 'upload-panel']);
 
 app.controller("toastController", function($mdToast, $animate, $scope) {
     var showToast = function (text) {

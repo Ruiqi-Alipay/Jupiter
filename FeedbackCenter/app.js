@@ -3,9 +3,22 @@ var app = express();
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var multer = require('multer');
 
 var clientInterface = require('./routes/clientInterface');
 
+app.use(multer({
+    dest: path.join(__dirname, 'uploads'),
+    rename: function(fieldname, filename) {
+        return filename;
+    },
+    onFileUploadStart: function(file) {
+        console.log(file.originalname + ' is starting...');
+    },
+    onFileUploadComplete: function(file) {
+        console.log(file.originalname + ' is done');
+    }
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());

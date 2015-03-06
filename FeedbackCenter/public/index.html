@@ -13,8 +13,12 @@
     <script src="bower_components/angular-aria/angular-aria.js"></script>
     <script src="bower_components/angular-material/angular-material.js"></script>
 
+    <script src="bower_components/ng-file-upload/angular-file-upload-shim.min.js"></script> 
+    <script src="bower_components/ng-file-upload/angular-file-upload.min.js"></script> 
+
     <script src="webapp/angularApp.js"></script>
     <script src="webapp/feedback-panel/feedback-panel.js"></script>
+    <script src="webapp/upload-panel/upload-panel.js"></script>
     <script src="webapp/backend-service/backend-service.js"></script>
   </head>
   <body ng-controller="toastController">
@@ -24,8 +28,9 @@
         </h2>
       </md-toolbar>
       <br>
-      <div layout="row" layout-align="center center">
-        <feedback-panel style="width: 700px; height: 550px;"></feedback-panel>
+      <div layout="row" layout-align="center start">
+        <upload-panel style="width: 200px; height: 100px;"></upload-panel>
+        <feedback-panel style="width: 650px; height: 550px;"></feedback-panel>
       </div>
   </body>
 </html>
