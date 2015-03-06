@@ -1,5 +1,6 @@
 <md-card layout="column">
 	<md-content class="md-padding" layout-fill>
+		<md-content layout="row">
 		  <md-select ng-model="feedback.semanticCategory">
 		    <md-option value="CUSTOMER_SERVICE">客服咨询</md-option>
 		    <md-option value="BUG" ng-selected="true">缺陷反馈</md-option>
@@ -9,6 +10,9 @@
 		  <md-select ng-model="feedback.apptype">
 		  	<md-option value="interpaysdk_android" ng-selected="true">interpaysdk_android</md-option>
 		  </md-select>
+		  <div flex></div>
+		  <md-progress-circular md-mode="indeterminate" ng-show="running"></md-progress-circular>
+		</md-content>
 	    <md-input-container>
 	        <label>标题</label>
 	        <input ng-model="feedback.title">

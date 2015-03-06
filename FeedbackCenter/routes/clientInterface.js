@@ -4,6 +4,7 @@ var request = require('request');
 var path = require('path');
 var xlsx = require('xlsx');
 var exec = require('child_process').exec;
+var fs = require('fs');
 
 var saveToMPop = function (array, callback) {
 	var params = 'q=';
@@ -46,23 +47,35 @@ var saveToMPop = function (array, callback) {
 				}
 			}
 
-			var args = encodeURIComponent(JSON.stringify(array));
-			console.log('Address: ' + args);
-			exec('java -jar ' + path.join(__dirname, '..', 'libs', 'feedback.jar') + ' ' + args
-				, function (error, stdout, stderr){
-				console.log('Save feedback finished! ');
-				console.log('stdout: ' + stdout);
+			var d = new Date();
+			var filePath = path.join(__dirname, '..', 'libs', d.getTime() + '.json');
 
-				if (stdout.indexOf('retCode-SUCCESS') > 0) {
-					callback({
-						result: true
-					});
-				} else {
-					callback({
+			fs.writeFile(filePath, JSON.stringify(array), function (err) {
+				  if (err) {
+				  	return callback({
 						result: false,
-						msg: stdout
+						msg: err
 					});
-				}
+				  }
+
+				exec('java -jar ' + path.join(__dirname, '..', 'libs', 'feedback.jar') + ' ' + filePath
+					, function (error, stdout, stderr){
+					console.log('Save feedback finished! ');
+					console.log('stdout: ' + stdout);
+
+					fs.unlink(filePath);
+
+					if (stdout.indexOf('retCode-SUCCESS') > 0) {
+						callback({
+							result: true
+						});
+					} else {
+						callback({
+							result: false,
+							msg: stdout
+						});
+					}
+				});
 			});
 		}
 	);

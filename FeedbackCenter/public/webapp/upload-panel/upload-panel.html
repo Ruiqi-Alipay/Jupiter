@@ -1,10 +1,10 @@
 <md-card>
 	<md-content layout-padding layout="column" layout-align="center">
-		<md-button class="md-raised md-primary" ng-file-select ng-model="files" ng-file-change="batchUpload(files)" ng-multiple="false" ng-accept="'*.xlsx'">批量上传</md-button>
+		<md-button class="md-raised md-primary" ng-file-select ng-model="files" ng-file-change="batchUpload(files)" ng-multiple="false" ng-accept="'*.xlsx'" ng-disabled="progress.running">批量上传</md-button>
 	</md-content>
 
-	<div layout="column" layout-padding>
-	  	<md-progress-linear md-mode="buffer" value="{{progress.value}}" md-buffer-value="100">
+	<div layout="column" ng-show="progress.running" layout-padding>
+	  	<md-progress-linear md-mode="{{progress.mode}}" value="{{progress.value}}">
 	  	</md-progress-linear>
 		<md-item-content>
 			<div class="md-tile-left">

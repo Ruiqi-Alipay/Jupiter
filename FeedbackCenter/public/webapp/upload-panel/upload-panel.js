@@ -7,15 +7,28 @@ uploadPanel.directive("uploadPanel", function($rootScope, $interval, $upload, ba
         scope: true,
     	templateUrl: "webapp/upload-panel/upload-panel.html",
     	link: function (scope, element, attr) {
-          scope.progress = {};
+          scope.progress = {
+            running: false,
+            mode: 'buffer'
+          };
 
           var updateProgress = function (present) {
               scope.progress.value = present;
-              scope.progress.text = present + '%';
-              if (present == 100) {
-                  scope.progress.message = '上传成功';
+
+              if (present == -1 || present == -2) {
+                  scope.progress.running = false;
+                  $rootScope.$broadcast('toast:show', present == -1 ? '批量上传成功' : '批量上传失败');
               } else {
-                  scope.progress.message = '上传中...'
+                  scope.progress.running = true;
+                  if (present == 100) {
+                    scope.progress.mode = 'indeterminate';
+                    scope.progress.text = '';
+                    scope.progress.message = '上传完成，数据创建中...'
+                  } else {
+                    scope.progress.mode = 'buffer';
+                    scope.progress.text = present + '%';
+                    scope.progress.message = '上传中...'
+                  }
               }
           };
 
@@ -30,7 +43,7 @@ uploadPanel.directive("uploadPanel", function($rootScope, $interval, $upload, ba
                   var present = parseInt(100.0 * evt.loaded / evt.total);
                   updateProgress(present);
               }).success(function (data, status, headers, config) {
-                  updateProgress(100);
+                  updateProgress(data.result ? -1 : -2);
               }).error(function (data, status, headers, config) {
                   
               });
