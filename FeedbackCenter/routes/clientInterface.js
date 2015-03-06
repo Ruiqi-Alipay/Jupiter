@@ -61,7 +61,9 @@ var saveToMPop = function (array, callback) {
 				exec('java -jar ' + path.join(__dirname, '..', 'libs', 'feedback.jar') + ' ' + filePath
 					, function (error, stdout, stderr){
 					console.log('Save feedback finished! ');
+					console.log('error: ' + error);
 					console.log('stdout: ' + stdout);
+					console.log('stderr: ' + stderr);
 
 					fs.unlink(filePath);
 
