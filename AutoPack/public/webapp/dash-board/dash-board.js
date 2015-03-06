@@ -1,11 +1,11 @@
-var taskList = angular.module('task-list', ['backend-service']);
+var taskList = angular.module('task-list', ['backend-service', 'ngMaterial']);
 
-taskList.directive("taskList", function($rootScope, backendService) {
+taskList.directive("taskList", function($rootScope, $mdDialog, backendService) {
   	return {
     	restrict: "E",
     	replace: true,
         scope: true,
-    	templateUrl: "webapp/task-list/task-list.html",
+    	templateUrl: "webapp/dash-board/dash-board.html",
     	link: function (scope, element, attr) {
             var refreshList = function () {
                 backendService.getTasks(function(tasks) {
@@ -13,6 +13,10 @@ taskList.directive("taskList", function($rootScope, backendService) {
                 }, function(error) {
 
                 });
+            };
+
+            scope.pannel = {
+                page: 'project'
             };
 
             scope.onNewTask = function () {
@@ -37,6 +41,29 @@ taskList.directive("taskList", function($rootScope, backendService) {
                     $rootScope.$broadcast('toast:show', '删除失败：' + error);
                 });
             };
+            scope.showCreateProejctDialog = function(ev) {
+                $mdDialog.show({
+                  controller: function (scope, $mdDialog) {
+                      scope.hide = function() {
+                        $mdDialog.hide();
+                      };
+                      scope.cancel = function() {
+                        $mdDialog.cancel();
+                      };
+                      scope.createProject = function(project) {
+                        
+                        $mdDialog.hide();
+                      };
+                  },
+                  templateUrl: 'webapp/dash-board/project-dialog.html',
+                  targetEvent: ev,
+                })
+                .then(function(answer) {
+                  scope.alert = 'You said the information was "' + answer + '".';
+                }, function() {
+                  scope.alert = 'You cancelled the dialog.';
+                });
+              };
 
             refreshList();
 	    }

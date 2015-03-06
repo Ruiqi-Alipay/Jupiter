@@ -1,0 +1,44 @@
+<md-dialog aria-label="新建工程" style="width: 600px;">
+  <md-content>
+    <md-subheader class="md-sticky-no-effect">新建工程</md-subheader>
+    <form name="projectForm">
+      <md-input-container>
+        <label>工程名</label>
+        <input required name="name" ng-model="project.name">
+        <div ng-messages="projectForm.name.$error">
+          <div ng-message="required">请输入工程名称.</div>
+        </div>
+      </md-input-container>
+      <md-input-container>
+        <label>工程SVN地址</label>
+        <input required name="svn" ng-model="project.svn">
+        <div ng-messages="projectForm.svn.$error">
+          <div ng-message="required">请输入工程SVN地址.</div>
+        </div>
+      </md-input-container>
+      <md-input-container>
+        <label>SVN用户名@密码</label>
+        <input name="auth" ng-model="project.auth">
+        <div ng-messages="projectForm.auth.$error">
+          <div ng-message="required">请输入工程SVN用户名和密码，用'@'隔开.</div>
+        </div>
+      </md-input-container>
+      <md-input-container>
+        <label>pack.jar相对路径</label>
+        <input required name="packPath" ng-model="project.packPath">
+        <div ng-messages="projectForm.packPath.$error">
+          <div ng-message="required">请输入pack.jsr的SVN工程内的相对地址.</div>
+        </div>
+      </md-input-container>
+    </form>
+  </md-content>
+  <div class="md-actions" layout="row">
+    <span flex></span>
+    <md-button flex="30" ng-click="hide()">
+      取消
+    </md-button>
+    <md-button flex="30" ng-click="createProject(project)" class="md-primary" ng-disabled="!projectForm.$valid">
+      创建
+    </md-button>
+  </div>
+</md-dialog>

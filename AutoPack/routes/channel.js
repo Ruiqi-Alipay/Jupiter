@@ -1,29 +1,22 @@
+var channelMap = {};
 
 module.exports = {
-	start: function (app, port) {
-		var http = require('http').Server(app);
+	start: function (http) {
 		var io = require('socket.io')(http);
-		var path = require('path');
-
-		var channelMap = {};
 
 		io.on('connection', function(socket){
 		  socket.on('userInput', function(msg){
 		    var child = channelMap[msg.id];
 		    if (child) {
-		    	console.log('USER INPUT: ' + msg.cmd + String.fromCharCode(13));
-		    	child.stdin.write(msg.cmd + String.fromCharCode(13));
+		    	var cmd = msg.cmd + String.fromCharCode(13);
+		    	console.log('USER INPUT: ' + cmd);
+		    	child.stdin.write(cmd);
 		    }
 		  });
 		});
-
-		if (port) {
-			http.listen(port, function() {
-			  console.log('Autopack server started! listening on port ' + port);
-			});
-		}
 	},
 	newChannel: function (task, success, error) {
+		var path = require('path');
 		var app = require('../app');
 		var http = require('http').Server(app);
 		var io = require('socket.io')(http);

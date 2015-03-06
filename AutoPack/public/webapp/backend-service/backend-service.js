@@ -28,6 +28,13 @@ backendService.factory('backendService', function ($http) {
 		  	}).error(function(data, status, headers, config) {
 		  		error(data);
 		  	});
-		}
+		},
+		newProject: function (project, success, error) {
+			$http.post('./api/project', project).success(function(data){
+		    	success(data);
+		  	}).error(function(data, status, headers, config) {
+		  		error(data);
+		  	});
+		},
 	};
 });

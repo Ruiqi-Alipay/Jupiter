@@ -1,6 +1,7 @@
 var express = require('express');
 var app = express();
 var path = require('path');
+var channel = require('./routes/channel.js')
 
 /* DB connection */
 var mongoose = require('mongoose');
@@ -21,11 +22,15 @@ app.get('/', function(req, res){
 });
 
 if (require.main === module) {
-    app.listen(80, function(){
-        console.info('Express server listening on port ' + 80);
-    });
+	var http = require('http').Server(app);
+	http.listen(80, function() {
+	  console.log('Autopack server started! listening on port ' + 80);
+	});
+	channel.start(http);
 } else {
-	var channel = require('./routes/channel.js');
-	channel.start(app)
-    module.exports = app;
+	exports.start = function (http) {
+		channel.start(http);
+	};
+
+    exports.app = app;
 }

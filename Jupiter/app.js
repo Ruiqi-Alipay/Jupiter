@@ -6,8 +6,7 @@ var logger = require('morgan');
 var root = require('./routes/rootIndex')
 var autoTest = require('../AutoTest/app.js');
 var adkEditor = require('../SDKEditor/app.js');
-var autoPack = require('../AutoPack/app.js');
-var channel = require('../AutoPack/routes/channel.js');
+var autoPack = require('../AutoPack/app.js').app;
 var feedbackCenter = require('../FeedbackCenter/app.js');
 
 var app = express();
