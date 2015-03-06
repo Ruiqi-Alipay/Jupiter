@@ -33,8 +33,10 @@ var saveToMPop = function (array, callback) {
 								titleTranslate = true;
 							}
 							if (!contentTranslate && item.content == result.src) {
-								if (item.content != result.dst) {
-									item.content += (' 【' + result.dst + '】');
+								var needTranslate = item.content != result.dst;
+								item.content = (array.length == 1 ? 'WEB手动导入' : 'AE反馈批量导入') + String.fromCharCode(13) + item.content;
+								if (needTranslate) {
+									item.content += (String.fromCharCode(13) + '【' + result.dst + '】');
 								}
 								contentTranslate = true;
 							}
