@@ -155,6 +155,11 @@ router.post('/upload', function (req, res, next) {
                 subject = subject.v;
                 content = content.v;
 
+                var versionIndex2 = content.indexOf('Version:');
+                var deviceIndex2 = content.indexOf('Device:');
+                var osIndex2 = content.indexOf('OS:');
+                var npsIndex2 = content.indexOf('NPS:');
+
                 var deviceIndex = content.indexOf('Device :');
                 var osIndex = content.indexOf('OS :');
                 var engineIndex = content.indexOf('Engine :');
@@ -178,6 +183,18 @@ router.post('/upload', function (req, res, next) {
                     }
 
                     appInfo = ':' + os + ':' + device + '::::::' + bowser + ' ' + engine + '::' + etao;
+                } else if (versionIndex2 > 0 &&
+                            deviceIndex2 > versionIndex2 &&
+                            osIndex2 > deviceIndex2 &&
+                            npsIndex2 > osIndex2) {
+                    content = content.slice(0, versionIndex2);
+
+                    var version = content.slice(versionIndex2, deviceIndex2);
+                    var device = content.slice(deviceIndex2, osIndex2);
+                    var os = content.slice(osIndex2, npsIndex2);
+                    var nps = content.slice(npsIndex2);
+
+                    appInfo = version + ':' + os + ':' + device + '::::::::';
                 }
 
                 var feedback = {
