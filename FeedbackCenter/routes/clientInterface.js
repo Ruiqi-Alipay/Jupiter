@@ -49,10 +49,13 @@ var translate = function (array, manualInput, callback) {
                                 }
                                 if (!contentTranslate && item.content == result.src) {
                                     contentTranslate = true;
-                                    var needTranslate = item.content != result.dst;
-                                    item.content = (manualInput ? '【WEB手动导入】' : '【AE反馈批量导入】') + String.fromCharCode(13) + item.content;
-                                    if (needTranslate) {
-                                        item.content += (String.fromCharCode(13) + '【' + result.dst + '】');
+                                    if (item.content != result.dst) {
+                                        item.content = (manualInput ? '【WEB手动导入】' : '【AE反馈批量导入】')
+                                                + String.fromCharCode(13) + '【' + result.dst + '】'
+                                                + String.fromCharCode(13) + item.content;
+                                    } else {
+                                        item.content = (manualInput ? '【WEB手动导入】' : '【AE反馈批量导入】')
+                                                + String.fromCharCode(13) + item.content;
                                     }
                                 }
 
