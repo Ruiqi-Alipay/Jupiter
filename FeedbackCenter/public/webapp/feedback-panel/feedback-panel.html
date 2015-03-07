@@ -1,26 +1,33 @@
 <md-card layout="column">
 	<md-content class="md-padding" layout-fill>
+		<form name="feedbackForm">
 		<md-content layout="row">
-		  <md-select ng-model="feedback.semanticCategory">
+		  <md-select required name="semanticCategory" ng-model="feedback.semanticCategory">
 		    <md-option value="CUSTOMER_SERVICE">客服咨询</md-option>
 		    <md-option value="BUG" ng-selected="true">缺陷反馈</md-option>
 		    <md-option value="REQUIREMENT">需求建议</md-option>
 		    <md-option value="OTHERS">其他</md-option>
 		  </md-select>
-		  <md-select ng-model="feedback.apptype">
+		  <md-select required name="apptype" ng-model="feedback.apptype">
 		  	<md-option value="interpaysdk_android" ng-selected="true">interpaysdk_android</md-option>
 		  </md-select>
 		  <div flex></div>
 		  <md-progress-circular md-mode="indeterminate" ng-show="running"></md-progress-circular>
 		</md-content>
-	    <md-input-container>
+	      <md-input-container>
 	        <label>标题</label>
-	        <input ng-model="feedback.title">
-	    </md-input-container>
-	    <md-input-container>
-	        <label>内容</label>
-	        <input ng-model="feedback.content">
-	    </md-input-container>
+	        <input md-maxlength="288" required name="title" ng-model="feedback.title">
+	        <div ng-messages="feedbackForm.title.$error">
+	          <div ng-message="required">输入标题不得为空并小于288个字符.</div>
+	        </div>
+	      </md-input-container>
+	      <md-input-container>
+	        <label>标题</label>
+	        <input md-maxlength="288" required name="content" ng-model="feedback.content">
+	        <div ng-messages="feedbackForm.content.$error">
+	          <div ng-message="required">输入内容不得为空并小于288个字符.</div>
+	        </div>
+	      </md-input-container>
 	    <md-input-container>
 	        <label>附加信息</label>
 	        <input ng-model="feedback.extra">
@@ -69,7 +76,8 @@
 	          <input ng-model="appInfo.micaddress">
 	        </md-input-container>
 	      </div>
-	    <md-button class="md-primary md-fab md-fab-bottom-right" ng-click="onSubmit()" ng-disabled="!feedback.title || !feedback.content || !feedback.semanticCategory || running">
+	    </form>
+	    <md-button class="md-primary md-fab md-fab-bottom-right" ng-click="onSubmit()" ng-disabled="!feedbackForm.$valid || running">
 	    	提交
 	    </md-button>
 	</md-content>

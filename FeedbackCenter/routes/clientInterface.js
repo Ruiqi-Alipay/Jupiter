@@ -65,6 +65,18 @@ var translate = function (array, manualInput, callback) {
                     }
                 }
 
+                array.forEach(function (item) {
+                    if (item.title.length > 288) {
+                        item.title = item.title.slice(0, 288);
+                    }
+                    if (item.content.length > 288) {
+                        item.content = item.content.slice(0, 288);
+                    }
+                    if (item.extra && item.extra.length > 288) {
+                        item.extra = item.extra.slice(0, 288);
+                    }
+                });
+
                 if (finished >= array.length / 10) {
                     callback(array);
                 }
@@ -92,11 +104,20 @@ var saveToMPop = function (array, manualInput, callback) {
                 if (error) console.log('error: ' + error);
                 if (stderr) console.log('stderr: ' + stderr);
 
+                console.log(stdout);
+
                 fs.unlink(filePath);
 
-                var result = JSON.parse(stdout.slice(stdout.indexOf('<MPOPJARRESULT>') + 15, stdout.indexOf('</MPOPJARRESULT>')));
+                var result;
+                var resultError;
+                try {
+                    result = JSON.parse(stdout.slice(stdout.indexOf('<MPOPJARRESULT>') + 15, stdout.indexOf('</MPOPJARRESULT>')));
+                } catch (err) {
+                    resultError = err;
+                }
+                
                 callback({
-                	msg: '创建完成：成功 ' + result.success + ' 失败 ' + result.failed
+                	msg: result ? ('创建完成：成功 ' + result.success + ' 失败 ' + result.failed) : ('System error: ' + resultError)
                 });
             });
         });
@@ -173,6 +194,8 @@ router.post('/upload', function (req, res, next) {
             index++;
         }
     }
+
+    fs.unlink(file.path);
 
 	saveToMPop(feedbacks, false, function (result) {
 	    res.json(result);
