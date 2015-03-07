@@ -26,12 +26,9 @@ feedbackPanel.directive("feedbackPanel", function($rootScope, backendService) {
 
                 scope.running = true;
                 $rootScope.$broadcast('toast:show', '反馈创建中...');
-    			backendService.newFeedback(scope.feedback, function (data) {
+    			backendService.newFeedback(scope.feedback, function (msg) {
                     scope.running = false;
-    				$rootScope.$broadcast('toast:show', '创建成功');
-    			}, function (error) {
-                    scope.running = false;
-    				$rootScope.$broadcast('toast:show', '创建失败：' + error);
+    				$rootScope.$broadcast('toast:show', msg);
     			});
     		};
 	    }

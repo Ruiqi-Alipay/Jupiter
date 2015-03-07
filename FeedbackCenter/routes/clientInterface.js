@@ -6,89 +6,107 @@ var xlsx = require('xlsx');
 var exec = require('child_process').exec;
 var fs = require('fs');
 
-var saveToMPop = function (array, callback) {
-	var params = 'q=';
-	array.forEach(function (item) {
-		params += (item.title + '%0A' + item.content + '%0A');
-	});
-	params = params.slice(0, params.length - 3);
+var translate = function (array, manualInput, callback) {
+    var finished = 0;
+    var finishedmap = {};
 
-	request.post({
-		url:'http://openapi.baidu.com/public/2.0/bmt/translate',
-		form: 'client_id=kaGTr93fmLAhwGxibsbiFd7y&' + params + '&from=en&to=zh'
-		}, function(err, httpResponse, body){
-			if (body) {
-				body = JSON.parse(body);
-				if (body.trans_result) {
-					array.forEach(function (item) {
-						var titleTranslate, contentTranslate = false;
+    for (var i = 0; i < array.length; i+=10) {
+        var j = i;
+        var params = 'q=';
+        for (; j < i + 10; j++) {
+            if (j >= array.length) {
+                break;
+            }
 
-						for (var index in body.trans_result) {
-							var result = body.trans_result[index];
+            params += (array[j].title + '%0A' + array[j].content + '%0A');
+        }
+        params = params.slice(0, params.length - 3);
 
-							if (!titleTranslate && item.title == result.src) {
-								if (item.title != result.dst) {
-									item.title += (' 【' + result.dst + '】');
-								}
-								titleTranslate = true;
-							}
-							if (!contentTranslate && item.content == result.src) {
-								var needTranslate = item.content != result.dst;
-								item.content = (array.length == 1 ? 'WEB手动导入' : 'AE反馈批量导入') + String.fromCharCode(13) + item.content;
-								if (needTranslate) {
-									item.content += (String.fromCharCode(13) + '【' + result.dst + '】');
-								}
-								contentTranslate = true;
-							}
+        request.post({
+            url:'http://openapi.baidu.com/public/2.0/bmt/translate',
+            form: 'client_id=kaGTr93fmLAhwGxibsbiFd7y&' + params + '&from=en&to=zh'
+            }, function(err, httpResponse, body){
+                finished++;
+                if (body) {
+                    body = JSON.parse(body);
+                    if (body.trans_result) {
+                        for (var arrayIndex = 0; arrayIndex < array.length; arrayIndex++) {
+                            if (arrayIndex in finishedmap) {
+                                continue;
+                            }
 
-							if (titleTranslate && contentTranslate) {
-								break;
-							}
-						}
-					});
-				}
-			}
+                            var item = array[arrayIndex];
+                            var titleTranslate = false;
+                            var contentTranslate = false;
+                            for (var index in body.trans_result) {
+                                var result = body.trans_result[index];
 
-			var d = new Date();
-			var filePath = path.join(__dirname, '..', 'libs', d.getTime() + '.json');
+                                if (!titleTranslate && item.title == result.src) {
+                                    titleTranslate = true;
+                                    if (item.title != result.dst) {
+                                        item.title += (' 【' + result.dst + '】');
+                                    }
+                                }
+                                if (!contentTranslate && item.content == result.src) {
+                                    contentTranslate = true;
+                                    var needTranslate = item.content != result.dst;
+                                    item.content = (manualInput ? 'WEB手动导入' : 'AE反馈批量导入') + String.fromCharCode(13) + item.content;
+                                    if (needTranslate) {
+                                        item.content += (String.fromCharCode(13) + '【' + result.dst + '】');
+                                    }
+                                }
 
-			fs.writeFile(filePath, JSON.stringify(array), function (err) {
-				  if (err) {
-				  	return callback({
-						result: false,
-						msg: err
-					});
-				  }
+                                if (titleTranslate && contentTranslate) {
+                                    finishedmap[index] = result;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
 
-				exec('java -jar ' + path.join(__dirname, '..', 'libs', 'feedback.jar') + ' ' + filePath
-					, function (error, stdout, stderr){
-					console.log('Save feedback finished! ');
-					console.log('error: ' + error);
-					console.log('stdout: ' + stdout);
-					console.log('stderr: ' + stderr);
+                if (finished >= array.length / 10) {
+                    callback(array);
+                }
+            }
+        );
+    }
+}
 
-					fs.unlink(filePath);
+var saveToMPop = function (array, manualInput, callback) {
+    translate(array, manualInput, function (results) {
+        var d = new Date();
+        var filePath = path.join(__dirname, '..', 'libs', d.getTime() + '.json');
 
-					if (stdout.indexOf('retCode-SUCCESS') > 0) {
-						callback({
-							result: true
-						});
-					} else {
-						callback({
-							result: false,
-							msg: stdout
-						});
-					}
-				});
-			});
-		}
-	);
+        fs.writeFile(filePath, JSON.stringify(results), function (err) {
+            if (err) {
+                return callback({
+                    result: false,
+                    msg: err
+                });
+            }
+
+            exec('java -jar ' + path.join(__dirname, '..', 'libs', 'feedback.jar') + ' ' + filePath
+                , function (error, stdout, stderr){
+                console.log('Save feedback finished! ');
+                if (error) console.log('error: ' + error);
+                if (stderr) console.log('stderr: ' + stderr);
+
+                fs.unlink(filePath);
+
+                var result = JSON.parse(stdout.slice(stdout.indexOf('<MPOPJARRESULT>') + 15, stdout.indexOf('</MPOPJARRESULT>')));
+                callback({
+                	msg: '创建完成：成功 ' + result.success + ' 失败 ' + result.failed
+                });
+            });
+        });
+    });
 };
 
 router.post('/feedback', function (req, res, next) {
 	if (!req.body) return next(new Error('Request body is empty!'));
 
-	saveToMPop([req.body], function (result) {
+	saveToMPop([req.body], true, function (result) {
 		res.json(result);
 	});
 });
@@ -156,7 +174,7 @@ router.post('/upload', function (req, res, next) {
         }
     }
 
-	saveToMPop(feedbacks, function (result) {
+	saveToMPop(feedbacks, false, function (result) {
 	    res.json(result);
 	});
 });

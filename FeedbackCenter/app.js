@@ -5,8 +5,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var multer = require('multer');
 
-var clientInterface = require('./routes/clientInterface');
-
 app.use(multer({
     dest: path.join(__dirname, 'uploads'),
     rename: function(fieldname, filename) {
@@ -22,7 +20,7 @@ app.use(multer({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use('/api', clientInterface);
+app.use('/api', require('./routes/clientInterface'));
 app.use('/', express.static(path.join(__dirname, 'public')));
 
 app.get('/', function(req, res){

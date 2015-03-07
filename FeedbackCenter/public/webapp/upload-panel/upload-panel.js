@@ -12,12 +12,12 @@ uploadPanel.directive("uploadPanel", function($rootScope, $interval, $upload, ba
             mode: 'buffer'
           };
 
-          var updateProgress = function (present) {
+          var updateProgress = function (present, msg) {
               scope.progress.value = present;
 
-              if (present == -1 || present == -2) {
+              if (present == -1) {
                   scope.progress.running = false;
-                  $rootScope.$broadcast('toast:show', present == -1 ? '批量上传成功' : '批量上传失败');
+                  $rootScope.$broadcast('toast:show', msg);
               } else {
                   scope.progress.running = true;
                   if (present == 100) {
@@ -33,6 +33,8 @@ uploadPanel.directive("uploadPanel", function($rootScope, $interval, $upload, ba
           };
 
           scope.batchUpload = function (files) {
+              if (!files || !files[0]) return;
+              
               updateProgress(0);
 
               $upload.upload({
@@ -43,7 +45,7 @@ uploadPanel.directive("uploadPanel", function($rootScope, $interval, $upload, ba
                   var present = parseInt(100.0 * evt.loaded / evt.total);
                   updateProgress(present);
               }).success(function (data, status, headers, config) {
-                  updateProgress(data.result ? -1 : -2);
+                  updateProgress(-1, data.msg);
               }).error(function (data, status, headers, config) {
                   
               });
