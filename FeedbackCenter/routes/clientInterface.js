@@ -152,7 +152,7 @@ router.post('/upload', function (req, res, next) {
                     index++;
                     continue;
                 }
-
+                subject = subject.v;
                 content = content.v;
 
                 var deviceIndex = content.indexOf('Device :');
@@ -183,8 +183,8 @@ router.post('/upload', function (req, res, next) {
                 var feedback = {
                     apptype: 'interpaysdk_android',
                     semanticCategory: 'OTHERS',
-                    title: subject.v,
-                    content: content.v
+                    title: subject,
+                    content: content
                 };
 
                 if (appInfo) {
