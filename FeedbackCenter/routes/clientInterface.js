@@ -24,7 +24,7 @@ var translate = function (array, manualInput, callback) {
 
         request.post({
             url:'http://openapi.baidu.com/public/2.0/bmt/translate',
-            form: 'client_id=kaGTr93fmLAhwGxibsbiFd7y&' + params + '&from=en&to=zh'
+            form: 'client_id=kaGTr93fmLAhwGxibsbiFd7y&' + params + '&from=auto&to=zh'
             }, function(err, httpResponse, body){
                 finished++;
                 if (body) {
@@ -133,73 +133,82 @@ router.post('/feedback', function (req, res, next) {
 });
 
 router.post('/upload', function (req, res, next) {
-    var file = req.files.file;
-    var workbook = xlsx.readFile(file.path);
-    var feedbacks = [];
+    try {
+        var file = req.files.file;
+        var workbook = xlsx.readFile(file.path);
+        var feedbacks = [];
 
-    for (var key in workbook.Sheets) {
-        var sheet = workbook.Sheets[key];
-        var index = 2;
-        while (sheet['A' + index]) {
-        	var subject = sheet['F' + index];
-        	var content = sheet['H' + index];
+        for (var key in workbook.Sheets) {
+            var sheet = workbook.Sheets[key];
+            var index = 2;
+            while (sheet['A' + index]) {
+                var subject = sheet['F' + index];
+                var content = sheet['H' + index];
 
-        	if (!subject || !subject.v || !content || !content.v) {
-        		index++;
-        		continue;
-        	}
+                if (!subject || !subject.v || !content || !content.v) {
+                    index++;
+                    continue;
+                }
 
-        	var feedback = {
-        		apptype: 'interpaysdk_android',
-            	semanticCategory: 'OTHERS',
-        		title: subject.v,
-        		content: content.v
-        	};
+                var feedback = {
+                    apptype: 'interpaysdk_android',
+                    semanticCategory: 'OTHERS',
+                    title: subject.v,
+                    content: content.v
+                };
 
-            var createTime = sheet['A' + index];
-            if (createTime && createTime.v) {
-            	feedback.commentTimeSecond = createTime.v;
-            }
-            var memberId = sheet['C' + index];
-            if (memberId && memberId.v) {
-            	feedback.alipayUserId = memberId.v;
-            }
-            var id = sheet['G' + index];
-            if (id && id.v) {
-            	feedback.originRecordId = id.v;
-            }
+                var createTime = sheet['A' + index];
+                if (createTime && createTime.v) {
+                    feedback.commentTimeSecond = createTime.v;
+                }
+                var memberId = sheet['C' + index];
+                if (memberId && memberId.v) {
+                    feedback.alipayUserId = memberId.v;
+                }
+                var id = sheet['G' + index];
+                if (id && id.v) {
+                    feedback.originRecordId = id.v;
+                }
 
-            var companyName = sheet['B' + index];
-            if (companyName && companyName.v) {
-            	feedback.extra = 'CompanyName: ' + companyName.v;
-            }
-            var country = sheet['D' + index];
-            if (country && country.v) {
-            	if (feedback.extra) {
-            		feedback.extra += ('; Country: ' + country.v);
-            	} else {
-            		feedback.extra = 'Country: ' + country.v;
-            	}
-            }
-            var email = sheet['E' + index];
-            if (email && email.v) {
-            	if (feedback.extra) {
-            		feedback.extra += ('; Email: ' + email.v);
-            	} else {
-            		feedback.extra = 'Email: ' + email.v;
-            	}
-            }
+                var companyName = sheet['B' + index];
+                if (companyName && companyName.v) {
+                    feedback.extra = 'CompanyName: ' + companyName.v;
+                }
+                var country = sheet['D' + index];
+                if (country && country.v) {
+                    if (feedback.extra) {
+                        feedback.extra += ('; Country: ' + country.v);
+                    } else {
+                        feedback.extra = 'Country: ' + country.v;
+                    }
+                }
+                var email = sheet['E' + index];
+                if (email && email.v) {
+                    if (feedback.extra) {
+                        feedback.extra += ('; Email: ' + email.v);
+                    } else {
+                        feedback.extra = 'Email: ' + email.v;
+                    }
+                }
 
-            feedbacks.push(feedback);
-            index++;
+                feedbacks.push(feedback);
+                index++;
+            }
         }
+
+        fs.unlink(file.path);
+
+        saveToMPop(feedbacks, false, function (result) {
+            res.json(result);
+        });
+    } catch (err) {
+        var file = req.files ? req.files.file : undefined;
+        if (file) {
+            fs.unlink(file.path);
+        }
+
+        res.json({msg: err});
     }
-
-    fs.unlink(file.path);
-
-	saveToMPop(feedbacks, false, function (result) {
-	    res.json(result);
-	});
 });
 
 module.exports = router;
