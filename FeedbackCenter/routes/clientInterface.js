@@ -153,6 +153,8 @@ router.post('/upload', function (req, res, next) {
                     continue;
                 }
 
+                content = content.v;
+
                 var deviceIndex = content.indexOf('Device :');
                 var osIndex = content.indexOf('OS :');
                 var engineIndex = content.indexOf('Engine :');
