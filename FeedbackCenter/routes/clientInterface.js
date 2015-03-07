@@ -153,12 +153,41 @@ router.post('/upload', function (req, res, next) {
                     continue;
                 }
 
+                var deviceIndex = content.indexOf('Device :');
+                var osIndex = content.indexOf('OS :');
+                var engineIndex = content.indexOf('Engine :');
+                var bowserIndex = content.indexOf('Browser:');
+                var appInfo;
+
+                if (bowserIndex > 0 &&
+                    engineIndex > bowserIndex &&
+                    osIndex > engineIndex &&
+                    deviceIndex > osIndex) {
+                    content = content.slice(0, bowserIndex);
+
+                    var bowser = content.slice(bowserIndex, engineIndex);
+                    var engine = content.slice(engineIndex, osIndex);
+                    var os = content.slice(osIndex, deviceIndex);
+                    var lastPart = content.slice(deviceIndex).split(' ');
+                    var device = lastPart[0];
+                    var etao = '';
+                    if (lastPart.length > 1) {
+                        etao = lastPart[1];
+                    }
+
+                    appInfo = ':' + os + ':' + device + '::::::' + bowser + ' ' + engine + '::' + etao;
+                }
+
                 var feedback = {
                     apptype: 'interpaysdk_android',
                     semanticCategory: 'OTHERS',
                     title: subject.v,
                     content: content.v
                 };
+
+                if (appInfo) {
+                    feedback.appInfo = appInfo;
+                }
 
                 var createTime = sheet['A' + index];
                 if (createTime && createTime.v) {
