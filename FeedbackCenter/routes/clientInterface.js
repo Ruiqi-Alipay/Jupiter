@@ -170,8 +170,6 @@ router.post('/upload', function (req, res, next) {
                     engineIndex > bowserIndex &&
                     osIndex > engineIndex &&
                     deviceIndex > osIndex) {
-                    content = content.slice(0, bowserIndex);
-
                     var bowser = content.slice(bowserIndex, engineIndex);
                     var engine = content.slice(engineIndex, osIndex);
                     var os = content.slice(osIndex, deviceIndex);
@@ -182,18 +180,18 @@ router.post('/upload', function (req, res, next) {
                         etao = lastPart[1];
                     }
 
+                    content = content.slice(0, bowserIndex);
                     appInfo = ':' + os + ':' + device + '::::::' + bowser + ' ' + engine + '::' + etao;
                 } else if (versionIndex2 > 0 &&
                             deviceIndex2 > versionIndex2 &&
                             osIndex2 > deviceIndex2 &&
                             npsIndex2 > osIndex2) {
-                    content = content.slice(0, versionIndex2);
-
                     var version = content.slice(versionIndex2, deviceIndex2);
                     var device = content.slice(deviceIndex2, osIndex2);
                     var os = content.slice(osIndex2, npsIndex2);
                     var nps = content.slice(npsIndex2);
 
+                    content = content.slice(0, versionIndex2);
                     appInfo = version + ':' + os + ':' + device + '::::::::';
                 }
 
