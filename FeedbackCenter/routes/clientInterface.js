@@ -44,7 +44,7 @@ var translate = function (array, manualInput, callback) {
                                 if (!titleTranslate && item.title == result.src) {
                                     titleTranslate = true;
                                     if (item.title != result.dst) {
-                                        item.title += (' 【' + result.dst + '】');
+                                        item.title = '【' + result.dst + '】' + item.title;
                                     }
                                 }
                                 if (!contentTranslate && item.content == result.src) {
