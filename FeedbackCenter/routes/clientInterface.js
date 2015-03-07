@@ -27,6 +27,7 @@ var translate = function (array, manualInput, callback) {
             form: 'client_id=kaGTr93fmLAhwGxibsbiFd7y&' + params + '&from=auto&to=zh'
             }, function(err, httpResponse, body){
                 finished++;
+
                 if (body) {
                     body = JSON.parse(body);
                     if (body.trans_result) {
@@ -60,25 +61,13 @@ var translate = function (array, manualInput, callback) {
                                 }
 
                                 if (titleTranslate && contentTranslate) {
-                                    finishedmap[index] = result;
+                                    finishedmap[arrayIndex] = item;
                                     break;
                                 }
                             }
                         }
                     }
                 }
-
-                array.forEach(function (item) {
-                    if (item.title.length > 288) {
-                        item.title = item.title.slice(0, 288);
-                    }
-                    if (item.content.length > 288) {
-                        item.content = item.content.slice(0, 288);
-                    }
-                    if (item.extra && item.extra.length > 288) {
-                        item.extra = item.extra.slice(0, 288);
-                    }
-                });
 
                 if (finished >= array.length / 10) {
                     callback(array);
@@ -155,8 +144,8 @@ router.post('/upload', function (req, res, next) {
                 subject = subject.v;
                 content = content.v;
 
-                if (content.indexOf('Contact Name:') == 0) {
-                    content = content.slice(13);
+                if (content.indexOf('Contact Name: ') == 0) {
+                    content = content.slice(content.indexOf(' ', 15) + 1);
                 }
 
                 var versionIndex2 = content.indexOf('Version:');
@@ -197,6 +186,13 @@ router.post('/upload', function (req, res, next) {
 
                     content = content.slice(0, versionIndex2);
                     appInfo = version + ':' + os + ':' + device + '::::::::';
+                }
+
+                if (subject.length > 288) {
+                    subject = subject.slice(0, 288);
+                }
+                if (content.length > 288) {
+                    content = content.slice(0, 288);
                 }
 
                 var feedback = {
