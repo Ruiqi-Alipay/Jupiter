@@ -155,6 +155,10 @@ router.post('/upload', function (req, res, next) {
                 subject = subject.v;
                 content = content.v;
 
+                if (content.indexOf('Contact Name:') == 0) {
+                    content = content.slice(13);
+                }
+
                 var versionIndex2 = content.indexOf('Version:');
                 var deviceIndex2 = content.indexOf('Device:');
                 var osIndex2 = content.indexOf('OS:');
