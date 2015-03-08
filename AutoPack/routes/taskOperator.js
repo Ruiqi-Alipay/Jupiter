@@ -1,5 +1,4 @@
 var mongoose = require('mongoose');
-var path = require('path');
 var Task = mongoose.model('Task', mongoose.Schema({
   name: String,
   state: String,
@@ -48,15 +47,10 @@ module.exports = {
 	  });
 	},
 	getTasks: function (req, res, next) {
-		console.log('Query: ');
-		console.log(req.query);
-	    Task.find({}, function(err, items){
+	    Task.find({project: req.project._id}, function(err, items){
 	      if(err){ return next(err); }
 
 	      res.json(items);
 	    });
-	},
-	getTaskById: function (req, res, next) {
-	    res.json(req.task);
 	}
 };

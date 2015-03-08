@@ -1,11 +1,15 @@
 var mongoose = require('mongoose');
+var fs = require('fs-extra')
 var path = require('path');
+
 var Project = mongoose.model('Project', mongoose.Schema({
   name: String,
   state: String,
   date: Date,
   svn: String,
-  auth: String,
+  username: String,
+  password: String,
+  projectPath: String,
   packPath: String
 }));
 
@@ -21,13 +25,23 @@ module.exports = {
 	},
 	newProject: function (req, res, next) {
 		req.body.date = new Date();
-		req.body.state = 'Preparing';
+		req.body.state = 'Inactive';
 
 		var project = new Project(req.body);
 		project.save(function(err, item){
 			if (err) return next(new Error('Insert new project failed!'));
 
 		    res.json(item);
+		});
+	},
+	activeProject: function (req, res, next) {
+		require('./channel.js').prepareProject(req.project, function () {
+			req.project.state = 'Activating';
+			req.project.save(function(err, item){
+				if (err) return next(new Error('Active project failed!'));
+
+			    res.json(item);
+			});
 		});
 	},
 	editProject: function (req, res, next) {
@@ -46,7 +60,18 @@ module.exports = {
 	deleteProject: function (req, res, next) {
 	  req.project.remove(function(err, item){
 	    if (err) { return next(err); }
+	    try {
+	    	var idString = JSON.stringify(req.project._id);
+	    	if (idString.indexOf('"') == 0 && idString.lastIndexOf('"') == idString.length - 1) {
+	    		idString = idString.slice(1, idString.length - 1);
+	    	}
+	    	fs.remove(path.join(__dirname, '..', 'Projects', idString), function (err) {
+	    		
+	    	});
+	    } catch (err) {
 
+	    }
+	    
 	    res.json(item);
 	  });
 	},

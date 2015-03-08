@@ -1,9 +1,12 @@
+var exec = require('child_process').exec;
+var path = require('path');
+
 var channelMap = {};
+var io;
 
 module.exports = {
 	start: function (http) {
-		var io = require('socket.io')(http);
-
+		io = require('socket.io')(http);
 		io.on('connection', function(socket){
 		  socket.on('userInput', function(msg){
 		    var child = channelMap[msg.id];
@@ -16,12 +19,6 @@ module.exports = {
 		});
 	},
 	newChannel: function (task, success, error) {
-		var path = require('path');
-		var app = require('../app');
-		var http = require('http').Server(app);
-		var io = require('socket.io')(http);
-		var exec = require('child_process').exec;
-
 		if (task._id in channelMap || task.state == 'Finished') {
 			console.log('Channel exist !');
 			success(task); 
@@ -50,5 +47,39 @@ module.exports = {
 		});
 
 		channelMap[task._id] = child;
+	},
+	prepareProject: function (project, callback) {
+		var success = true;
+		var dir = path.join(__dirname, '..', 'Projects', JSON.stringify(project._id));
+		var params = (project.username && project.password) ? ('--username ' + project.username + ' --password ' + project.password + ' ') : '';
+		var child = exec('svn checkout ' + params + project.svn + ' ' + dir,
+				function (error, stdout, stderr){
+			if (success) {
+				project.state = 'Active';
+				project.projectPath = dir;
+				project.save();
+
+				io.emit(project._id, '----------------------------------');
+				io.emit(project._id, '- Project now is ready for pack! -');
+				io.emit(project._id, '----------------------------------');
+
+				console.log('Activing project ' + project.name + ' success!')
+			} else {
+				project.state = 'Inactive';
+				project.save();
+
+				io.emit(project._id, '----------------------------------');
+				io.emit(project._id, '- Project activating falied!     -');
+				io.emit(project._id, '----------------------------------');
+
+				console.log('Activing project ' + project.name + ' failed!')
+			}
+		});
+
+		child.stdout.on('data', function (data) {
+			io.emit(project._id, data);
+		});
+
+		callback();
 	}
 };

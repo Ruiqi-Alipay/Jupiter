@@ -14,12 +14,33 @@
 				        <p>{{item.date | date:'yyyy-MM-dd HH:mm:ss'}}</p>
 				      </div>
 				      <div class="md-tile-right">
-				      	<md-button class="md-fab md-primary md-hue-3" aria-label="Edit project" ng-click="onEditProject($event, item)" style="width: 40px; height: 40px;">
-				      		E
-		        		</md-button>
-				      	<md-button class="md-fab md-warn" aria-label="Delete project" ng-click="onDeleteProject(item)" style="width: 40px; height: 40px;">
-				      		D
-		        		</md-button>
+				      	<div ng-switch="item.state">
+				      		<div ng-switch-when="Inactive">
+						      	<md-button class="md-fab md-primary md-hue-3" aria-label="Active project" ng-click="onActiveProject($event, item);$event.stopPropagation();" style="width: 40px; height: 40px;">
+						      		A
+								  <md-tooltip>
+							        Active Project
+							      </md-tooltip>
+				        		</md-button>
+				      		</div>
+				      		<div ng-switch-when="Activating">
+				      			<md-progress-circular class="progress-circular-small" md-mode="indeterminate"></md-progress-circular>
+				      		</div>
+				      		<div ng-switch-when="Active">
+						      	<md-button class="md-fab md-primary md-hue-3" aria-label="Edit project" ng-click="onEditProject($event, item);$event.stopPropagation();" style="width: 40px; height: 40px;">
+						      		E
+								  <md-tooltip>
+							        Edit Project
+							      </md-tooltip>
+				        		</md-button>
+						      	<md-button class="md-fab md-warn" aria-label="Delete project" ng-click="showConfirmDialog($event, item);$event.stopPropagation();" style="width: 40px; height: 40px;">
+						      		D
+								  <md-tooltip>
+							        Delete Project
+							      </md-tooltip>
+				        		</md-button>
+				      		</div>
+				      	</div>
 				      </div>
 				    </md-item-content>
 				  </md-item>
@@ -39,7 +60,7 @@
 			</md-item-content>
 			<md-content flex="90">
 				<md-list >
-				  <md-item ng-repeat="item in todos | orderBy: 'date': true">
+				  <md-item ng-repeat="item in projectTasks | orderBy: 'date': true">
 				    <md-item-content ng-click="onItemClicked(item)">
 				      <div class="md-tile-content">
 				        <h3>{{item.date | date:'yyyy-MM-dd HH:mm:ss'}}</h3>

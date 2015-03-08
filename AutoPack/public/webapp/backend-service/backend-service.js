@@ -8,8 +8,8 @@ backendService.factory('backendService', function ($http, $rootScope) {
 		  		error(data);
 		  	});
 		},
-		getTasks: function (success, error) {
-			$http.get('./api/task').success(function(data){
+		getTasks: function (projectId, success, error) {
+			$http.get('./api/task/' + projectId).success(function(data){
 		    	success(data);
 		  	}).error(function(data, status, headers, config) {
 		  		error(data);
@@ -49,6 +49,13 @@ backendService.factory('backendService', function ($http, $rootScope) {
 			  		error(data);
 			  	});
 			}
+		},
+		activeProject: function (project, success, error) {
+			$http.get('./api/active/' + project._id).success(function(data){
+		    	success(data);
+		  	}).error(function(data, status, headers, config) {
+		  		error(data);
+		  	});
 		},
 		getProjects: function (success, error) {
 			$http.get('./api/project').success(function(data){

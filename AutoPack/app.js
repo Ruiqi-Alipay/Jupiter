@@ -1,6 +1,7 @@
 var express = require('express');
 var app = express();
 var path = require('path');
+var favicon = require('serve-favicon');
 var channel = require('./routes/channel.js')
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -19,6 +20,7 @@ var clientInterface = require('./routes/clientInterface');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(favicon(path.join(__dirname, 'public', 'webapp', 'terminal.ico')));
 app.use('/api', clientInterface);
 app.use('/', express.static(path.join(__dirname, 'public')));
 
