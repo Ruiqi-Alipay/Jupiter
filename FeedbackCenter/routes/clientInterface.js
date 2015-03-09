@@ -5,8 +5,80 @@ var path = require('path');
 var xlsx = require('xlsx');
 var exec = require('child_process').exec;
 var fs = require('fs');
+var q = require('q');
 
-var translate = function (array, manualInput, callback) {
+var azureClientID = "ClientFeedbackTranslator2";
+var azureClientSecret = "u0zrEdaIxuSwpEWTb+k5dd5ULUC5hidRj/1UqFpko4k=";
+var azureTranslatorURI = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13";
+var azureRequestDetails = "grant_type=client_credentials&client_id="
+                            + encodeURIComponent(azureClientID) + "&client_secret="
+                            + encodeURIComponent(azureClientSecret) + "&scope=http://api.microsofttranslator.com";
+
+var azureTranslate = function (array, manualInput, callback) {
+    request.post({
+        url: azureTranslatorURI,
+        headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Content-Length': azureRequestDetails.length
+        },
+        body: azureRequestDetails
+        }, function(err, httpResponse, body){
+            var contentPrefix = manualInput ? '【WEB手动导入】' : '【AE反馈批量导入】';
+            var response = JSON.parse(body);
+            var to = "zh-CHS";
+
+            var penndingForTranslation = {};
+            array.forEach(function (item) {
+                penndingForTranslation[item.title] = false;
+                penndingForTranslation[item.content] = false;
+            });
+
+            var defer = q.defer();
+            var taskCounter = 0;
+
+            for (var key in penndingForTranslation) {
+                var uri = "http://api.microsofttranslator.com/v2/Http.svc/Translate?text=" + encodeURIComponent(key) + "&to=" + to;
+                var authToken = "Bearer" + " " + response.access_token;
+
+                taskCounter++;
+                (function () {
+                    var original = key;
+                    request.get({
+                        url: uri,
+                        headers: {
+                              'Authorization': authToken
+                        }}, function (err, httpResponse, body) {
+                            taskCounter--;
+
+                            var translated = body.slice(body.indexOf('/">') + 3, body.lastIndexOf('</string>'));
+
+                            array.forEach(function (item) {
+                                if (item.title == original) {
+                                    item.title = contentPrefix + '【' + translated + '】' + original;
+                                }
+                                if (item.content == original) {
+                                    item.content = contentPrefix + '【' + translated + '】' + original;
+                                }
+                            });
+
+                            if (taskCounter == 0) {
+                                defer.resolve(array);
+                            }
+                        }
+                    );
+                })();
+            }
+
+            defer.promise.then(function (results) {
+                callback(results);
+            }).catch(function (err) {
+                callback([]);
+            });
+        }
+    );
+};
+
+var baiduTranslate = function (array, manualInput, callback) {
     var finished = 0;
     var finishedmap = {};
 
@@ -78,16 +150,33 @@ var translate = function (array, manualInput, callback) {
 }
 
 var saveToMPop = function (array, manualInput, callback) {
-    translate(array, manualInput, function (results) {
+    azureTranslate(array, manualInput, function (results) {
         var d = new Date();
         var filePath = path.join(__dirname, '..', 'libs', d.getTime() + '.json');
 
-        fs.writeFile(filePath, JSON.stringify(results), function (err) {
+        var paymentFeedbacks = [];
+        if (manualInput) {
+            paymentFeedbacks = results;
+        } else {
+            results.forEach(function (item) {
+                var title = item.title.toLowerCase();
+                var content = item.content.toLowerCase();
+                if (title.indexOf('pay') > 0 || title.indexOf('支付') > 0 || title.indexOf('款') > 0
+                    || content.indexOf('pay') > 0 || content.indexOf('支付') > 0 || || content.indexOf('款') > 0) {
+                    paymentFeedbacks.push(item);
+                }
+            });
+        }
+
+        if (paymentFeedbacks.length == 0) {
+            return callback({
+                msg: '没有包含，pay或“支付”的反馈，导入取消！'
+            });
+        }
+
+        fs.writeFile(filePath, JSON.stringify(paymentFeedbacks), function (err) {
             if (err) {
-                return callback({
-                    result: false,
-                    msg: err
-                });
+                return callback({msg: err});
             }
 
             exec('java -jar ' + path.join(__dirname, '..', 'libs', 'feedback.jar') + ' ' + filePath
@@ -97,7 +186,6 @@ var saveToMPop = function (array, manualInput, callback) {
                 if (stderr) console.log('stderr: ' + stderr);
 
                 console.log(stdout);
-
                 fs.unlink(filePath);
 
                 var result;
@@ -119,7 +207,17 @@ var saveToMPop = function (array, manualInput, callback) {
 router.post('/feedback', function (req, res, next) {
 	if (!req.body) return next(new Error('Request body is empty!'));
 
-	saveToMPop([req.body], true, function (result) {
+    var feedbacks = (req.body instanceof Array) ? req.body : [req.body];
+    for (var index in feedbacks) {
+        var feedback = feedbacks[index];
+        if (!feedback.title || !feedback.content || !feedback.apptype || !feedback.semanticCategory) {
+            return res({
+                msg: '参数非法：反馈的title, content, apptype, semanticCategory属性不得为空!'
+            });
+        }
+    }
+
+	saveToMPop(feedbacks, true, function (result) {
 		res.json(result);
 	});
 });
