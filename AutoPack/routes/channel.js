@@ -25,12 +25,10 @@ module.exports = {
 			return success(project); 
 		}
 
-		var originPath = process.cwd();
 		var distPath = path.join(project.projectPath, project.packPath.slice(0, project.packPath.indexOf('pack.jar') - 1));
-		io.emit(task._id, distPath);
-		process.chdir(distPath)
-		var child = exec('java -Dfile.encoding=UTF-8 -jar pack.jar',
-				function (error, stdout, stderr){
+		var child = exec('java -Dfile.encoding=UTF-8 -jar pack.jar', {
+					cwd: distPath
+				}, function (error, stdout, stderr){
 			for (var index in project.tasks) {
 				if (project.tasks[index]._id == task._id) {
 					project.tasks[index].state = 'Finished';
@@ -42,7 +40,6 @@ module.exports = {
 
 			io.emit(task._id, 'Build jar execution finished!');
 		});
-		process.chdir(originPath);
 
 		child.stdout.on('data', function (data) {
 			io.emit(task._id, data);
