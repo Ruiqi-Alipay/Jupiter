@@ -32,7 +32,7 @@ module.exports = {
 				process.env[key] = env[key];
 			}
 			var distPath = path.join(project.projectPath, project.packPath.slice(0, project.packPath.indexOf('pack.jar') - 1));
-			var child = exec('java -Dfile.encoding=UTF-8 -jar pack.jar', {
+			var child = exec('java -Dfile.encoding=UTF-8 -jar test.jar', {
 						cwd: distPath,
 						env: env
 					}, function (error, stdout, stderr){
