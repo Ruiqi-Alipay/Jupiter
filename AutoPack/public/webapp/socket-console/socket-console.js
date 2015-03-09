@@ -25,21 +25,16 @@ socketConsole.directive("socketConsole", function($rootScope, backendService) {
             currentListenKey = data._id;
 
             socket.on(currentListenKey, function(data) {
-              if (data.indexOf('Project now is ready for pack!') > 0) {
+              if (data.indexOf('Project now is ready for pack!') >= 0) {
                   $rootScope.$broadcast('statechange:project');
+              } else if (data.indexOf('Build jar execution finished!') >= 0) {
+                  $rootScope.$broadcast('statechange:task');
               }
               scope.$broadcast('terminal-output', {
                   output: true,
                   text: [data],
                   breakLine: true
               });
-            });
-        });
-        $rootScope.$on('task:start', function (event, data) {
-            backendService.startTask(data._id, function (newData) {
-                $rootScope.$broadcast('task:stateChange', newData);
-            }, function (newData) {
-
             });
         });
 	    }

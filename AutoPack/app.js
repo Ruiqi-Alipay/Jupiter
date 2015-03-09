@@ -15,13 +15,13 @@ db.once('open', function (callback) {
   console.log('DB connection success!');
 });
 
-var clientInterface = require('./routes/clientInterface');
+require('./modules/project.js');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(favicon(path.join(__dirname, 'public', 'webapp', 'terminal.ico')));
-app.use('/api', clientInterface);
+app.use('/api', require('./routes/clientInterface'));
 app.use('/', express.static(path.join(__dirname, 'public')));
 
 app.get('/', function(req, res){

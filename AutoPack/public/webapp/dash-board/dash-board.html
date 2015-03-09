@@ -67,18 +67,14 @@
 				        <h4>{{item.state}}</h4>
 				      </div>
 				      <div class="md-tile-right">
-				      	<md-button class="md-fab md-primary" aria-label="Eat cake" ng-click="onDeleteTask(item)">
-		            		<md-icon md-svg-icon="core:alarm-add" style="color:#000;" alt="Add"></md-icon>
+				      	<md-button class="md-fab md-primary md-hue-3" aria-label="Eat cake" ng-click="onStartTask(item)"
+				      			style="width: 40px; height: 40px;" ng-show="item.state == 'Pennding'">
+		            			S
 		        		</md-button>
-		<!-- 				<div ng-switch="item.state">
-						  <div ng-switch-when="Pennding"> -->
-					      	<md-button class="md-fab md-primary" aria-label="Eat cake" ng-click="onStartTask(item)">
-			            		<md-icon md-svg-icon="core:alarm-add" style="color:#000;" alt="Add"></md-icon>
-			        		</md-button>
-		<!-- 				  </div>
-						  <div ng-switch-default>
-						  </div>
-						</div> -->
+				      	<md-button class="md-fab md-warn" aria-label="Eat cake" ng-click="onDeleteTask(item)"
+				      			style="width: 40px; height: 40px;" ng-show="item.state != 'Running'">
+		            			D
+		        		</md-button>
 				      </div>
 				      <div class="md-ripple-container"></div>
 				    </md-item-content>

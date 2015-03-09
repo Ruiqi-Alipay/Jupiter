@@ -1,7 +1,8 @@
 var exec = require('child_process').exec;
 var path = require('path');
+var mongoose = require('mongoose');
 
-var channelMap = {};
+var runningTasks = {};
 var io;
 
 module.exports = {
@@ -9,29 +10,37 @@ module.exports = {
 		io = require('socket.io')(http);
 		io.on('connection', function(socket){
 		  socket.on('userInput', function(msg){
-		    var child = channelMap[msg.id];
+		    var child = runningTasks[msg.id];
 		    if (child) {
-		    	var cmd = msg.cmd + String.fromCharCode(13);
+		    	var cmd = msg.cmd + '\r\n';
 		    	console.log('USER INPUT: ' + cmd);
 		    	child.stdin.write(cmd);
 		    }
 		  });
 		});
 	},
-	newChannel: function (task, success, error) {
-		if (task._id in channelMap || task.state == 'Finished') {
-			console.log('Channel exist !');
-			success(task); 
+	startTask: function (project, task, success, error) {
+		if (task._id in runningTasks || task.state == 'Finished') {
+			console.log('Task is running or already finished!');
+			return success(project); 
 		}
 
 		var originPath = process.cwd();
-		var distPath = path.join(originPath, 'internation_sdk', 'autopack');
+		var distPath = path.join(project.projectPath, project.packPath.slice(0, project.packPath.indexOf('pack.jar') - 1));
+		console.log('DIR: ' + distPath);
 		process.chdir(distPath)
 		var child = exec('java -Dfile.encoding=UTF-8 -jar pack.jar',
 				function (error, stdout, stderr){
-			task.state = 'Finished';
-			task.save();
-			delete channelMap[task._id];
+			for (var index in project.tasks) {
+				if (project.tasks[index]._id == task._id) {
+					project.tasks[index].state = 'Finished';
+					break;
+				}
+			}
+			project.save();
+			delete runningTasks[task._id];
+
+			io.emit(task._id, 'Build jar execution finished!');
 		});
 		process.chdir(originPath);
 
@@ -39,18 +48,26 @@ module.exports = {
 			io.emit(task._id, data);
 		});
 
-		task.state = 'Running';
-		task.save(function (err, newTask) {
+		runningTasks[task._id] = child;
+		for (var index in project.tasks) {
+			if (project.tasks[index]._id == task._id) {
+				project.tasks[index].state = 'Running';
+				break;
+			}
+		}
+		project.save(function (err, item) {
 			if (err) return error(new Error('Insert new task failed!'));
 
-		    success(newTask);
+		    success(item);
 		});
-
-		channelMap[task._id] = child;
 	},
 	prepareProject: function (project, callback) {
 		var success = true;
-		var dir = path.join(__dirname, '..', 'Projects', JSON.stringify(project._id));
+		var idString = JSON.stringify(project._id);
+    	if (idString.indexOf('"') == 0 && idString.lastIndexOf('"') == idString.length - 1) {
+    		idString = idString.slice(1, idString.length - 1);
+    	}
+		var dir = path.join(__dirname, '..', 'Projects', idString);
 		var params = (project.username && project.password) ? ('--username ' + project.username + ' --password ' + project.password + ' ') : '';
 		var child = exec('svn checkout ' + params + project.svn + ' ' + dir,
 				function (error, stdout, stderr){

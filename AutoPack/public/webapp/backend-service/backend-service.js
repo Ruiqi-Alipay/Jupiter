@@ -1,29 +1,29 @@
 var backendService = angular.module('backend-service', []);
 backendService.factory('backendService', function ($http, $rootScope) {
 	return {
-		newTask: function (success, error) {
-			$http.post('./api/task').success(function(data){
+		newTask: function (projectId, success, error) {
+			$http.post('./api/project/' + projectId + '/task').success(function(data){
 		    	success(data);
 		  	}).error(function(data, status, headers, config) {
 		  		error(data);
 		  	});
 		},
 		getTasks: function (projectId, success, error) {
-			$http.get('./api/task/' + projectId).success(function(data){
+			$http.get('./api/project/' + projectId + '/task').success(function(data){
 		    	success(data);
 		  	}).error(function(data, status, headers, config) {
 		  		error(data);
 		  	});
 		},
-		startTask: function (taskId, success, error) {
-			$http.get('./api/start/' + taskId).success(function(data){
+		startTask: function (projectId, taskId, success, error) {
+			$http.get('./api/project/' + projectId + '/start/' + taskId).success(function(data){
 		    	success(data);
 		  	}).error(function(data, status, headers, config) {
 		  		error(data);
 		  	});
 		},
-		deleteTask: function (taskId, success, error) {
-			$http.delete('./api/task/' + taskId).success(function(data){
+		deleteTask: function (projectId, taskId, success, error) {
+			$http.delete('./api/project/' + projectId + '/task/' + taskId).success(function(data){
 		    	success(data);
 		  	}).error(function(data, status, headers, config) {
 		  		error(data);
@@ -51,7 +51,7 @@ backendService.factory('backendService', function ($http, $rootScope) {
 			}
 		},
 		activeProject: function (project, success, error) {
-			$http.get('./api/active/' + project._id).success(function(data){
+			$http.get('./api/project/' + project._id + '/active').success(function(data){
 		    	success(data);
 		  	}).error(function(data, status, headers, config) {
 		  		error(data);
@@ -59,6 +59,13 @@ backendService.factory('backendService', function ($http, $rootScope) {
 		},
 		getProjects: function (success, error) {
 			$http.get('./api/project').success(function(data){
+		    	success(data);
+		  	}).error(function(data, status, headers, config) {
+		  		error(data);
+		  	});
+		},
+		getProjectById: function (projectId, success, error) {
+			$http.get('./api/project/' + projectId).success(function(data){
 		    	success(data);
 		  	}).error(function(data, status, headers, config) {
 		  		error(data);
