@@ -28,6 +28,9 @@ module.exports = {
 
 		fs.readFile(path.join(__dirname, '..', 'env.json'), function (err, data) {
 			var env = JSON.parse(data);
+			for (var key in env) {
+				process.env[key] = env[key];
+			}
 			var distPath = path.join(project.projectPath, project.packPath.slice(0, project.packPath.indexOf('pack.jar') - 1));
 			var child = exec('java -Dfile.encoding=UTF-8 -jar pack.jar', {
 						cwd: distPath,
