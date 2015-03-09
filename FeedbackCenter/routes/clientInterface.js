@@ -162,7 +162,7 @@ var saveToMPop = function (array, manualInput, callback) {
                 var title = item.title.toLowerCase();
                 var content = item.content.toLowerCase();
                 if (title.indexOf('pay') > 0 || title.indexOf('支付') > 0 || title.indexOf('款') > 0
-                    || content.indexOf('pay') > 0 || content.indexOf('支付') > 0 || || content.indexOf('款') > 0) {
+                    || content.indexOf('pay') > 0 || content.indexOf('支付') > 0 || content.indexOf('款') > 0) {
                     paymentFeedbacks.push(item);
                 }
             });
