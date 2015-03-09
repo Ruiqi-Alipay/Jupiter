@@ -32,21 +32,24 @@ module.exports = {
 				process.env[key] = env[key];
 			}
 			var distPath = path.join(project.projectPath, project.packPath.slice(0, project.packPath.indexOf('pack.jar') - 1));
-			var child = exec('java -Dfile.encoding=UTF-8 -jar test.jar', {
+			var child = exec('java -Dfile.encoding=UTF-8 -jar pack.jar', {
 						cwd: distPath,
 						env: env
 					}, function (error, stdout, stderr){
-				for (var index in project.tasks) {
-					if (project.tasks[index]._id == task._id) {
-						project.tasks[index].state = 'Finished';
-						break;
-					}
-				}
-				project.save();
-				delete runningTasks[task._id];
+						if (error) console.log(error);
+						if (stderr) console.log(stderr);
 
-				io.emit(task._id, 'Build jar execution finished!');
-			});
+						for (var index in project.tasks) {
+							if (project.tasks[index]._id == task._id) {
+								project.tasks[index].state = 'Finished';
+								break;
+							}
+						}
+						project.save();
+						delete runningTasks[task._id];
+
+						io.emit(task._id, 'Build jar execution finished!');
+					});
 
 			child.stdout.on('data', function (data) {
 				io.emit(task._id, data);
