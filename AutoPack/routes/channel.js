@@ -26,47 +26,41 @@ module.exports = {
 			return success(project); 
 		}
 
-		fs.readFile(path.join(__dirname, '..', 'env.json'), function (err, data) {
-			var env = JSON.parse(data);
-			for (var key in env) {
-				process.env[key] = env[key];
-			}
-			var distPath = path.join(project.projectPath, project.packPath.slice(0, project.packPath.indexOf('pack.jar') - 1));
-			var child = exec('java -Dfile.encoding=UTF-8 -jar pack.jar', {
-						cwd: distPath,
-						env: env
-					}, function (error, stdout, stderr){
-						if (error) console.log(error);
-						if (stderr) console.log(stderr);
+		var distPath = path.join(project.projectPath, project.packPath.slice(0, project.packPath.indexOf('pack.jar') - 1));
+		var child = exec('java -Dfile.encoding=UTF-8 -jar pack.jar', {
+					cwd: distPath,
+					maxBuffer: 200*1024*1024
+				}, function (error, stdout, stderr){
+					if (error) console.log(error);
+					if (stderr) console.log(stderr);
 
-						for (var index in project.tasks) {
-							if (project.tasks[index]._id == task._id) {
-								project.tasks[index].state = 'Finished';
-								break;
-							}
+					for (var index in project.tasks) {
+						if (project.tasks[index]._id == task._id) {
+							project.tasks[index].state = 'Finished';
+							break;
 						}
-						project.save();
-						delete runningTasks[task._id];
+					}
+					project.save();
+					delete runningTasks[task._id];
 
-						io.emit(task._id, 'Build jar execution finished!');
-					});
+					io.emit(task._id, 'Build jar execution finished!');
+				});
 
-			child.stdout.on('data', function (data) {
-				io.emit(task._id, data);
-			});
+		child.stdout.on('data', function (data) {
+			io.emit(task._id, data);
+		});
 
-			runningTasks[task._id] = child;
-			for (var index in project.tasks) {
-				if (project.tasks[index]._id == task._id) {
-					project.tasks[index].state = 'Running';
-					break;
-				}
+		runningTasks[task._id] = child;
+		for (var index in project.tasks) {
+			if (project.tasks[index]._id == task._id) {
+				project.tasks[index].state = 'Running';
+				break;
 			}
-			project.save(function (err, item) {
-				if (err) return error(new Error('Insert new task failed!'));
+		}
+		project.save(function (err, item) {
+			if (err) return error(new Error('Insert new task failed!'));
 
-			    success(item);
-			});
+		    success(item);
 		});
 	},
 	prepareProject: function (project, callback) {
