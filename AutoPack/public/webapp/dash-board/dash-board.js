@@ -131,10 +131,10 @@ taskList.directive("taskList", function($rootScope, $mdDialog, backendService) {
                 });
             };
             scope.onProjectClicked = function (project) {
+                $rootScope.$broadcast('task:selected', project);
+                selectProject = project;
                 if (project.state == 'Active') {
-                    selectProject = project;
                     scope.pannel.page = "task";
-                    $rootScope.$broadcast('task:selected', project);
                     updateTasks(project);
                 }
             };
