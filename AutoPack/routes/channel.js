@@ -29,7 +29,7 @@ module.exports = {
 		var distPath = path.join(project.projectPath, project.packPath.slice(0, project.packPath.indexOf('pack.jar') - 1));
 		io.emit(task._id, distPath);
 		process.chdir(distPath)
-		var child = exec('java -jar pack.jar',
+		var child = exec('java -Dfile.encoding=UTF-8 -jar pack.jar',
 				function (error, stdout, stderr){
 			for (var index in project.tasks) {
 				if (project.tasks[index]._id == task._id) {
