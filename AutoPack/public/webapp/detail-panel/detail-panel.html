@@ -1,0 +1,82 @@
+<md-card >
+  <md-content layout-fill>
+    <md-tabs md-selected="selectedIndex" flex>
+
+      <md-tab label="{{panel.tab1}}">
+        <div layout="column" layout-fill>
+          <md-toolbar class="md-tall" md-scroll-shrink>
+            <h2 class="md-toolbar-tools">
+              <span>{{project.name}}</span>
+            </h2>
+            <span flex></span>
+            <h2 class="md-toolbar-tools md-toolbar-tools-bottom" style="font-size: 0.7em;">
+              <span class="md-flex">{{project.description}}</span>
+            </h2>
+          </md-toolbar>
+          <md-content style="height: 480px;" layout-padding>
+            <md-list>
+              <md-item ng-repeat="action in project.actions">
+                <md-item-content layout-padding>
+                  <div class="md-tile-content" flex="80">
+                    <h4><b>{{($index + 1) + '. '}}</b>{{action.name}}</h4>
+                  </div>
+                  <div class="md-tile-right" flex="20">
+                      <md-button class="md-raised md-warn" ng-click="showTaskDialog($event, action)" layout-fill>执行</md-button>
+                  </div>
+                </md-item-content>
+                <md-divider ng-if="!$last"></md-divider>
+              </md-item>
+            </md-list>
+          </md-content>
+        </div>
+      </md-tab>
+
+      <md-tab label="{{panel.tab2}}">
+        <div layout="column" layout-fill>
+          <md-content style="height: 480px;" layout-padding>
+            <md-list>
+              <md-item ng-repeat="task in project.penndingTasks">
+                <md-item-content layout-padding>
+                  <div class="md-tile-content" flex="80">
+                    <h3>{{task.name}}</h3>
+                    <h4>{{task.actionName}}</h4>
+                    <p>{{task.date | date:'yyyy-MM-dd HH:mm:ss'}}</p>
+                  </div>
+                  <div class="md-tile-right" layout="column" flex="20" layout-fill layout-align="space-around">
+                      <md-button class="md-raised">运行状态</md-button>
+                      <md-button class="md-warn md-raised md-hue-2">删除任务</md-button>
+                  </div>
+                </md-item-content>
+                <md-divider ng-if="!$last"></md-divider>
+              </md-item>
+            </md-list>
+          </md-content>
+        </div>
+      </md-tab>
+
+      <md-tab label="{{panel.tab3}}">
+        <div layout="column" layout-fill>
+          <md-content style="height: 480px;" layout-padding>
+            <md-list>
+              <md-item ng-repeat="task in project.penndingTasks">
+                <md-item-content layout-padding>
+                  <div class="md-tile-content" flex="80">
+                    <h3>{{task.name}}</h3>
+                    <h4>{{task.actionName}}</h4>
+                    <p>{{task.date | date:'yyyy-MM-dd HH:mm:ss'}}</p>
+                  </div>
+                  <div class="md-tile-right" layout="column" flex="20" layout-fill layout-align="space-around">
+                      <md-button class="md-raised">运行记录</md-button>
+                      <md-button class="md-raised">打包结果</md-button>
+                  </div>
+                </md-item-content>
+                <md-divider ng-if="!$last"></md-divider>
+              </md-item>
+            </md-list>
+          </md-content>
+        </div>
+      </md-tab>
+
+    </md-tabs>
+  </md-content>
+</md-card>

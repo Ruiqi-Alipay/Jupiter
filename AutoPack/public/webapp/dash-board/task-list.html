@@ -1,0 +1,36 @@
+		<div ng-switch-when="task">
+			<md-item-content flex="10">
+				<div class="md-tile-left">
+					<md-button class="md-primary" ng-click="onBack($event)">返回</md-button>
+				</div>
+				<div class="md-tile-content">
+				</div>
+				<div class="md-tile-right">
+					<md-button class="md-raised md-primary" ng-click="onNewTask($event)">新建打包任务</md-button>
+				</div>
+			</md-item-content>
+			<md-content flex="90" style="height: 460px;">
+				<md-list >
+				  <md-item ng-repeat="item in selectProject.tasks | orderBy: 'date': true">
+				    <md-item-content ng-click="onSelectTask(item)">
+				      <div class="md-tile-content">
+				        <h3>{{item.date | date:'yyyy-MM-dd HH:mm:ss'}}</h3>
+				        <h4>{{item.state}}</h4>
+				      </div>
+				      <div class="md-tile-right">
+				      	<md-progress-circular class="progress-circular-small" md-mode="indeterminate" ng-show="item.state == 'Running'"></md-progress-circular>
+				      	<md-button class="md-fab md-primary md-hue-3" aria-label="Eat cake" ng-click="onStartTask(item)"
+				      			style="width: 40px; height: 40px;" ng-show="item.state == 'Pennding'">
+		            			S
+		        		</md-button>
+				      	<md-button class="md-fab md-warn" aria-label="Eat cake" ng-click="onDeleteTask(item)"
+				      			style="width: 40px; height: 40px;" ng-show="item.state != 'Running'">
+		            			D
+		        		</md-button>
+				      </div>
+				      <div class="md-ripple-container"></div>
+				    </md-item-content>
+				  </md-item>
+				</md-list>
+			</md-content>
+		</div>

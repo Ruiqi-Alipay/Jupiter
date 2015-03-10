@@ -1,0 +1,22 @@
+<md-dialog aria-label="新建工程" style="width: 600px;">
+  <md-content>
+    <form name="taskForm">
+      <md-input-container>
+        <label>任务名</label>
+        <input required name="name" ng-model="task.name">
+        <div ng-messages="taskForm.name.$error">
+          <div ng-message="required">请输入新建打包任务名称.</div>
+        </div>
+      </md-input-container>
+    </form>
+  </md-content>
+  <div class="md-actions" layout="row">
+    <span flex></span>
+    <md-button flex="30" ng-click="hide()">
+      取消
+    </md-button>
+    <md-button flex="30" ng-click="newTask(task.name)" class="md-primary" ng-disabled="!taskForm.$valid">
+      确定
+    </md-button>
+  </div>
+</md-dialog>

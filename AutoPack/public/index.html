@@ -20,9 +20,11 @@
     <script src="webapp/angularApp.js"></script>
     <script src="webapp/socket-console/socket-console.js"></script>
     <script src="webapp/dash-board/dash-board.js"></script>
-    <script src="webapp/backend-service/backend-service.js"></script>
     <script src="webapp/socket-console/vtortola.ng-terminal.js"></script>
     <script src="webapp/result-panel/result-panel.js"></script>
+    <script src="webapp/detail-panel/detail-panel.js"></script>
+    <script src="webapp/backend-service/backend-service.js"></script>
+    <script src="webapp/backend-service/data-service.js"></script>
   </head>
   <body ng-controller="mainController">
       <md-toolbar>
@@ -31,10 +33,9 @@
         </h2>
       </md-toolbar>
       <br>
-      <div layout="row" layout-margin layout-padding>
-        <task-list flex="30" flex-order="1" style="height: 520px;"></task-list>
-        <socket-console flex="68" flex-order="2" ng-show="app.showTerminal"></socket-console>
-        <result-panel flex="68" flex-order="2" ng-show="!app.showTerminal"></result-panel>
+      <div layout="row" layout-margin layout-padding layout-align="center center">
+        <dash-board flex-order="1" style="width:300px; height: 520px;"></dash-board>
+        <detail-panel flex-order="2" style="width:700px; height: 520px;"></detail-panel>
       </div>
   </body>
 </html>

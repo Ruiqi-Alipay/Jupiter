@@ -1,6 +1,6 @@
-var taskList = angular.module('task-list', ['backend-service', 'ngMaterial']);
+var taskList = angular.module('dash-board', ['backend-service', 'ngMaterial']);
 
-taskList.directive("taskList", function($rootScope, $mdDialog, backendService) {
+taskList.directive("dashBoard", function($rootScope, $mdDialog, backendService) {
   	return {
     	restrict: "E",
     	replace: true,
