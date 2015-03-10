@@ -168,7 +168,14 @@
             output.added = true;
             $scope.$apply(function () {
                 $scope.results.push(output);
-            })
+            });
+        }
+    });
+
+    $scope.$on('terminal-output-internal', function (e, output) {
+        if (!output.added) {
+            output.added = true;
+            $scope.results.push(output);
         }
     });
 

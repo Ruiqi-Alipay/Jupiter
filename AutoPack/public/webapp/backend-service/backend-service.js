@@ -1,5 +1,6 @@
 var backendService = angular.module('backend-service', []);
 backendService.factory('backendService', function ($http, $rootScope) {
+	var socket = io();
 	var projectList = [];
 	var findProject = function (projectId) {
 		for (var index in projectList) {
@@ -19,22 +20,113 @@ backendService.factory('backendService', function ($http, $rootScope) {
     		projectList.unshift(newProject);
     	}
 	};
+	var selectTask = function (task) {
+		if (!selectedTask || selectedTask._id != task._id) {
+			$rootScope.$broadcast('terminal-command', {command: 'clear'});
+          	$rootScope.$broadcast('terminal-output-internal', {
+              	output: true,
+              	text: ['Termainl change to Task: ' + task.date],
+              	breakLine: true
+          	});
+		}
+		selectedTask = task;
+		$rootScope.$broadcast('selectedchange', {
+			project: selectedProject,
+			task: selectedTask
+		});
+	};
+	var selectProject = function (project) {
+		if (!selectedProject || selectedProject._id != project._id) {
+			$rootScope.$broadcast('terminal-command', {command: 'clear'});
+          	$rootScope.$broadcast('terminal-output-internal', {
+              	output: true,
+              	text: ['Termainl change to Project: ' + project.name],
+              	breakLine: true
+          	});
+		}
+		selectedProject = project;
+		$rootScope.$broadcast('selectedchange', {
+			project: selectedProject,
+			task: selectedTask
+		});
+	};
+	var getProjectById = function (projectId, callback) {
+		$http.get('./api/project/' + projectId).success(function(data){
+	    	updateProject(data);
+	    	if (callback) callback(data);
+	  	}).error(function(error, status, headers, config) {
+	  		$rootScope.$broadcast('toast:show', '更新项目失败：' + error);
+	  	});
+	};
+	var refreshProjects = function () {
+		$http.get('./api/project').success(function(projects){
+			projectList.length = 0;
+			projectList.push.apply(projectList, projects);
+	  	}).error(function(error, status, headers, config) {
+	  		$rootScope.$broadcast('toast:show', '同步工程列表出错：' + error);
+	  	});
+	};
+	var refreshTask = function (project, task) {
+		if (task && project && project._id == selectedProject._id && task._id == selectedTask._id) {
+			getProjectById(project._id, function (data) {
+		    	for (var index in data.tasks) {
+		    		var task = data.tasks[index];
+		    		if (task._id == task._id) {
+		    			selectTask(task);
+		    			return;
+		    		}
+		    	}
+			});
+		}
+	};
+    var listen = function (listenId) {
+        if (listenId == oldListenerId) {
+            return;
+        }
+
+        if (oldListenerId) {
+            socket.removeAllListeners(oldListenerId);
+        }
+        oldListenerId = listenId;
+
+        socket.on(listenId, function(data) {
+          if (data.indexOf('Project now is ready for pack!') >= 0) {
+              refreshProjects();
+          } else if (data.indexOf('*** Build execution') >= 0) {
+              refreshTask(selectedProject, selectedTask);
+          }
+          $rootScope.$broadcast('terminal-output', {
+              output: true,
+              text: [data],
+              breakLine: true
+          });
+        });
+    };
 	var selectedProject;
+	var selectedTask;
+	var oldListenerId;
 
 	return {
+		socketInput: function (command) {
+            socket.emit('userInput', {
+              id: oldListenerId,
+              cmd: command
+            });
+		},
+		selectTask: function (task) {
+			selectTask(task);
+		},
+		getSelectedTask: function () {
+			return selectedTask;
+		},
 		selectProject: function (project) {
-			selectedProject = project;
+			selectProject(project);
 		},
 		getSelectedProject: function () {
 			return selectedProject;
 		},
 		getProjects: function () {
-			$http.get('./api/project').success(function(projects){
-				projectList.length = 0;
-				projectList.push.apply(projectList, projects);
-		  	}).error(function(error, status, headers, config) {
-		  		$rootScope.$broadcast('toast:show', '同步工程列表出错：' + error);
-		  	});
+			refreshProjects();
 			return projectList;
 		},
 		getTasks: function (projectId) {
@@ -49,8 +141,16 @@ backendService.factory('backendService', function ($http, $rootScope) {
 		  	});
 		},
 		startTask: function (projectId, taskId) {
+			listen(taskId);
 			$http.get('./api/project/' + projectId + '/start/' + taskId).success(function(data){
 		    	updateProject(data);
+		    	for (var index in data.tasks) {
+		    		var task = data.tasks[index];
+		    		if (task._id == taskId) {
+		    			selectTask(task);
+		    			return;
+		    		}
+		    	}
 		  	}).error(function(error, status, headers, config) {
 		  		$rootScope.$broadcast('toast:show', '执行任务失败：' + error);
 		  	});
@@ -83,19 +183,16 @@ backendService.factory('backendService', function ($http, $rootScope) {
 			}
 		},
 		activeProject: function (project) {
+			listen(project._id);
 			$http.get('./api/project/' + project._id + '/active').success(function(data){
 		    	updateProject(data);
-		    	$rootScope.$broadcast('task:selected', project);
+		    	selectProject(data);
 		  	}).error(function(error, status, headers, config) {
 		  		$rootScope.$broadcast('toast:show', 'Failed to active：' + error);
 		  	});
 		},
-		getProjectById: function (projectId) {
-			$http.get('./api/project/' + projectId).success(function(data){
-		    	updateProject(data);
-		  	}).error(function(error, status, headers, config) {
-		  		$rootScope.$broadcast('toast:show', '更新项目失败：' + error);
-		  	});
+		getProjectById: function (projectId, callback) {
+			getProjectById(projectId, callback);
 		},
 		deleteProject: function (id) {
 			$http.delete('./api/project/' + id).success(function(data){

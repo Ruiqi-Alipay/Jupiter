@@ -5,7 +5,7 @@
 				<md-button class="md-raised md-primary" ng-click="showCreateProejctDialog($event)">新建工程</md-button>
 			</md-content>
 			<md-content flex="90">
-				<md-list >
+				<md-list style="height: 460px;">
 				  <md-item ng-repeat="item in projects | orderBy: 'date': true">
 				    <md-item-content ng-click="onProjectClicked(item)">
 				      <div class="md-tile-content">
@@ -58,10 +58,10 @@
 					<md-button class="md-raised md-primary" ng-click="onNewTask($event)">新建打包任务</md-button>
 				</div>
 			</md-item-content>
-			<md-content flex="90">
+			<md-content flex="90" style="height: 460px;">
 				<md-list >
 				  <md-item ng-repeat="item in selectProject.tasks | orderBy: 'date': true">
-				    <md-item-content ng-click="onItemClicked(item)">
+				    <md-item-content ng-click="onSelectTask(item)">
 				      <div class="md-tile-content">
 				        <h3>{{item.date | date:'yyyy-MM-dd HH:mm:ss'}}</h3>
 				        <h4>{{item.state}}</h4>

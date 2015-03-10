@@ -14,8 +14,12 @@ app.controller("mainController", function($mdToast, $animate, $scope) {
         showTerminal: true
     };
 
-    $scope.$on('app:toggleTerminal', function (event, show) {
-        $scope.app.showTerminal = show;
+    $scope.$on('selectedchange', function (event, select) {
+        if (select.task && select.task.state == 'Finiahed') {
+            $scope.showTerminal = false;
+        } else {
+            $scope.showTerminal = true;
+        }
     });
     
     $scope.$on('toast:show', function (event, text) {

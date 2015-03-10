@@ -53,12 +53,10 @@ taskList.directive("taskList", function($rootScope, $mdDialog, backendService) {
                     $rootScope.$broadcast('toast:show', '新建任务失败：' + error);
                 });
             };
-            scope.onItemClicked = function (item) {
-                $rootScope.$broadcast('task:selected', item);
-                $rootScope.$broadcast('app:toggleTerminal', item.state != 'Finished');
+            scope.onSelectTask= function (item) {
+                backendService.selectTask(item);
             };
             scope.onStartTask = function (item) {
-                $rootScope.$broadcast('task:selected', item);
                 backendService.startTask(scope.selectProject._id, item._id);
             };
             scope.onDeleteTask = function (item) {
@@ -78,16 +76,17 @@ taskList.directive("taskList", function($rootScope, $mdDialog, backendService) {
             };
             scope.onProjectClicked = function (project) {
                 backendService.selectProject(project);
-                $rootScope.$broadcast('project:selected', project);
-                $rootScope.$broadcast('app:toggleTerminal', true);
-                scope.selectProject = project;
-                if (project.state == 'Active') {
-                    scope.pannel.page = "task";
-                }
             };
             scope.onBack = function () {
                 scope.pannel.page = "project";
             };
+
+            scope.$on('selectedchange', function (event, select) {
+                scope.selectProject = select.project;
+                if (scope.selectProject && scope.selectProject.state == 'Active') {
+                    scope.pannel.page = "task";
+                }
+            });
 
             scope.projects = backendService.getProjects();
 	    }
