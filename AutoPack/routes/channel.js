@@ -70,6 +70,8 @@ module.exports = {
 						targetTask.state = 'Finished';
 						targetTask.downloads = [];
 						collectFiles(targetTask.downloads, targetDir, '');
+						console.log('Files for download: ')
+						console.log(targetTask.downloads);
 					} else {
 						if (error) io.emit(task._id, error);
 						if (stderr) io.emit(task._id, stderr);

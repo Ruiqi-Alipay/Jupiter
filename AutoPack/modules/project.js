@@ -14,7 +14,7 @@ var Project = mongoose.model('Project', mongoose.Schema({
 	  name: String,
 	  state: String,
 	  date: Date,
-    downloads: [],
+    downloads: ['Test'],
 	  retry: {type: Number, default: 0}
   })]
 }));
