@@ -60,7 +60,7 @@
 			</md-item-content>
 			<md-content flex="90">
 				<md-list >
-				  <md-item ng-repeat="item in projectTasks | orderBy: 'date': true">
+				  <md-item ng-repeat="item in selectProject.tasks | orderBy: 'date': true">
 				    <md-item-content ng-click="onItemClicked(item)">
 				      <div class="md-tile-content">
 				        <h3>{{item.date | date:'yyyy-MM-dd HH:mm:ss'}}</h3>

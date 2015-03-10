@@ -45,13 +45,9 @@ module.exports = {
 	  req.project.remove(function(err, item){
 	    if (err) { return next(err); }
 	    try {
-	    	var idString = JSON.stringify(req.project._id);
-	    	if (idString.indexOf('"') == 0 && idString.lastIndexOf('"') == idString.length - 1) {
-	    		idString = idString.slice(1, idString.length - 1);
-	    	}
-	    	fs.remove(path.join(__dirname, '..', 'Projects', idString), function (err) {
-	    		
-	    	});
+	    	var idString = req.project._id.toString();
+	    	fs.remove(path.join(__dirname, '..', 'Projects', idString));
+	    	fs.remove(path.join(__dirname, '..', 'download', idString));
 	    } catch (err) {
 
 	    }
@@ -106,6 +102,11 @@ module.exports = {
 		  	if (err) return handleError(err);
 		  	res.json(project);
 		});
+
+		var downloadDir = path.join(__dirname, '..', 'download', req.project.toString(), req.task._id.toString());
+		if (fs.existsSync(downloadDir)) {
+			fs.remove(downloadDir);
+		}
 	},
 	getTasks: function (req, res, next) {
 		res.json(req.project);

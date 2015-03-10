@@ -44,9 +44,7 @@ module.exports = {
 					for (var index in project.tasks) {
 						if (project.tasks[index]._id == task._id) {
 							if (success) {
-								var targetTask = project.tasks[index];
-								targetTask.downloads = fs.readdirSync(distPath);
-								targetTask.state = 'Finished';
+								project.tasks[index].state = 'Finished';
 							} else {
 								project.tasks[index].state = 'Pennding';
 							}
@@ -58,7 +56,7 @@ module.exports = {
 					delete runningTasks[task._id];
 
 					if (success) {
-						var targetDir = path.join(__dirname, '..', 'download', JSON.stringify(task._id));
+						var targetDir = path.join(__dirname, '..', 'download', project._id.toString(), task._id.toString());
 						fs.ensureDirSync(targetDir);
 						fs.copySync(buildPath, targetDir);
 					} else {
@@ -88,11 +86,7 @@ module.exports = {
 	},
 	prepareProject: function (project, callback) {
 		var success = true;
-		var idString = JSON.stringify(project._id);
-    	if (idString.indexOf('"') == 0 && idString.lastIndexOf('"') == idString.length - 1) {
-    		idString = idString.slice(1, idString.length - 1);
-    	}
-		var dir = path.join(__dirname, '..', 'Projects', idString);
+		var dir = path.join(__dirname, '..', 'Projects', project._id.toString());
 		var params = (project.username && project.password) ? ('--username ' + project.username + ' --password ' + project.password + ' ') : '';
 		var child = exec('svn checkout ' + params + project.svn + ' ' + dir,
 				function (error, stdout, stderr){

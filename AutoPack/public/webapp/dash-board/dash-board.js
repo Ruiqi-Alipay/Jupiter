@@ -7,25 +7,6 @@ taskList.directive("taskList", function($rootScope, $mdDialog, backendService) {
         scope: true,
     	templateUrl: "webapp/dash-board/dash-board.html",
     	link: function (scope, element, attr) {
-            var updateTasks = function (project) {
-                if (project._id == selectProject._id) {
-                    scope.projectTasks = project.tasks;
-                }
-            };
-            var refreshProjects = function () {
-                backendService.getProjects(function(projects) {
-                    scope.projects = projects;
-                }, function(error) {
-
-                });
-            };
-            var refreshProjectById = function (projectId) {
-                backendService.getProjectById(projectId, function(project) {
-                    updateTasks(project);
-                }, function(error) {
-
-                });
-            };
             var showProjectDialog = function (ev, project) {
                 $mdDialog.show({
                   controller: function (scope, $mdDialog) {
@@ -38,12 +19,7 @@ taskList.directive("taskList", function($rootScope, $mdDialog, backendService) {
                         $mdDialog.cancel();
                       };
                       scope.newEditProject = function(project) {
-                        backendService.newEditProject(project, function (data) {
-                            $rootScope.$broadcast('task:selected', data);
-                            refreshProjects();
-                        }, function (error) {
-                          
-                        });
+                        backendService.newEditProject(project);
                         $mdDialog.hide();
                       };
                   },
@@ -60,35 +36,18 @@ taskList.directive("taskList", function($rootScope, $mdDialog, backendService) {
                   .cancel('取消')
                   .targetEvent(ev);
                 $mdDialog.show(confirm).then(function() {
-                    backendService.deleteProject(item._id, function(data) {
-                        refreshProjects();
-                        $rootScope.$broadcast('toast:show', '删除成功');
-                    }, function(error) {
-                        $rootScope.$broadcast('toast:show', '删除失败：' + error);
-                    });
+                    backendService.deleteProject(item._id);
                 }, function() {
                   
                 });
             };
 
-            var selectProject;
-
             scope.pannel = {
                 page: 'project'
             };
 
-            $rootScope.$on('statechange:project', function () {
-                refreshProjects();
-            });
-            $rootScope.$on('statechange:task', function () {
-                if (selectProject) {
-                    refreshProjectById(selectProject._id);
-                }
-            });
-
             scope.onNewTask = function () {
-                backendService.newTask(selectProject._id, function(project) {
-                    updateTasks(project);
+                backendService.newTask(scope.selectProject._id, function(project) {
                     $rootScope.$broadcast('toast:show', '新建任务成功，点击开始按钮开始执行');
                 }, function(error) {
                     $rootScope.$broadcast('toast:show', '新建任务失败：' + error);
@@ -96,22 +55,14 @@ taskList.directive("taskList", function($rootScope, $mdDialog, backendService) {
             };
             scope.onItemClicked = function (item) {
                 $rootScope.$broadcast('task:selected', item);
+                $rootScope.$broadcast('app:toggleTerminal', item.state != 'Finished');
             };
             scope.onStartTask = function (item) {
                 $rootScope.$broadcast('task:selected', item);
-                backendService.startTask(selectProject._id, item._id, function (project) {
-                    updateTasks(project);
-                }, function (newData) {
-
-                });
+                backendService.startTask(scope.selectProject._id, item._id);
             };
             scope.onDeleteTask = function (item) {
-                backendService.deleteTask(selectProject._id, item._id, function(project) {
-                    $rootScope.$broadcast('toast:show', '删除成功');
-                    updateTasks(project);
-                }, function(error) {
-                    $rootScope.$broadcast('toast:show', '删除失败：' + error);
-                });
+                backendService.deleteTask(scope.selectProject._id, item._id);
             };
             scope.showCreateProejctDialog = function(ev) {
                 showProjectDialog(ev);
@@ -123,26 +74,21 @@ taskList.directive("taskList", function($rootScope, $mdDialog, backendService) {
                 showProjectDialog(ev, project);
             };
             scope.onActiveProject = function (ev, project) {
-                backendService.activeProject(project, function(data) {
-                    refreshProjects();
-                    $rootScope.$broadcast('task:selected', project);
-                }, function(error) {
-                    $rootScope.$broadcast('toast:show', 'Failed to active：' + error);
-                });
+                backendService.activeProject(project);
             };
             scope.onProjectClicked = function (project) {
                 $rootScope.$broadcast('task:selected', project);
-                selectProject = project;
+                $rootScope.$broadcast('app:toggleTerminal', true);
+                scope.selectProject = project;
                 if (project.state == 'Active') {
                     scope.pannel.page = "task";
-                    updateTasks(project);
                 }
             };
             scope.onBack = function () {
                 scope.pannel.page = "project";
             };
 
-            refreshProjects();
+            scope.projects = backendService.getProjects();
 	    }
   	};
 });

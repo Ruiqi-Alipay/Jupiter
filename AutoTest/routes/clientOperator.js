@@ -75,7 +75,7 @@ module.exports = {
 	        index++;
 	        selectList.push({
 	          title: '未分组脚本',
-	          key: index
+	          key: '' + index
 	        });
 
 	        unFolderedScript.forEach(function(script, scriptIndex) {
