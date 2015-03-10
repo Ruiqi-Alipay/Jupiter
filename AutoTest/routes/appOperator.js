@@ -2,6 +2,7 @@ require('../models/TestApp');
 
 var mongoose = require('mongoose');
 var fs = require('fs-extra')
+var path = require('path');
 var TestApp = mongoose.model('TestApp');
 
 module.exports = {
@@ -37,7 +38,7 @@ module.exports = {
 	  });
 	},
 	deleteApp: function (req, res, next) {
-	  fs.remove('uploads/' + req.app.name, function(err) {
+	  fs.remove(path.join(__dirname, '..', 'uploads', req.app.name), function(err) {
 	    if (err) return console.error(err)
 
 	    console.log("Delete apk success")
