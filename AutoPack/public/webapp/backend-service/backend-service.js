@@ -19,8 +19,15 @@ backendService.factory('backendService', function ($http, $rootScope) {
     		projectList.unshift(newProject);
     	}
 	};
+	var selectedProject;
 
 	return {
+		selectProject: function (project) {
+			selectedProject = project;
+		},
+		getSelectedProject: function () {
+			return selectedProject;
+		},
 		getProjects: function () {
 			$http.get('./api/project').success(function(projects){
 				projectList.length = 0;

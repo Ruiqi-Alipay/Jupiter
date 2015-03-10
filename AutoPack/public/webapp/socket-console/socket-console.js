@@ -39,7 +39,7 @@ socketConsole.directive("socketConsole", function($rootScope, backendService) {
               if (data.indexOf('Project now is ready for pack!') >= 0) {
                   backendService.getProjects();
               } else if (data.indexOf('*** Build execution') >= 0) {
-                  backendService.getProjectById(item._id);
+                  backendService.getProjectById(backendService.getSelectedProject()._id);
               }
               scope.$broadcast('terminal-output', {
                   output: true,

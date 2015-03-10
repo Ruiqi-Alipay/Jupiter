@@ -28,7 +28,7 @@ module.exports = {
 
 		var buildPath = path.join(project.projectPath, project.buildPath);
 		if (fs.existsSync(buildPath)) {
-			fs.rmdirSync(buildPath);
+			fs.removeSync(buildPath);
 		}
 
 		var distPath = path.join(project.projectPath, project.packPath.slice(0, project.packPath.indexOf('pack.jar') - 1));
