@@ -1,4 +1,4 @@
-var app = angular.module('autopackApp', ['ngMaterial', 'socket-console', 'task-list']);
+var app = angular.module('autopackApp', ['ngMaterial', 'socket-console', 'task-list', 'result-panel']);
 
 app.controller("mainController", function($mdToast, $animate, $scope) {
     var showToast = function (text) {

@@ -6,6 +6,19 @@ var fs = require('fs-extra');
 var runningTasks = {};
 var io;
 
+var collectFiles = function (results, target, prefix) {
+	var fileNames = fs.readdirSync(target);
+	fileNames.forEach(function (name) {
+		var filePath = path.join(target, name);
+		var fileState = fs.lstatSync(filePath);
+		if (fileState.isDirectory()) {
+			collectFiles(results, filePath, path.join(prefix, name));
+		} else if (fileState.isFile()) {
+			results.push(path.join(prefix, name));
+		}
+	});
+}
+
 module.exports = {
 	start: function (http) {
 		io = require('socket.io')(http);
@@ -40,29 +53,32 @@ module.exports = {
 					if (stderr) console.log(stderr);
 
 					var success = fs.existsSync(buildPath);
-
+					var targetIndex;
 					for (var index in project.tasks) {
 						if (project.tasks[index]._id == task._id) {
-							if (success) {
-								project.tasks[index].state = 'Finished';
-							} else {
-								project.tasks[index].state = 'Pennding';
-							}
-							
+							targetIndex = index;
 							break;
 						}
 					}
-					project.save();
-					delete runningTasks[task._id];
+					var targetTask = project.tasks[targetIndex];
 
 					if (success) {
 						var targetDir = path.join(__dirname, '..', 'download', project._id.toString(), task._id.toString());
 						fs.ensureDirSync(targetDir);
 						fs.copySync(buildPath, targetDir);
+
+						targetTask.state = 'Finished';
+						targetTask.downloads = [];
+						collectFiles(targetTask.downloads, targetDir, '');
 					} else {
 						if (error) io.emit(task._id, error);
 						if (stderr) io.emit(task._id, stderr);
+
+						project.tasks[index].state = 'Pennding';
 					}
+
+					project.save();
+					delete runningTasks[task._id];
 
 					io.emit(task._id, '*** Build execution ' + (success ? 'finished! ***' : 'failed! ***'));
 				});
