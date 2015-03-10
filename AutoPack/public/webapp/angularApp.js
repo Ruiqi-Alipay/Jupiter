@@ -15,7 +15,7 @@ app.controller("mainController", function($mdToast, $animate, $scope) {
     };
 
     $scope.$on('selectedchange', function (event, select) {
-        if (select.task && select.task.state == 'Finiahed') {
+        if (select.task && select.task.state == 'Finished') {
             $scope.showTerminal = false;
         } else {
             $scope.showTerminal = true;
