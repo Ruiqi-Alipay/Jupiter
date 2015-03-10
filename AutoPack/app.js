@@ -22,6 +22,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(favicon(path.join(__dirname, 'public', 'webapp', 'terminal.ico')));
 app.use('/api', require('./routes/clientInterface'));
+app.use('/download', express.static(path.join(__dirname, 'download')));
 app.use('/', express.static(path.join(__dirname, 'public')));
 
 app.get('/', function(req, res){
