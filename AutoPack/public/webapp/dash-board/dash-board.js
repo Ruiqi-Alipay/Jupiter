@@ -78,7 +78,7 @@ taskList.directive("taskList", function($rootScope, $mdDialog, backendService) {
             };
             scope.onProjectClicked = function (project) {
                 backendService.selectProject(project);
-                $rootScope.$broadcast('task:selected', project);
+                $rootScope.$broadcast('project:selected', project);
                 $rootScope.$broadcast('app:toggleTerminal', true);
                 scope.selectProject = project;
                 if (project.state == 'Active') {

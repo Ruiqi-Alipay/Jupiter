@@ -11,17 +11,7 @@ socketConsole.directive("socketConsole", function($rootScope, backendService) {
         var currentListenKey;
         var hidePrompt = false;
 
-        scope.$on('terminal-input', function (e, consoleInput) {
-            var cmd = consoleInput[0];
-            socket.emit('userInput', {
-              id: currentListenKey,
-              cmd: cmd.command
-            });
-            $rootScope.$broadcast('secondary-command', {command: 'hidePrompt'});
-            hidePrompt = true;
-        });
-
-        $rootScope.$on('task:selected', function (event, item) {
+        var onSelectionChange = function (event, item) {
             if (currentListenKey && item._id == currentListenKey) {
                 return;
             }
@@ -48,7 +38,25 @@ socketConsole.directive("socketConsole", function($rootScope, backendService) {
               });
             });
 
-            $rootScope.$broadcast('terminal-command', {command: 'clear'})
+            $rootScope.$broadcast('terminal-command', {command: 'clear'});
+        };
+
+        scope.$on('terminal-input', function (e, consoleInput) {
+            var cmd = consoleInput[0];
+            socket.emit('userInput', {
+              id: currentListenKey,
+              cmd: cmd.command
+            });
+            $rootScope.$broadcast('secondary-command', {command: 'hidePrompt'});
+            hidePrompt = true;
+        });
+
+        $rootScope.$on('project:selected', function (event, item) {
+            onSelectionChange(event, item);
+        })
+
+        $rootScope.$on('task:selected', function (event, item) {
+            onSelectionChange(event, item);
         });
 	    }
   	};
