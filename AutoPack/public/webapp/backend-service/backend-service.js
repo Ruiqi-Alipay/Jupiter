@@ -90,6 +90,10 @@ backendService.factory('backendService', function ($http, $rootScope) {
         oldListenerId = listenId;
 
         socket.on(listenId, function(data) {
+          if (hidePrompt) {
+          	$rootScope.$broadcast('secondary-command', {command: 'showPrompt'});
+          	hidePrompt = false;
+          }
           if (data.indexOf('Project now is ready for pack!') >= 0) {
               refreshProjects();
           } else if (data.indexOf('*** Build execution') >= 0) {
@@ -105,6 +109,7 @@ backendService.factory('backendService', function ($http, $rootScope) {
 	var selectedProject;
 	var selectedTask;
 	var oldListenerId;
+	var hidePrompt;
 
 	return {
 		socketInput: function (command) {
@@ -112,6 +117,8 @@ backendService.factory('backendService', function ($http, $rootScope) {
               id: oldListenerId,
               cmd: command
             });
+            $rootScope.$broadcast('secondary-command', {command: 'hidePrompt'});
+            hidePrompt = true;
 		},
 		selectTask: function (task) {
 			selectTask(task);

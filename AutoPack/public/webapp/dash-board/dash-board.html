@@ -67,6 +67,7 @@
 				        <h4>{{item.state}}</h4>
 				      </div>
 				      <div class="md-tile-right">
+				      	<md-progress-circular class="progress-circular-small" md-mode="indeterminate" ng-show="item.state == 'Running'"></md-progress-circular>
 				      	<md-button class="md-fab md-primary md-hue-3" aria-label="Eat cake" ng-click="onStartTask(item)"
 				      			style="width: 40px; height: 40px;" ng-show="item.state == 'Pennding'">
 		            			S
