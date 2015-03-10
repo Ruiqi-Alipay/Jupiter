@@ -19,7 +19,7 @@ module.exports = {
 	    var file = req.files.file;
 	    var newItem = new TestApp();
 	    newItem.name = file.name;
-	    newItem.path = 'uploads/' + file.name;
+	    newItem.path = '/uploads/' + file.name;
 
 	    var data = JSON.parse(req.body.data);
 	    newItem.type = data.type;
