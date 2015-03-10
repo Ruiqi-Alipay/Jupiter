@@ -305,6 +305,14 @@
 
                         var config = attrs['terminalConfig'];
                         scope.init(config || 'default');
+
+                        scope.$on('secondary-command', function (event, cmd) {
+                            if (cmd.command == 'showPrompt') {
+                                scope.showPrompt = true;
+                            } else if (cmd.command == 'hidePrompt') {
+                                scope.showPrompt = false;
+                            }
+                        });
                                                             
                         setInterval(function () {
                             var focused = $document[0].activeElement == target[0];
@@ -388,9 +396,9 @@
                                 }
                             }
 
-                            scope.showPrompt = false;
+                            // scope.showPrompt = false;
                             var f = [function () {
-                                scope.showPrompt = true;
+                                // scope.showPrompt = true;
                                 scope.$$phase || scope.$apply();
                                 consoleView[0].scrollTop = consoleView[0].scrollHeight;
                             }];

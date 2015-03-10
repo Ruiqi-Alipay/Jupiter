@@ -9,6 +9,7 @@ socketConsole.directive("socketConsole", function($rootScope, backendService) {
     	link: function (scope, element, attr) {
         var socket = io();
         var currentListenKey;
+        var hidePrompt = false;
 
         scope.$on('terminal-input', function (e, consoleInput) {
             var cmd = consoleInput[0];
@@ -16,18 +17,28 @@ socketConsole.directive("socketConsole", function($rootScope, backendService) {
               id: currentListenKey,
               cmd: cmd.command
             });
+            $rootScope.$broadcast('secondary-command', {command: 'hidePrompt'});
+            hidePrompt = true;
         });
 
         $rootScope.$on('task:selected', function (event, data) {
+            if (currentListenKey && data._id == currentListenKey) {
+                return;
+            }
+
             if (currentListenKey) {
               socket.removeAllListeners(currentListenKey);
             }
             currentListenKey = data._id;
 
             socket.on(currentListenKey, function(data) {
+              if (hidePrompt) {
+                  hidePrompt = false;
+                  $rootScope.$broadcast('secondary-command', {command: 'showPrompt'});
+              }
               if (data.indexOf('Project now is ready for pack!') >= 0) {
                   $rootScope.$broadcast('statechange:project');
-              } else if (data.indexOf('Build jar execution finished!') >= 0) {
+              } else if (data.indexOf('*** Build execution') >= 0) {
                   $rootScope.$broadcast('statechange:task');
               }
               scope.$broadcast('terminal-output', {
@@ -36,6 +47,8 @@ socketConsole.directive("socketConsole", function($rootScope, backendService) {
                   breakLine: true
               });
             });
+
+            $rootScope.$broadcast('terminal-command', {command: 'clear'})
         });
 	    }
   	};

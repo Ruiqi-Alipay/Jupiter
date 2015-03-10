@@ -1,7 +1,7 @@
 var exec = require('child_process').exec;
 var path = require('path');
 var mongoose = require('mongoose');
-var fs = require('fs');
+var fs = require('fs-extra');
 
 var runningTasks = {};
 var io;
@@ -26,6 +26,11 @@ module.exports = {
 			return success(project); 
 		}
 
+		var buildPath = path.join(project.projectPath, project.buildPath);
+		if (fs.existsSync(buildPath)) {
+			fs.rmdirSync(buildPath);
+		}
+
 		var distPath = path.join(project.projectPath, project.packPath.slice(0, project.packPath.indexOf('pack.jar') - 1));
 		var child = exec('java -Dfile.encoding=UTF-8 -jar pack.jar', {
 					cwd: distPath,
@@ -34,16 +39,34 @@ module.exports = {
 					if (error) console.log(error);
 					if (stderr) console.log(stderr);
 
+					var success = fs.existsSync(buildPath);
+
 					for (var index in project.tasks) {
 						if (project.tasks[index]._id == task._id) {
-							project.tasks[index].state = 'Finished';
+							if (success) {
+								var targetTask = project.tasks[index];
+								targetTask.downloads = fs.readdirSync(distPath);
+								targetTask.state = 'Finished';
+							} else {
+								project.tasks[index].state = 'Pennding';
+							}
+							
 							break;
 						}
 					}
 					project.save();
 					delete runningTasks[task._id];
 
-					io.emit(task._id, 'Build jar execution finished!');
+					if (success) {
+						var targetDir = path.join(__dirname, '..', 'download', JSON.stringify(task._id));
+						fs.ensureDirSync(targetDir);
+						fs.copySync(buildPath, targetDir);
+					} else {
+						if (error) io.emit(task._id, error);
+						if (stderr) io.emit(task._id, stderr);
+					}
+
+					io.emit(task._id, '*** Build execution ' + (success ? 'finished! ***' : 'failed! ***'));
 				});
 
 		child.stdout.on('data', function (data) {

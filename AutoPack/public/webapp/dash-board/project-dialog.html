@@ -39,6 +39,13 @@
           <div ng-message="required">请输入pack.jsr的SVN工程内的相对地址.</div>
         </div>
       </md-input-container>
+      <md-input-container>
+        <label>打包完成后的文件存放目录，用于下载打包结果</label>
+        <input required name="buildPath" ng-model="project.buildPath">
+        <div ng-messages="projectForm.buildPath.$error">
+          <div ng-message="required">请输入打包结果SVN工程内的相对地址.</div>
+        </div>
+      </md-input-container>
     </form>
   </md-content>
   <div class="md-actions" layout="row">

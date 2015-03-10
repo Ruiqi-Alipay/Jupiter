@@ -29,11 +29,11 @@ module.exports = {
 		});
 	},
 	editProject: function (req, res, next) {
+		for (var key in req.body) {
+			if (key == '_id') continue;
+			req.project[key] = req.body[key];
+		}
 		req.project.date = new Date();
-		req.project.name = req.body.name;
-		req.project.svn = req.body.svn;
-		req.project.auth = req.body.auth;
-		req.project.packPath = req.body.packPath;
 
 		req.project.save(function(err, item){
 			if (err) return next(new Error('Update project failed!'));

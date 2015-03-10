@@ -9,10 +9,12 @@ var Project = mongoose.model('Project', mongoose.Schema({
   password: String,
   projectPath: String,
   packPath: String,
+  buildPath: String,
   tasks: [mongoose.Schema({
 	  name: String,
 	  state: String,
 	  date: Date,
+    downloads: [],
 	  retry: {type: Number, default: 0}
   })]
 }));
