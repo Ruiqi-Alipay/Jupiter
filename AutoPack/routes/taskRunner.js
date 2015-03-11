@@ -57,7 +57,7 @@ var runTask = function (project, task, action) {
 		channel.emit(task._id, 'Preparing for task: ' + task.name);
 		var dir = path.join(__dirname, '..', 'Projects', task.project);
 		if (fs.existsSync(dir)) {
-			fs.removeSync(dir);
+			fs.deleteSync(dir);
 		}
 
 		channel.emit(task._id, 'SVN checking out: ' + project.svn);
@@ -102,7 +102,7 @@ var runTask = function (project, task, action) {
 							}
 
 							if (fs.existsSync(dir)) {
-								fs.removeSync(dir);
+								fs.deleteSync(dir);
 							}
 							channel.emit(task._id, '*** Build execution ' + (true ? 'finished! ***' : 'failed! ***'));
 						});
