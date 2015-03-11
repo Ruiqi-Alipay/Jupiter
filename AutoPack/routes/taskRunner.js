@@ -1,8 +1,8 @@
 var Task = require('../modules/task.js');
 var Project = require('../modules/project.js');
-var running = require('is-running')
+var running = require('is-running');
 var q = require('q');
-var fs = require('fs-extra');
+var fse = require('fs-extra');
 var exec = require('child_process').exec;
 var channel = require('./channel.js');
 var path = require('path');
@@ -39,6 +39,7 @@ var correctRunningState = function (argument) {
 				if (!task.pid || !running(task.pid)) {
 					task.state = 'Failed';
 					task.save();
+					channel.emit(task.project, 'active-task-change');
 				}
 			});
 			defer.resolve(tasks);
@@ -56,8 +57,8 @@ var runTask = function (project, task, action) {
 	try {
 		channel.emit(task._id, 'Preparing for task: ' + task.name);
 		var dir = path.join(__dirname, '..', 'Projects', task.project);
-		if (fs.existsSync(dir)) {
-			fs.deleteSync(dir);
+		if (fse.existsSync(dir)) {
+			fse.deleteSync(dir);
 		}
 
 		channel.emit(task._id, 'SVN checking out: ' + project.svn);
@@ -78,11 +79,11 @@ var runTask = function (project, task, action) {
 							if (stderr) console.log(stderr);
 
 							var result = path.join(__dirname, '..', 'Projects', task.project, project.packPath, 'result.json');
-							if (fs.existsSync(result)) {
-								var result = fs.readJson(result);
+							if (fse.existsSync(result)) {
+								var result = fse.readJson(result);
 								if (result.result) {
 									// var saveDir = path.join(__dirname, '..', 'download', task._id.toString());
-									// fs.copySync(, saveDir);
+									// fse.copySync(, saveDir);
 									// var fileList = [];
 									// var downlaodRecord = [];
 									// collectFiles(fileList, saveDir, '');
@@ -101,8 +102,8 @@ var runTask = function (project, task, action) {
 								defer.reject(new Error('Result file not found!'));
 							}
 
-							if (fs.existsSync(dir)) {
-								fs.deleteSync(dir);
+							if (fse.existsSync(dir)) {
+								fse.deleteSync(dir);
 							}
 							channel.emit(task._id, '*** Build execution ' + (true ? 'finished! ***' : 'failed! ***'));
 						});
@@ -132,10 +133,10 @@ var runTask = function (project, task, action) {
 	return defer.promise;
 };
 var collectFiles = function (results, target, prefix) {
-    var fileNames = fs.readdirSync(target);
+    var fileNames = fse.readdirSync(target);
     fileNames.forEach(function (name) {
         var filePath = path.join(target, name);
-        var fileState = fs.lstatSync(filePath);
+        var fileState = fse.lstatSync(filePath);
         if (fileState.isDirectory()) {
             collectFiles(results, filePath, path.join(prefix, name));
         } else if (fileState.isFile()) {
