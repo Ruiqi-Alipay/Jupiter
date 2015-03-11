@@ -57,8 +57,8 @@ var runTask = function (project, task, action) {
 	try {
 		channel.emit(task._id, 'Preparing for task: ' + task.name);
 		var dir = path.join(__dirname, '..', 'Projects', task.project);
-		fse.remove(dir, function (err) {
-			if (err) return defer.reject(err);
+		exec('sudo rm -R ' + dir, function (error, stdout, stderr) {
+			if (error) return defer.reject(error);
 
 			channel.emit(task._id, 'SVN checking out: ' + project.svn);
 			var command = 'svn checkout --username ' + project.username + ' --password ' + project.password
@@ -102,7 +102,7 @@ var runTask = function (project, task, action) {
 								}
 
 								if (fse.existsSync(dir)) {
-									fse.remove(dir);
+									// fse.remove(dir);
 								}
 								channel.emit(task._id, '*** Build execution ' + (true ? 'finished! ***' : 'failed! ***'));
 							});
@@ -179,7 +179,7 @@ setInterval(function () {
 									channel.emit(task.project, 'active-task-change');
 								}).catch(function (err) {
 									console.log(err);
-									
+
 									task.pid = -1;
 									task.state = 'Failed';
 									task.save();
