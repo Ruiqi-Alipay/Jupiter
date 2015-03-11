@@ -8,7 +8,7 @@ var bodyParser = require('body-parser');
 
 /* DB connection */
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/autopack');
+mongoose.connect('mongodb://localhost/autopack2');
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function (callback) {
