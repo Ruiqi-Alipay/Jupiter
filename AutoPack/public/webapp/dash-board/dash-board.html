@@ -1,9 +1,9 @@
-<md-card layout="column" layout-padding>
-	<md-content flex="10" layout="column" layout-align="center">
-		<md-button class="md-raised md-primary" ng-click="showCreateProejctDialog($event)">新建工程</md-button>
+<md-card layout="column">
+	<md-content flex="10" layout="column" layout-align="center" layout-padding>
+		<md-button class="md-raised md-primary" ng-click="createProject($event)">新建工程</md-button>
 	</md-content>
-	<md-content flex="90">
-		<md-list >
+	<md-content flex="90" layout-padding>
+		<md-list>
 		  <md-item ng-repeat="item in projects | orderBy: 'date': true">
 		    <md-item-content ng-click="onProjectClicked(item)">
 		      <div class="md-tile-content">
@@ -11,7 +11,7 @@
 		        <p>{{item.date | date:'yyyy-MM-dd HH:mm:ss'}}</p>
 		      </div>
 		      <div class="md-tile-right">
-		      	<h4>{{item.state}}</h4>
+		      	
 		      </div>
 		    </md-item-content>
 		    <md-divider ng-if="!$last"></md-divider>

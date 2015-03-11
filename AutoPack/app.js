@@ -15,8 +15,6 @@ db.once('open', function (callback) {
   console.log('DB connection success!');
 });
 
-require('./modules/project.js');
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());

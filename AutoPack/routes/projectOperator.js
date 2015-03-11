@@ -1,6 +1,9 @@
 var fs = require('fs-extra')
 var path = require('path');
 var Project = require('../modules/project.js');
+var Task = require('../modules/task.js');
+var request = require('request');
+var exec = require('child_process').exec;
 
 module.exports = {
 	projectId: function (req, res, next, id) {
@@ -12,20 +15,51 @@ module.exports = {
 	    return next();
 	  });
 	},
-	taskId: function (req, res, next, taskId) {
-		var task = req.project.tasks.id(taskId);
-		req.task = task;
-	    return next();
-	},
-	newProject: function (req, res, next) {
-		req.body.date = new Date();
-		req.body.state = 'Inactive';
+	createProject: function (req, res, next) {
+		if (!req.body.name || !req.body.description || !req.body.svn
+				|| !req.body.username || !req.body.password || !req.body.packPath) {
+			return next(new Error('Incorrect prameters for project creation!'));
+		}
 
-		var project = new Project(req.body);
-		project.save(function(err, item){
-			if (err) return next(new Error('Insert new project failed!'));
+		if (req.body.svn[req.body.svn.length - 1] != '/') {
+			req.body.svn += '/';
+		}
+		if (req.body.packPath[req.body.packPath.length - 1] != '/') {
+			req.body.packPath += '/';
+		}
+		if (req.body.packPath[0] == '/') {
+			req.body.packPath = req.body.packPath.slice(1);
+		}
 
-		    res.json(item);
+		var currentDate = new Date();
+		var output = path.join(__dirname, '..', 'Temp', currentDate.getTime() + '.json');
+		var functionJsonSvn = req.body.svn + req.body.packPath + 'function.json';
+		var command = 'svn export --username ' + req.body.username + ' --password ' + req.body.password + ' '+ functionJsonSvn + ' ' + output;
+		console.log('COMMAND: ' + command);
+		exec(command, function (error, stdout, stderr){
+			if (!fs.existsSync(output)) {
+				return next(new Error('Export function.json file not found or username/password not correct!'));
+			}
+
+			var actions = fs.readJsonSync(output);
+			fs.remove(output);
+			if (!(actions instanceof Array) || actions.length == 0) {
+				return next(new Error('Can not extract actions from function.json!'));
+			}
+			for (var index in actions) {
+				var action = actions[index];
+				if (!action.name || !action.args) return next(new Error('Each action in function.json must have name and args property!'));
+				action.args = JSON.stringify(action.args);
+			}
+
+			var project = new Project(req.body);
+			project.date = new Date();
+			project.actions = actions;
+			project.save(function(err, item){
+				if (err) return next(new Error('Insert new project failed!'));
+
+			    res.json(item);
+			});
 		});
 	},
 	editProject: function (req, res, next) {
@@ -34,7 +68,6 @@ module.exports = {
 			req.project[key] = req.body[key];
 		}
 		req.project.date = new Date();
-
 		req.project.save(function(err, item){
 			if (err) return next(new Error('Update project failed!'));
 
@@ -49,8 +82,14 @@ module.exports = {
 	    	fs.remove(path.join(__dirname, '..', 'Projects', idString));
 	    	fs.remove(path.join(__dirname, '..', 'download', idString));
 	    } catch (err) {
-
+	    	return next(err);
 	    }
+
+	    Task.find({'project': req.project._id}).remove().exec(function (err, result) {
+	    	if (err) console.log('Delete project tasks failed!');
+
+	    	console.log('Deleted Task: ' + result);
+	    });
 	    
 	    res.json(item);
 	  });
@@ -64,51 +103,5 @@ module.exports = {
 	},
 	getProjectById: function (req, res, next) {
 	    res.json(req.project);
-	},
-	activeProject: function (req, res, next) {
-		require('./channel.js').prepareProject(req.project, function () {
-			req.project.state = 'Activating';
-			req.project.save(function(err, item){
-				if (err) return next(new Error('Active project failed!'));
-
-			    res.json(item);
-			});
-		});
-	},
-	newTask: function (req, res, next) {
-		req.project.tasks.push({
-			date: new Date(),
-			name: 'Test',
-			state: 'Pennding'
-		})
-		req.project.save(function(err, project){
-			if (err) return next(new Error('Insert new task failed!'));
-
-		    res.json(project);
-		});
-	},
-	startTask: function (req, res, next) {
-		if (req.task.state == 'Finished') return next(new Error('Task state not correct! ' + req.task.state));
-
-		require('../routes/channel.js').startTask(req.project, req.task, function (project) {
-			res.json(project);
-		}, function (error) {
-			next(error);
-		});
-	},
-	deleteTask: function (req, res, next) {
-		req.project.tasks.id(req.task._id).remove();
-		req.project.save(function (err, project) {
-		  	if (err) return handleError(err);
-		  	res.json(project);
-		});
-
-		var downloadDir = path.join(__dirname, '..', 'download', req.project.toString(), req.task._id.toString());
-		if (fs.existsSync(downloadDir)) {
-			fs.remove(downloadDir);
-		}
-	},
-	getTasks: function (req, res, next) {
-		res.json(req.project);
 	}
 };

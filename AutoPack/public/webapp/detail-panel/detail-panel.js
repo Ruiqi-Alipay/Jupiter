@@ -7,30 +7,9 @@ detailPanel.directive("detailPanel", function($rootScope, $mdDialog, dataService
         scope: true,
     	templateUrl: "webapp/detail-panel/detail-panel.html",
     	link: function (scope, element, attr) {
-            var showTaskDialog = function (ev, action) {
-                $mdDialog.show({
-                  controller: function (scope, $mdDialog, dataService) {
-                      scope.hide = function() {
-                        $mdDialog.hide();
-                      };
-                      scope.cancel = function() {
-                        $mdDialog.cancel();
-                      };
-                      scope.newTask = function(name) {
-                        $mdDialog.hide();
-
-                        var project = dataService.getSelectedProject();
-                        project.penndingTasks.push({
-                        	name: name,
-                        	actionName: action.name,
-                        	date: new Date()
-                        });
-                      };
-                  },
-                  templateUrl: 'webapp/detail-panel/edit-dialog.html',
-                  targetEvent: ev,
-                });
-            };
+        scope.$on('project:select', function (event) {
+          scope.project = dataService.getSelectedProject();
+        });
 
 		    scope.panel = {
 		    	tab1: '工程详情',
@@ -38,11 +17,21 @@ detailPanel.directive("detailPanel", function($rootScope, $mdDialog, dataService
 		    	tab3: '打包历史',
 		    	selectedIndex: 0
 		    };
+        scope.activeTasks = dataService.getActiveTaskList();
+        scope.historyTasks = dataService.getHistoryTaskList();
 
-		    scope.project = dataService.getSelectedProject();
-		    scope.showTaskDialog = function (event, action) {
-		    	showTaskDialog(event, action);
+        scope.editProject = function (ev, project) {
+          dataService.editProject(ev, project)
+        }
+		    scope.createTask = function (event, action) {
+		    	dataService.createTask(event, action, scope.project._id);
 		    }
+        scope.deleteTask = function (event, task) {
+          dataService.deleteTask(event, task);
+        }
+        scope.openTerminal = function (task) {
+          // body...
+        }
 	    }
   	};
 });

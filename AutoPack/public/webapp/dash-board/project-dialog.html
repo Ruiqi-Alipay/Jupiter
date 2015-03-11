@@ -1,17 +1,27 @@
 <md-dialog aria-label="新建工程" style="width: 600px;">
   <md-content>
-    <md-subheader class="md-sticky-no-effect">{{project._id ? '修改工程' : '创建工程'}}</md-subheader>
+    <div layout="row">
+      <md-subheader class="md-sticky-no-effect dialog-header" flex>{{project._id ? '修改工程' : '创建工程'}}</md-subheader>
+      <md-progress-circular md-mode="indeterminate" ng-show="runningAction"></md-progress-circular>
+    </div>
     <form name="projectForm">
       <md-input-container>
         <label>工程名</label>
-        <input required name="name" ng-model="project.name">
+        <input required name="name" ng-disabled="runningAction" ng-model="project.name">
         <div ng-messages="projectForm.name.$error">
           <div ng-message="required">请输入工程名称.</div>
         </div>
       </md-input-container>
       <md-input-container>
+        <label>工程描述</label>
+        <input required name="description" ng-disabled="runningAction" ng-model="project.description">
+        <div ng-messages="projectForm.description.$error">
+          <div ng-message="required">请输入工程描述信息.</div>
+        </div>
+      </md-input-container>
+      <md-input-container>
         <label>工程SVN地址</label>
-        <input required name="svn" ng-model="project.svn">
+        <input required name="svn" ng-disabled="runningAction" ng-model="project.svn">
         <div ng-messages="projectForm.svn.$error">
           <div ng-message="required">请输入工程SVN地址.</div>
         </div>
@@ -19,14 +29,14 @@
       <div layout layout="column">
         <md-input-container flex>
           <label>SVN用户名</label>
-          <input name="username" ng-model="project.username">
+          <input required name="username" ng-disabled="runningAction" ng-model="project.username">
           <div ng-messages="projectForm.username.$error">
             <div ng-message="required">请输入工程SVN用户名.</div>
           </div>
         </md-input-container>
         <md-input-container flex>
           <label>SVN密码</label>
-          <input name="password" ng-model="project.password">
+          <input required name="password" type="password" ng-disabled="runningAction" ng-model="project.password">
           <div ng-messages="projectForm.password.$error">
             <div ng-message="required">请输入工程SVN密码.</div>
           </div>
@@ -34,26 +44,22 @@
       </div>
       <md-input-container>
         <label>pack.jar相对路径</label>
-        <input required name="packPath" ng-model="project.packPath">
+        <input required name="packPath" ng-disabled="runningAction" ng-model="project.packPath">
         <div ng-messages="projectForm.packPath.$error">
           <div ng-message="required">请输入pack.jsr的SVN工程内的相对地址.</div>
-        </div>
-      </md-input-container>
-      <md-input-container>
-        <label>打包完成后的文件存放目录，用于下载打包结果</label>
-        <input required name="buildPath" ng-model="project.buildPath">
-        <div ng-messages="projectForm.buildPath.$error">
-          <div ng-message="required">请输入打包结果SVN工程内的相对地址.</div>
         </div>
       </md-input-container>
     </form>
   </md-content>
   <div class="md-actions" layout="row">
+    <md-button class="md-warn md-hue-2" flex="30" ng-disabled="runningAction" ng-show="project._id" ng-click="deleteProject($event, project)">
+      删除工程
+    </md-button>
     <span flex></span>
-    <md-button flex="30" ng-click="hide()">
+    <md-button flex="30" ng-disabled="runningAction" ng-click="cancel()">
       取消
     </md-button>
-    <md-button flex="30" ng-click="newEditProject(project)" class="md-primary" ng-disabled="!projectForm.$valid">
+    <md-button flex="30" ng-click="newEditProject(project)" class="md-primary" ng-disabled="runningAction || !projectForm.$valid">
       {{project._id ? '修改' : '创建'}}
     </md-button>
   </div>

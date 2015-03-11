@@ -38,3 +38,8 @@
 .progress-circular-small {
   
 }
+
+.dialog-header {
+  background-color: #dcedc8;
+  margin: 0px;
+}
