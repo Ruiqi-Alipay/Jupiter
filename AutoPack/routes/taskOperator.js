@@ -20,7 +20,7 @@ module.exports = {
 			name: req.body.name,
 			state: 'Pennding',
 			date: new Date(),
-			action: req.body.actionId
+			actionId: req.body.actionId
 		});
 
 		task.save(function (err, newTask) {
@@ -30,8 +30,8 @@ module.exports = {
 		});
 	},
 	deleteTask: function (req, res, next) {
-		if (req.task.state == 'Running') {
-
+		if (req.task.state == 'Running' && req.task.pid > 0) {
+			process.kill(req.task.pid);
 		}
 
 		var downloadDir = path.join(__dirname, '..', 'download', req.task._id.toString());

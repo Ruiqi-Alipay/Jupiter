@@ -40,13 +40,16 @@
             <md-list>
               <md-item ng-repeat="task in activeTasks">
                 <md-item-content layout-padding>
-                  <div class="md-tile-content" flex="80">
-                    <h3>{{task.name}}</h3>
-                    <h4>{{task.actionName}}</h4>
+                  <div class="md-tile-left" layout="column" layout-align="center" ng-show="task.state=='Running'">
+                      <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+                  </div>
+                  <div class="md-tile-content" flex>
+                    <h3>{{task.name + '  ( ' + task.state + ' )'}}</h3>
+                    <h4>{{task.action.name}}</h4>
                     <p>{{task.date | date:'yyyy-MM-dd HH:mm:ss'}}</p>
                   </div>
                   <div class="md-tile-right" layout="column" flex="20" layout-fill layout-align="space-around">
-                      <md-button class="md-raised" ng-click="openTerminal(task)">运行状态</md-button>
+                      <md-button class="md-raised" ng-click="openTerminal($event, task)">运行状态</md-button>
                       <md-button class="md-warn md-raised md-hue-2" ng-click="deleteTask($event, task)">删除任务</md-button>
                   </div>
                 </md-item-content>
@@ -64,8 +67,8 @@
               <md-item ng-repeat="task in historyTasks">
                 <md-item-content layout-padding>
                   <div class="md-tile-content" flex="80">
-                    <h3>{{task.name}}</h3>
-                    <h4>{{task.actionName}}</h4>
+                    <h3>{{task.name + '  ( ' + task.state + ' )'}}</h3>
+                    <h4>{{task.action.name}}</h4>
                     <p>{{task.date | date:'yyyy-MM-dd HH:mm:ss'}}</p>
                   </div>
                   <div class="md-tile-right" layout="column" flex="20" layout-fill layout-align="space-around">

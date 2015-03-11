@@ -5,6 +5,26 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
   var historyTaskList = [];
   var selectedProject;
 
+  var socket = io();
+
+  var listenOnProject = function (oldProject, newProject) {
+      if (oldProject && oldProject._id == newProject._id) {
+          return;
+      }
+
+      if (oldProject) {
+          socket.removeAllListeners(oldProject._id);
+      }
+
+      socket.on(newProject._id, function(command) {
+        if (command == 'active-task-change') {
+          syncProjectActiveTasks(newProject._id);
+        } else if (command == 'history-task-change') {
+          syncProjectHistoryTasks(newProject._id);
+        }
+      });
+  };
+
   var isCurrentProject = function (projectId) {
     return selectedProject && selectedProject._id == projectId;
   };
@@ -154,10 +174,44 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
         targetEvent: ev,
       });
   };
+  var showTermainl = function (ev, task) {
+      $mdDialog.show({
+        controller: function (scope, $rootScope, $mdDialog) {
+          var taskSocket = io();
+          scope.hide = function() {
+            $mdDialog.hide();
+          };
+          scope.cancel = function() {
+            $mdDialog.cancel();
+          };
+          // scope.$on('terminal-input', function (e, consoleInput) {
+          //     var cmd = consoleInput[0];
+          //     socket.emit('userInput', {
+          //       id: oldListenerId,
+          //       cmd: cmd.command
+          //     });
+          //     $rootScope.$broadcast('secondary-command', {command: 'hidePrompt'});
+          //     hidePrompt = true;
+          // });
+          taskSocket.on(task._id, function (command) {
+            $rootScope.$broadcast('terminal-output', {
+                output: true,
+                text: [command],
+                breakLine: true
+            });
+          });
+        },
+        templateUrl: 'webapp/detail-panel/terminal-dialog.html',
+        targetEvent: ev,
+      });
+  };
   var syncProjectActiveTasks = function (projectId) {
     if (isCurrentProject(projectId)) {
       restService.syncActiveTasks(projectId, function (tasks) {
         if (isCurrentProject(projectId)) {
+          tasks.forEach(function (task) {
+            task.action = findAction(selectedProject.actions, task.actionId);
+          });
           activeTaskList.length = 0;
           activeTaskList.push.apply(activeTaskList, tasks);
         }
@@ -168,6 +222,9 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
     if (isCurrentProject(projectId)) {
       restService.syncHistoryTasks(projectId, function (tasks) {
         if (isCurrentProject(projectId)) {
+          tasks.forEach(function (task) {
+            task.action = findAction(selectedProject.actions, task.actionId);
+          });
           historyTaskList.length = 0;
           historyTaskList.push.apply(historyTaskList, tasks);
         }
@@ -201,6 +258,24 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
         });
       });
   };
+  var selectProject = function (project) {
+    listenOnProject(selectedProject, project);
+
+    selectedProject = project;
+    activeTaskList.length = 0;
+    historyTaskList.length = 0;
+    syncProjectActiveTasks(project._id);
+    syncProjectHistoryTasks(project._id);
+    $rootScope.$broadcast('project:select');
+  };
+  var findAction = function (actions, actionId) {
+    for (var index in actions) {
+      var action = actions[index];
+      if (action._id == actionId) {
+        return action;
+      }
+    }
+  }
 
 	return {
     getActiveTaskList: function () {
@@ -220,6 +295,9 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
 				if (projects) {
 					projectsList.length = 0;
 					projectsList.push.apply(projectsList, projects);
+          if (!selectedProject) {
+            selectProject(projects[0]);
+          }
 				}
 			});
 			return projectsList;
@@ -228,18 +306,16 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
 			return selectedProject;
 		},
 		selectProject: function (project) {
-			selectedProject = project;
-      activeTaskList.length = 0;
-      historyTaskList.length = 0;
-      syncProjectActiveTasks(project._id);
-      syncProjectHistoryTasks(project._id);
-			$rootScope.$broadcast('project:select');
+      selectProject(project);
 		},
     createTask: function (ev, action, projectId) {
       showTaskDialog(ev, action, projectId);
     },
     deleteTask: function (ev, task) {
       deleteTask(ev, task);
+    },
+    showTermainl: function (ev, task) {
+      showTermainl(ev, task);
     }
 	};
 });

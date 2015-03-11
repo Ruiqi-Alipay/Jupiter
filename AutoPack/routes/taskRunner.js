@@ -4,6 +4,8 @@ var running = require('is-running')
 var q = require('q');
 var fs = require('fs-extra');
 var exec = require('child_process').exec;
+var channel = require('./channel.js');
+var path = require('path');
 
 // 	"args": {
 // 		"dir.spec": "$SVN_PATH",
@@ -14,13 +16,13 @@ var exec = require('child_process').exec;
 // },
 //
 // 这里的args对应上面的json里面的args
-var makeArgs = function (project, action) {
+var makeArgs = function (dir, action) {
 	var cmd = '';
 	var args = JSON.parse(action.args);
 	for (var key in args) {
 		var value = args[key];
 		if (value == '$SVN_PATH') {
-			value = project.svn;
+			value = dir;
 		}
 		cmd += (' -D' + key + '=' + value);
 	}
@@ -49,72 +51,75 @@ var correctRunningState = function (argument) {
 };
 
 var runTask = function (project, task, action) {
-	var dir = path.join(__dirname, '..', 'Projects', task.project);
-	if (fs.existsSync(dir)) {
-		fs.removeSync(dir);
-	}
-	var params = '--username ' + project.username + ' --password ' + project.password;
-	exec('svn checkout ' + params + project.svn + ' ' + dir,{
-			maxBuffer: 200*1024*1024
-		}, function (error, stdout, stderr){
-			var distPath = path.join(project.projectPath, project.packPath.slice(0, project.packPath.indexOf('pack.jar') - 1));
-			var child = exec('java -Dfile.encoding=UTF-8 -jar pack.jar', {
-						cwd: distPath,
-						maxBuffer: 200*1024*1024
-					}, function (error, stdout, stderr){
-						if (error) console.log(error);
-						if (stderr) console.log(stderr);
+	var defer = q.defer();
 
-						var success = fs.existsSync(buildPath);
-						var targetIndex;
-						for (var index in project.tasks) {
-							if (project.tasks[index]._id == task._id) {
-								targetIndex = index;
-								break;
+	try {
+		channel.emit(task._id, 'Preparing for task: ' + task.name);
+		var dir = path.join(__dirname, '..', 'Projects', task.project);
+		if (fs.existsSync(dir)) {
+			fs.removeSync(dir);
+		}
+
+		channel.emit(task._id, 'SVN checking out: ' + project.svn);
+		var command = 'svn checkout --username ' + project.username + ' --password ' + project.password
+				+ ' ' + project.svn + ' ' + dir;
+		var child = exec(command, {
+				maxBuffer: 200*1024*1024
+			}, function (error, stdout, stderr){
+				channel.emit(task._id, 'SVN checking complate! preparing to build project...');
+
+				var args = makeArgs(dir, action);
+				var jarPath = path.join(dir, project.packPath);
+				var child = exec('java' + args + ' -jar pack.jar', {
+							cwd: jarPath,
+							maxBuffer: 200*1024*1024
+						}, function (error, stdout, stderr){
+							if (error) console.log(error);
+							if (stderr) console.log(stderr);
+
+							var result = path.join(__dirname, '..', 'Projects', task.project, project.packPath, 'result.json');
+							if (fs.existsSync(result)) {
+								var result = fs.readJson(result);
+								if (result.result) {
+									defer.resolve(task);
+								} else {
+									defer.reject(new Error('Pack failed!'));
+								}
+							} else {
+								defer.reject(new Error('Result file not found!'));
 							}
-						}
-						var targetTask = project.tasks[targetIndex];
 
-						if (success) {
-							var targetDir = path.join(__dirname, '..', 'download', project._id.toString(), task._id.toString());
-							fs.ensureDirSync(targetDir);
-							fs.copySync(buildPath, targetDir);
+							if (fs.existsSync(dir)) {
+								fs.removeSync(dir);
+							}
+							channel.emit(task._id, '*** Build execution ' + (true ? 'finished! ***' : 'failed! ***'));
+						});
 
-							targetTask.state = 'Finished';
-							targetTask.downloads = [];
-							collectFiles(targetTask.downloads, targetDir, '');
-							console.log('Files for download: ')
-							console.log(targetTask.downloads);
-						} else {
-							if (error) io.emit(task._id, error);
-							if (stderr) io.emit(task._id, stderr);
+				child.stdout.on('data', function (data) {
+					console.log(data);
+					channel.emit(task._id, data);
+				});
 
-							project.tasks[index].state = 'Pennding';
-						}
-
-						project.save();
-						delete runningTasks[task._id];
-
-						io.emit(task._id, '*** Build execution ' + (success ? 'finished! ***' : 'failed! ***'));
-					});
-
-			child.stdout.on('data', function (data) {
-				io.emit(task._id, data);
+				task.pid = child.pid;
+				task.state = 'Running';
+				task.save();
 			});
 
-			runningTasks[task._id] = child;
-			for (var index in project.tasks) {
-				if (project.tasks[index]._id == task._id) {
-					project.tasks[index].state = 'Running';
-					break;
-				}
-			}
-			project.save(function (err, item) {
-				if (err) return error(new Error('Insert new task failed!'));
-
-			    success(item);
-			});
+		child.stdout.on('data', function (data) {
+			console.log(data);
+			channel.emit(task._id, data);
 		});
+
+		task.pid = child.pid;
+		task.state = 'Running';
+		task.save();
+	} catch (err) {
+		console.log(err);
+
+		defer.reject(err);
+	}
+
+	return defer.promise;
 };
 
 var findAction = function (actions, actionId) {
@@ -136,16 +141,31 @@ setInterval(function () {
 			});
 		}
 
-		Project.find({'_id': {$nin: runningProject}}, {'_id': 1, 'actions': 1}, function (err, projects) {
+		Project.find({'_id': {$nin: runningProject}}, function (err, projects) {
 			if (projects) {
 				projects.forEach(function (project) {
 					Task.find({ 'project': project._id, 'state': 'Pennding' }).limit(1).sort('date').exec(function (err, tasks) {
 						var task = tasks ? tasks[0] : undefined;
 						if (task) {
 							var action = findAction(project.actions, task.actionId);
-							if (action) {
-								runTask(task, action);
+							if (action && action._id) {
+								runTask(project, task, action).then(function (finishedTask) {
+									task.pid = -1;
+									task.state = 'Success';
+									task.save();
+
+									channel.emit(task.project, 'active-task-change');
+								}).catch(function (err) {
+									task.pid = -1;
+									task.state = 'Failed';
+									task.save();
+
+									channel.emit(task.project, 'active-task-change');
+								});
+
+								channel.emit(task.project, 'active-task-change');
 							} else {
+								task.pid = -1;
 								task.state = 'Failed';
 								task.save();
 							}

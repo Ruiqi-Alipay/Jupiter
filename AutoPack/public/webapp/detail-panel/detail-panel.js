@@ -29,8 +29,8 @@ detailPanel.directive("detailPanel", function($rootScope, $mdDialog, dataService
         scope.deleteTask = function (event, task) {
           dataService.deleteTask(event, task);
         }
-        scope.openTerminal = function (task) {
-          // body...
+        scope.openTerminal = function (event, task) {
+          dataService.showTermainl(event, task);
         }
 	    }
   	};

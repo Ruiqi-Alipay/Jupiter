@@ -6,7 +6,7 @@
         var me = {};
         me.typeSoundUrl =null;
         me.startSoundUrl = null;
-        me.promptConfiguration = { end: ':>', user: 'terminal', separator: '@', path: '\\' };
+        me.promptConfiguration = { end: ':>', user: 'anon', separator: '@', path: '\\' };
                
         me.getTypeEffect = null;
         me.getStartEffect = null;
@@ -166,15 +166,6 @@
     $scope.$on('terminal-output', function (e, output) {
         if (!output.added) {
             output.added = true;
-            $scope.$apply(function () {
-                $scope.results.push(output);
-            });
-        }
-    });
-
-    $scope.$on('terminal-output-internal', function (e, output) {
-        if (!output.added) {
-            output.added = true;
             $scope.results.push(output);
         }
     });
@@ -312,14 +303,6 @@
 
                         var config = attrs['terminalConfig'];
                         scope.init(config || 'default');
-
-                        scope.$on('secondary-command', function (event, cmd) {
-                            if (cmd.command == 'showPrompt') {
-                                scope.showPrompt = true;
-                            } else if (cmd.command == 'hidePrompt') {
-                                scope.showPrompt = false;
-                            }
-                        });
                                                             
                         setInterval(function () {
                             var focused = $document[0].activeElement == target[0];
@@ -403,9 +386,9 @@
                                 }
                             }
 
-                            // scope.showPrompt = false;
+                            scope.showPrompt = false;
                             var f = [function () {
-                                // scope.showPrompt = true;
+                                scope.showPrompt = true;
                                 scope.$$phase || scope.$apply();
                                 consoleView[0].scrollTop = consoleView[0].scrollHeight;
                             }];
