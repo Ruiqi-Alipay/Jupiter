@@ -40,3 +40,5 @@ if (require.main === module) {
 
     exports.app = app;
 }
+
+require('./routes/taskRunner.js')

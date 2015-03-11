@@ -6,7 +6,8 @@ var Task = mongoose.model('Task', mongoose.Schema({
   state: String,
   date: Date,
   downloads: [],
-  action: String
+  action: String,
+  pid: Number
 }));
 
 module.exports = Task;

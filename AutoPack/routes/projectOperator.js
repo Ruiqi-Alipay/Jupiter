@@ -36,7 +36,7 @@ module.exports = {
 		var functionJsonSvn = req.body.svn + req.body.packPath + 'function.json';
 		var command = 'svn export --username ' + req.body.username + ' --password ' + req.body.password + ' '+ functionJsonSvn + ' ' + output;
 		console.log('COMMAND: ' + command);
-		exec(command, function (error, stdout, stderr){
+		var child = exec(command, function (error, stdout, stderr){
 			if (!fs.existsSync(output)) {
 				return next(new Error('Export function.json file not found or username/password not correct!'));
 			}
@@ -61,6 +61,7 @@ module.exports = {
 			    res.json(item);
 			});
 		});
+		console.log(child);
 	},
 	editProject: function (req, res, next) {
 		for (var key in req.body) {
