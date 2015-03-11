@@ -96,7 +96,6 @@ var runTask = function (project, task, action) {
 						});
 
 				child.stdout.on('data', function (data) {
-					console.log(data);
 					channel.emit(task._id, data);
 				});
 
@@ -106,7 +105,6 @@ var runTask = function (project, task, action) {
 			});
 
 		child.stdout.on('data', function (data) {
-			console.log(data);
 			channel.emit(task._id, data);
 		});
 
@@ -175,7 +173,7 @@ setInterval(function () {
 			}
 		});
 	});
-}, 10000);
+}, 30000);
 
 module.exports = {
 
