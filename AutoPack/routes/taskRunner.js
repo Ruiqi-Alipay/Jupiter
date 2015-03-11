@@ -81,6 +81,18 @@ var runTask = function (project, task, action) {
 							if (fs.existsSync(result)) {
 								var result = fs.readJson(result);
 								if (result.result) {
+									// var saveDir = path.join(__dirname, '..', 'download', task._id.toString());
+									// fs.copySync(, saveDir);
+									// var fileList = [];
+									// var downlaodRecord = [];
+									// collectFiles(fileList, saveDir, '');
+									// fileList.forEach(function (path) {
+									// 	downlaodRecord.push({
+									// 		name: path.slice(path.lastIndexOf('/') + 1),
+									// 		path: path
+									// 	})
+									// })
+									// task.downloads = JSON.stringify(downlaodRecord);
 									defer.resolve(task);
 								} else {
 									defer.reject(new Error('Pack failed!'));
@@ -119,7 +131,18 @@ var runTask = function (project, task, action) {
 
 	return defer.promise;
 };
-
+var collectFiles = function (results, target, prefix) {
+    var fileNames = fs.readdirSync(target);
+    fileNames.forEach(function (name) {
+        var filePath = path.join(target, name);
+        var fileState = fs.lstatSync(filePath);
+        if (fileState.isDirectory()) {
+            collectFiles(results, filePath, path.join(prefix, name));
+        } else if (fileState.isFile()) {
+            results.push(path.join(prefix, name));
+        }
+    });
+}
 var findAction = function (actions, actionId) {
 	for (var index in actions) {
 		var action = actions[index];

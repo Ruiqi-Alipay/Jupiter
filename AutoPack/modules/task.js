@@ -5,7 +5,7 @@ var Task = mongoose.model('Task', mongoose.Schema({
   name: String,
   state: String,
   date: Date,
-  downloads: [],
+  downloads: String,
   actionId: String,
   pid: Number
 }));
