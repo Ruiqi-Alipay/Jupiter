@@ -59,7 +59,7 @@ var runTask = function (project, task, action) {
 		var dir = path.join(__dirname, '..', 'Projects', task.project);
 		fse.remove(dir, function (err) {
 			if (err) return defer.reject(err);
-			
+
 			channel.emit(task._id, 'SVN checking out: ' + project.svn);
 			var command = 'svn checkout --username ' + project.username + ' --password ' + project.password
 					+ ' ' + project.svn + ' ' + dir;
@@ -178,6 +178,8 @@ setInterval(function () {
 
 									channel.emit(task.project, 'active-task-change');
 								}).catch(function (err) {
+									console.log(err);
+									
 									task.pid = -1;
 									task.state = 'Failed';
 									task.save();
