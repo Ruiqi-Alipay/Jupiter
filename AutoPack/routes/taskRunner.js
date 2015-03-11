@@ -58,6 +58,8 @@ var runTask = function (project, task, action) {
 		channel.emit(task._id, 'Preparing for task: ' + task.name);
 		var dir = path.join(__dirname, '..', 'Projects', task.project);
 		fse.remove(dir, function (err) {
+			if (err) return defer.reject(err);
+			
 			channel.emit(task._id, 'SVN checking out: ' + project.svn);
 			var command = 'svn checkout --username ' + project.username + ' --password ' + project.password
 					+ ' ' + project.svn + ' ' + dir;
