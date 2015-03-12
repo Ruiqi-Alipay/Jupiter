@@ -166,8 +166,6 @@ var startJob = function () {
 									channel.emit(task._id, '===         Build Success           === ');
 									channel.emit(task._id, '========================================');
 									channel.emit(task.project, 'run-task-finished');
-
-									startJob();
 								}).catch(function (err) {
 									console.log(err);
 
@@ -183,8 +181,6 @@ var startJob = function () {
 									channel.emit(task._id, '===         Build Failed           === ');
 									channel.emit(task._id, '========================================');
 									channel.emit(task.project, 'run-task-finished');
-
-									startJob();
 								});
 							} else {
 								task.pid = -1;
