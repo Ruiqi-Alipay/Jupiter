@@ -63,10 +63,10 @@ module.exports = {
 				});
 			});
 
-			setTimeout(function (child, next) {
-				process.kill(child.pid);
-				next(new Error('Timeout! cannot get project information!'));
-			}, 60000, child, next);
+			// setTimeout(function (child, next) {
+			// 	process.kill(child.pid);
+			// 	next(new Error('Timeout! cannot get project information!'));
+			// }, 60000, child, next);
 		} catch (err) {
 			next(err);
 		}
