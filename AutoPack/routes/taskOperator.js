@@ -131,15 +131,19 @@ module.exports = {
 			   ]
 			};
 
-			// send the message and get a callback with an error or details of the message that was sent
-			server.send(message, function(err, message) {
-			    if(err){
-			    	console.log(err);
-			        return next(err);
-			    }
+			try {
+				// send the message and get a callback with an error or details of the message that was sent
+				server.send(message, function(err, message) {
+				    if(err){
+				    	console.log(err);
+				        return next(err);
+				    }
 
-				res.json(message);
-			});
+					res.json(message);
+				});
+			} catch (err) {
+				return next(err);
+			}
 		});
 	},
 	getRecord: function (req, res, next) {
