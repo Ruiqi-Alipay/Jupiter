@@ -10,7 +10,7 @@ var server  = email.server.connect({
    user: "sdkpack@alibaba-inc.com", 
    password: "2014@sdk", 
    host: "smtp.zue.alipay.com",
-   ssl: true
+   ssl: false
 });
 
 module.exports = {
