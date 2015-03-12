@@ -1,23 +1,19 @@
 <md-dialog aria-label="Result">
 	<md-content>
-      <md-content layout="row" ng-repeat="download in task.downloads">
-        <div layout="column" flex>
-			<h3>{{download.name}}</h3>
-		    <p>{{download.link}}</p>
-        </div>
-    	<div>
-        	<img ng-src="{{download.link}}.png">
-    	</div>
-        <md-divider ng-if="!$last"></md-divider>
-      </md-content>
-
-	    <md-content layout="row" layout-align="center center">
+		<div layout="row" ng-repeat="download in task.downloads">
+	      <md-card-content flex>
+	        <h2>{{download.name}}</h2>
+	        <a ng-href="{{download.link}}">{{download.link}}</a>
+	      </md-card-content>
+	      <img ng-src="{{download.link}}.png">
+	    </div>
+	    <div layout="row" layout-align="center center">
 		    <md-input-container flex>
 		      <label>Email Address, split by ','</label>
 		      <input ng-model="email.address" ng-disabled="runningAction">
 		    </md-input-container>
 		    <md-button class="md-raised" ng-click="sendEmail(email)" ng-disabled="runningAction" style="height: 40px; margin-left: 20px;">Send Email</md-button>
 		    <md-progress-circular md-mode="indeterminate" ng-show="runningAction"></md-progress-circular>
-		</md-content>
+		</div>
 	</md-content>
 </md-dialog>
