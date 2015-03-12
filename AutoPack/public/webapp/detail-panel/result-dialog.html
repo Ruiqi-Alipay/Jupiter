@@ -1,4 +1,5 @@
-<md-dialog aria-label="Result" layout="column" style="width: 600px;">
+<md-dialog aria-label="Result">
+	<md-content layout="column" style="width: 600px;">
 	  <md-content flex="90" layout-padding>
 	    <md-list>
 	      <md-item ng-repeat="download in task.downloads">
@@ -15,12 +16,13 @@
 	      </md-item>
 	    </md-list>
 	  </md-content>
-    <md-content flex="10" layout="row" layout-align="center center">
-	    <md-input-container flex>
-	      <label>Email Address, split by ','</label>
-	      <input ng-model="email.address" ng-disabled="runningAction">
-	    </md-input-container>
-	    <md-button class="md-raised" ng-click="sendEmail(email)" ng-disabled="runningAction" style="height: 40px; margin-left: 20px;">Send Email</md-button>
-	    <md-progress-circular md-mode="indeterminate" ng-show="runningAction"></md-progress-circular>
+	    <md-content flex="10" layout="row" layout-align="center center">
+		    <md-input-container flex>
+		      <label>Email Address, split by ','</label>
+		      <input ng-model="email.address" ng-disabled="runningAction">
+		    </md-input-container>
+		    <md-button class="md-raised" ng-click="sendEmail(email)" ng-disabled="runningAction" style="height: 40px; margin-left: 20px;">Send Email</md-button>
+		    <md-progress-circular md-mode="indeterminate" ng-show="runningAction"></md-progress-circular>
+		</md-content>
 	</md-content>
 </md-dialog>
