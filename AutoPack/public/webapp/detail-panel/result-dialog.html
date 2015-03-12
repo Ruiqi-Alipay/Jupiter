@@ -1,11 +1,7 @@
 <md-dialog aria-label="Result" style="width: 600px;">
-    <md-content layout-padding layout="row" ng-repeat="download in task.downloads">
-      <div layout="column" flex>
+    <md-content layout-padding layout="column" ng-repeat="download in task.downloads">
 	    <h2>{{download.name}}</h2>
 	    <a>{{download.link}}</a>
-      </div>
-      <div >
-          <img ng-src="{{download.link}}.png">
-      </div>
+	    <img ng-src="{{download.link}}.png">
     </md-content>
 </md-dialog>
