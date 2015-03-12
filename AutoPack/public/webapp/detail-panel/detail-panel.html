@@ -78,7 +78,7 @@
                       <div>{{task.date | date:'yyyy-MM-dd HH:mm:ss'}}</div>
                       <div flex></div>
                       <md-button class="md-raised" ng-click="viewLog($event, task)">运行记录</md-button>
-                      <md-button class="md-raised" ng-show="task.state=='Success'" style="margin-left: 20px;" ng-click="viewResult($event, task)">打包结果</md-button>
+                      <md-button class="md-raised" style="margin-left: 20px;" ng-click="viewResult($event, task)">打包结果</md-button>
                       <md-button class="md-warn md-raised md-hue-2" ng-click="deleteTask($event, task)" style="margin-left: 20px;">删除任务</md-button>
                     </div>
                   </div>
