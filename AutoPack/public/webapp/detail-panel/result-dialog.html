@@ -1,7 +1,17 @@
 <md-dialog aria-label="Result" style="width: 600px;">
     <md-content layout-padding layout="column" ng-repeat="download in task.downloads">
 	    <h2>{{download.name}}</h2>
-	    <a>{{download.link}}</a>
-	    <img ng-src="{{download.link}}.png">
+	    <a ng-href="{{download.link}}">{{download.link}}</a>
+	    <md-content layout-align="center center">
+	    	<img ng-src="{{download.link}}.png">
+		</md-content>
     </md-content>
+    <md-content layout="row" layout-align="center center">
+	    <md-input-container flex>
+	      <label>Email Address, split by ','</label>
+	      <input ng-model="email.address" ng-disabled="runningAction">
+	    </md-input-container>
+	    <md-button class="md-raised" ng-click="sendEmail(email)" ng-disabled="runningAction" style="height: 40px; margin-left: 20px;">Send Email</md-button>
+	    <md-progress-circular md-mode="indeterminate" ng-show="runningAction"></md-progress-circular>
+	</md-content>
 </md-dialog>

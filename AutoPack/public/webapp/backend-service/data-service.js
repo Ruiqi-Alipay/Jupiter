@@ -214,12 +214,20 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
   };
   var showTaskResult = function (ev, task) {
       $mdDialog.show({
-        controller: function (scope, $mdDialog) {
+        controller: function (scope, $mdDialog, restService) {
+          scope.runningAction = false;
           scope.hide = function() {
             $mdDialog.hide();
           };
           scope.cancel = function() {
             $mdDialog.cancel();
+          };
+          scope.sendEmail = function (address) {
+            restService.sendEmail(address, task._id, function (mailInfo) {
+              scope.runningAction = false;
+            }, function () {
+              scope.runningAction = true;
+            })
           };
           scope.task = task;
         },

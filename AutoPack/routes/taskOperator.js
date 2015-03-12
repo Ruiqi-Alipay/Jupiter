@@ -1,7 +1,17 @@
 var fs = require('fs')
 var path = require('path');
 var Task = require('../modules/task.js');
+var Project = require('../modules/project.js');
 var exec = require('child_process').exec;
+var nodemailer = require('nodemailer');
+
+var transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+        user: 'ruiqi.sg@gmail.com',
+        pass: '0293248094'
+    }
+});
 
 module.exports = {
 	taskId: function (req, res, next, taskId) {
@@ -80,6 +90,51 @@ module.exports = {
 			if (err) return next(err);
 
 			res.json(tasks);
+		});
+	},
+	sendEmail: function (req, res, next) {
+		if (!req.body.address) return next(new Error('Email address is empty!'));
+		if (!req.task.downloads) return next(new Error('Task has nothing for download!'));
+
+		Project.findById(req.task.project).exec(function (err, project) {
+			if (err) return next(err);
+
+			var findAction;
+			for (var index in project.actions) {
+				var action = project.actions[index];
+				if (action._id == req.task.actionId) {
+					findAction = action;
+					break;
+				}
+			}
+
+			if (!findAction) return next(new Error('Action not found in project'));
+
+			var downloads = JSON.parse(req.task.downloads);
+			var mailText = '';
+			var mailHtml = '<div>';
+			downloads.forEach(function (download) {
+				mailText += (download.name + '\r\n' + download.link + '\r\n');
+				mailHtml += ('<b>' + download.name + '</b><br><a href="' + download.link + '">' + download.link + '</a><br>');
+			});
+			mailHtml += '</div>';
+
+			var mailOptions = {
+			    from: 'Autopack Server <ruiqi.sg@gmail.com>', // sender address
+			    to: req.body.address, // list of receivers
+			    subject: '在线打包：' + req.task.name + '(' + findAction.name + ')', // Subject line
+			    text: mailText, // plaintext body
+			    html: mailHtml // html body
+			};
+
+			// send mail with defined transport object
+			transporter.sendMail(mailOptions, function(error, info){
+			    if(error){
+			        return next(error);
+			    }
+
+			    res.json(info);
+			});
 		});
 	}
 };

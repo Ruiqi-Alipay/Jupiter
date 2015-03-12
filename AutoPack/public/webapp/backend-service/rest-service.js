@@ -85,6 +85,16 @@ backendService.factory('restService', function ($http, $rootScope) {
 		  		finished();
 		  	});
 		  	if (start) start();
+		},
+		sendEmail: function (address, taskId, finished, start) {
+			$http.post('./api/task/send/' + taskId, address).success(function(mailInfo){
+				$rootScope.$broadcast('toast:show', '邮件发送成功');
+				finished(mailInfo);
+		  	}).error(function(error, status, headers, config) {
+		  		$rootScope.$broadcast('toast:show', '邮件发送错误：' + error);
+		  		finished();
+		  	});
+		  	if (start) start();
 		}
 	};
 });
