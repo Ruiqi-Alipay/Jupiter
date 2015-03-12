@@ -2,7 +2,7 @@ var Task = require('../modules/task.js');
 var Project = require('../modules/project.js');
 var running = require('is-running');
 var q = require('q');
-var fse = require('fs-extra');
+var fs = require('fs');
 var exec = require('child_process').exec;
 var channel = require('./channel.js');
 var path = require('path');
@@ -78,11 +78,13 @@ var runTask = function (project, task, action) {
 								if (stderr) console.log(stderr);
 
 								var result = path.join(__dirname, '..', 'Projects', task.project, project.packPath, 'result.json');
-								if (fse.existsSync(result)) {
-									var result = fse.readJson(result);
+								if (fs.existsSync(result)) {
+									channel.emit(task._id, 'Build result: ' + result);
+									
+									var result = JSON.parse(fs.readFileSync(result));
 									if (result && result.result) {
 										// var saveDir = path.join(__dirname, '..', 'download', task._id.toString());
-										// fse.copySync(, saveDir);
+										// fs.copySync(, saveDir);
 										// var fileList = [];
 										// var downlaodRecord = [];
 										// collectFiles(fileList, saveDir, '');
@@ -101,8 +103,8 @@ var runTask = function (project, task, action) {
 									defer.reject(new Error('Result file not found!'));
 								}
 
-								if (fse.existsSync(dir)) {
-									// fse.remove(dir);
+								if (fs.existsSync(dir)) {
+									// fs.remove(dir);
 								}
 								channel.emit(task._id, '*** Build execution ' + (true ? 'finished! ***' : 'failed! ***'));
 							});
@@ -123,6 +125,8 @@ var runTask = function (project, task, action) {
 			task.pid = child.pid;
 			task.state = 'Running';
 			task.save();
+
+			channel.emit(task.project, 'active-task-change');
 		});
 	} catch (err) {
 		console.log(err);
@@ -133,10 +137,10 @@ var runTask = function (project, task, action) {
 	return defer.promise;
 };
 var collectFiles = function (results, target, prefix) {
-    var fileNames = fse.readdirSync(target);
+    var fileNames = fs.readdirSync(target);
     fileNames.forEach(function (name) {
         var filePath = path.join(target, name);
-        var fileState = fse.lstatSync(filePath);
+        var fileState = fs.lstatSync(filePath);
         if (fileState.isDirectory()) {
             collectFiles(results, filePath, path.join(prefix, name));
         } else if (fileState.isFile()) {
@@ -186,8 +190,6 @@ setInterval(function () {
 
 									channel.emit(task.project, 'active-task-change');
 								});
-
-								channel.emit(task.project, 'active-task-change');
 							} else {
 								task.pid = -1;
 								task.state = 'Failed';
