@@ -1,9 +1,11 @@
 <md-dialog aria-label="Result" style="width: 600px;">
-	<div>sdfsdfsd</div>
-  <div ng-repeat="download in task.downloads">
-	  <md-card-content>
+    <md-content layout-padding layout="row" ng-repeat="download in task.downloads">
+      <div layout="column" flex>
 	    <h2>{{download.name}}</h2>
 	    <a>{{download.link}}</a>
-	  </md-card-content>
-  </div>
+      </div>
+      <div >
+          <img ng-src="download.link + '.svg'">
+      </div>
+    </md-content>
 </md-dialog>
