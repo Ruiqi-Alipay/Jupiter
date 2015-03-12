@@ -181,9 +181,9 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
         targetEvent: ev,
       });
   };
-  var showTermainl = function (ev, task) {
+  var showTermainl = function (ev, task, listenKey) {
       $mdDialog.show({
-        controller: function (scope, $rootScope, $mdDialog) {
+        controller: function (scope, $rootScope, $mdDialog, restService) {
           var taskSocket = io();
           scope.hide = function() {
             $mdDialog.hide();
@@ -200,13 +200,19 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
           //     $rootScope.$broadcast('secondary-command', {command: 'hidePrompt'});
           //     hidePrompt = true;
           // });
-          taskSocket.on(task._id, function (command) {
+          taskSocket.on(listenKey ? listenKey : task._id, function (command) {
             $rootScope.$broadcast('terminal-output', {
                 output: true,
                 text: [command],
                 breakLine: true
             });
           });
+
+          if (listenKey) {
+            restService.getRecord(task._id, listenKey, function () {
+
+            });
+          }
         },
         templateUrl: 'webapp/detail-panel/terminal-dialog.html',
         targetEvent: ev,
@@ -366,6 +372,10 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
     },
     showTaskResult: function (ev, task) {
       showTaskResult(ev, task);
+    },
+    showLogRecord: function (ev, task) {
+      var date = new Date();
+      showTermainl(ev, task, date.getTime() + '');
     }
 	};
 });

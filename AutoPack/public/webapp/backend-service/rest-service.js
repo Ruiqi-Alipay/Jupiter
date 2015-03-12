@@ -95,6 +95,15 @@ backendService.factory('restService', function ($http, $rootScope) {
 		  		finished();
 		  	});
 		  	if (start) start();
+		},
+		getRecord: function (taskId, listener, finished, start) {
+			$http.get('./api/task/record/' + taskId + '?listener=' + listener).success(function(listener){
+				finished(listener);
+		  	}).error(function(error, status, headers, config) {
+		  		$rootScope.$broadcast('toast:show', '获取LOG记录失败：' + error);
+		  		finished();
+		  	});
+		  	if (start) start();
 		}
 	};
 });

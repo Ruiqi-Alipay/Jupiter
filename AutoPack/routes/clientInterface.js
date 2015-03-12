@@ -17,5 +17,6 @@ router.get('/task/active', taskOperator.getProjectActiveTasks);
 router.get('/task/history', taskOperator.getProjectHistoryTasks);
 router.delete('/task/:taskId', taskOperator.deleteTask);
 router.post('/task/send/:taskId', taskOperator.sendEmail);
+router.get('/task/record/:taskId', taskOperator.getRecord);
 
 module.exports = router;

@@ -70,6 +70,7 @@ var runTask = function (project, task, action) {
 
 					var args = makeArgs(dir, action);
 					var jarPath = path.join(dir, project.packPath);
+					var saveDir = path.join(__dirname, '..', 'download', task._id.toString());
 					var child = exec('java -Dfile.encoding=UTF-8' + args + ' -jar pack.jar', {
 								cwd: jarPath,
 								maxBuffer: 200*1024*1024
@@ -82,7 +83,6 @@ var runTask = function (project, task, action) {
 									var result = JSON.parse(fs.readFileSync(result));
 									if (result && result.result && result.pkgs) {
 										var fse = require('fs-extra');
-										var saveDir = path.join(__dirname, '..', 'download', task._id.toString());
 										var downlaodRecord = [];
 										result.pkgs.forEach(function (pkgPath) {
 											var fileName = pkgPath.slice(pkgPath.lastIndexOf('/') + 1);
@@ -115,6 +115,8 @@ var runTask = function (project, task, action) {
 					child.stdout.on('data', function (data) {
 						channel.emit(task._id, data);
 					});
+
+					child.stdout.pipe(fs.createWriteStream(path.join(saveDir, 'record.log')));
 
 					task.pid = child.pid;
 					task.state = 'Running';

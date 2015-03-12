@@ -4,6 +4,7 @@ var Task = require('../modules/task.js');
 var Project = require('../modules/project.js');
 var exec = require('child_process').exec;
 var nodemailer = require('nodemailer');
+var lineReader = require('line-reader');
 
 var transporter = nodemailer.createTransport({
     service: 'Gmail',
@@ -140,6 +141,23 @@ module.exports = {
 
 			    res.json(info);
 			});
+		});
+	},
+	getRecord: function (req, res, next) {
+		if (!req.param('listener')) return next(new Error('Must have a listener prameter!'));
+
+		var listener = req.param('listener');
+		var recordPath = path.join(__dirname, '..', 'download', req.task._id.toString(), 'record.log');
+		if (!fs.existsSync(recordPath)) return next(new Error('Record not found!'));
+
+		var channel = require('./channel.js');
+
+		lineReader.eachLine(recordPath, function(line, last) {
+		  channel.emit(listener, line);
+		});
+
+		res.json({
+			listener: listener
 		});
 	}
 };

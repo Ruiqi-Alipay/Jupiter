@@ -43,7 +43,7 @@ detailPanel.directive("detailPanel", function($rootScope, $mdDialog, dataService
           dataService.showTaskResult(event, task);
         }
         scope.viewLog = function (event, task) {
-          dataService.showTaskResult(event, task);
+          dataService.showLogRecord(event, task);
         }
 	    }
   	};

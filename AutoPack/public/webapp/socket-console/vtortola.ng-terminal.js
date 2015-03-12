@@ -389,7 +389,7 @@
                             scope.showPrompt = false;
                             var f = [function () {
                                 scope.showPrompt = true;
-                                scope.$$phase || scope.$apply();
+                                scope.$$phase;// || scope.$apply();
                                 consoleView[0].scrollTop = consoleView[0].scrollHeight;
                             }];
 
