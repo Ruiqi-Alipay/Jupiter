@@ -5,7 +5,7 @@ var Project = require('../modules/project.js');
 var exec = require('child_process').exec;
 var lineReader = require('line-reader');
 
-var email   = require(path.join(__dirname, '..', 'node_dodules', 'emailjs', "email.js"));
+var email   = require(path.join(__dirname, '..', 'node_modules', 'emailjs', "email.js"));
 var server  = email.server.connect({
    user:    "sdkpack@alibaba-inc.com", 
    password:"2014@sdk", 
