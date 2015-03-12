@@ -39,6 +39,12 @@ detailPanel.directive("detailPanel", function($rootScope, $mdDialog, dataService
         scope.historyNextPage = function () {
           dataService.historyNextPage();
         }
+        scope.viewResult = function (event, task) {
+          dataService.showTaskResult(event, task);
+        }
+        scope.viewLog = function (event, task) {
+          dataService.showTaskResult(event, task);
+        }
 	    }
   	};
 });
