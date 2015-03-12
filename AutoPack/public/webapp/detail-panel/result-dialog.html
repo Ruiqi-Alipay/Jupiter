@@ -1,11 +1,20 @@
 <md-dialog aria-label="Result" style="width: 600px;">
-    <md-content layout-padding layout="column" ng-repeat="download in task.downloads">
-	    <h2>{{download.name}}</h2>
-	    <a ng-href="{{download.link}}">{{download.link}}</a>
-	    <md-content layout-align="center center">
-	    	<img ng-src="{{download.link}}.png">
-		</md-content>
-    </md-content>
+	  <md-content layout-padding>
+	    <md-list>
+	      <md-item ng-repeat="download in task.downloads">
+	        <md-item-content layout-padding>
+	          <div class="md-tile-content" flex>
+			    <h3>{{download.name}}</h3>
+			    <a ng-href="{{download.link}}">{{download.link}}</a>
+	          </div>
+	          <div class="md-tile-right" layout="column" layout-align="center center">
+	              <img ng-src="{{download.link}}.png">
+	          </div>
+	        </md-item-content>
+	        <md-divider ng-if="!$last"></md-divider>
+	      </md-item>
+	    </md-list>
+	  </md-content>
     <md-content layout="row" layout-align="center center">
 	    <md-input-container flex>
 	      <label>Email Address, split by ','</label>
