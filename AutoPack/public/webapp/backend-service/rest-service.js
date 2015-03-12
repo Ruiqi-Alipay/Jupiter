@@ -69,9 +69,17 @@ backendService.factory('restService', function ($http, $rootScope) {
 		  	});
 		  	if (start) start();
 		},
-		syncHistoryTasks: function (projectId, finished, start) {
-			$http.get('./api/task/history?project=' + projectId).success(function(tasks){
+		syncHistoryTasks: function (projectId, starterTask, orlder, finished, start) {
+			var pagePrarm = '';
+			if (starterTask) {
+				pagePrarm = '&' + (orlder ? 'next=' : 'prev=') + encodeURIComponent(starterTask.date);
+			}
+			$http.get('./api/task/history?project=' + projectId + pagePrarm).success(function(tasks){
 				finished(tasks);
+
+				if (starterTask && tasks.length == 0) {
+					$rootScope.$broadcast('toast:show', orlder ? '已经没有更多历史记录' : '已是最新记录');
+				}
 		  	}).error(function(error, status, headers, config) {
 		  		$rootScope.$broadcast('toast:show', '同步历史任务出错：' + error);
 		  		finished();

@@ -1,4 +1,4 @@
-var fs = require('fs-extra')
+var fs = require('fs')
 var path = require('path');
 var Task = require('../modules/task.js');
 
@@ -36,7 +36,7 @@ module.exports = {
 
 		var downloadDir = path.join(__dirname, '..', 'download', req.task._id.toString());
 		if (fs.existsSync(downloadDir)) {
-			fs.remove(downloadDir);
+			exec('sudo rm -R ' + downloadDir);
 		}
 		
 		req.task.remove(function (err, deletedTask) {
@@ -48,7 +48,7 @@ module.exports = {
 	getProjectActiveTasks: function (req, res, next) {
 		if (!req.param('project')) return next(new Error('Unformated prameter for query task!'));
 
-		Task.find({'project': req.param('project'), 'state': {$in: ['Running', 'Pennding', 'Failed']}}, function (err, tasks) {
+		Task.find({'project': req.param('project'), 'state': {$in: ['Running', 'Pennding']}}).sort('date').exec(function (err, tasks) {
 			if (err) return next(err);
 
 			res.json(tasks);
@@ -57,7 +57,25 @@ module.exports = {
 	getProjectHistoryTasks: function (req, res, next) {
 		if (!req.param('project')) return next(new Error('Unformated prameter for query task!'));
 
-		Task.find({'project': req.param('project'), 'state': 'Success'}, function (err, tasks) {
+		var next = req.param('next');
+		var prev = req.param('prev');
+		var selection = {
+			'project': req.param('project'),
+			'state': {$nin: ['Running', 'Pennding']}
+		};
+		if (prev) {
+			selection['date'] ={
+				$gt: decodeURIComponent(prev)
+			}
+		} else if (next) {
+			selection['date'] ={
+				$lt: decodeURIComponent(next)
+			}
+		}
+
+		console.log(selection);
+
+		Task.find(selection).sort('-date').limit(10).exec(function (err, tasks) {
 			if (err) return next(err);
 
 			res.json(tasks);

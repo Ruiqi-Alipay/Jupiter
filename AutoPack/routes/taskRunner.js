@@ -39,7 +39,7 @@ var correctRunningState = function (argument) {
 				if (!task.pid || !running(task.pid)) {
 					task.state = 'Failed';
 					task.save();
-					channel.emit(task.project, 'active-task-change');
+					channel.emit(task.project, 'run-task-finished');
 				}
 			});
 			defer.resolve(tasks);
@@ -57,9 +57,8 @@ var runTask = function (project, task, action) {
 	try {
 		channel.emit(task._id, 'Preparing for task: ' + task.name);
 		var dir = path.join(__dirname, '..', 'Projects', task.project);
-		exec('sudo rm -R ' + dir, function (error, stdout, stderr) {
-			if (error) return defer.reject(error);
 
+		exec('sudo rm -R ' + dir, function (error, stdout, stderr) {
 			channel.emit(task._id, 'SVN checking out: ' + project.svn);
 			var command = 'svn checkout --username ' + project.username + ' --password ' + project.password
 					+ ' ' + project.svn + ' ' + dir;
@@ -79,8 +78,6 @@ var runTask = function (project, task, action) {
 
 								var result = path.join(__dirname, '..', 'Projects', task.project, project.packPath, 'result.json');
 								if (fs.existsSync(result)) {
-									channel.emit(task._id, 'Build result: ' + result);
-
 									var result = JSON.parse(fs.readFileSync(result));
 									if (result && result.result && result.pkgs) {
 										var fse = require('fs-extra');
@@ -104,9 +101,7 @@ var runTask = function (project, task, action) {
 									defer.reject(new Error('Result file not found!'));
 								}
 
-								if (fs.existsSync(dir)) {
-									// fs.remove(dir);
-								}
+								exec('sudo rm -R ' + dir);
 								channel.emit(task._id, '*** Build execution ' + (true ? 'finished! ***' : 'failed! ***'));
 							});
 
@@ -127,7 +122,7 @@ var runTask = function (project, task, action) {
 			task.state = 'Running';
 			task.save();
 
-			channel.emit(task.project, 'active-task-change');
+			channel.emit(task.project, 'run-task-start');
 		});
 	} catch (err) {
 		console.log(err);
@@ -146,8 +141,7 @@ var findAction = function (actions, actionId) {
 	}
 }
 
-setInterval(function () {
-	console.log('======================== Cron jonbs running ========================');
+var startJob = function () {
 	correctRunningState().then(function (runningTasks) {
 		var runningProject = [];
 		if (runningTasks) {
@@ -169,20 +163,35 @@ setInterval(function () {
 									task.state = 'Success';
 									task.save();
 
-									channel.emit(task.project, 'active-task-change');
+									channel.emit(task._id, '========================================');
+									channel.emit(task._id, '===         Build Success           === ');
+									channel.emit(task._id, '========================================');
+									channel.emit(task.project, 'run-task-finished');
+
+									startJob();
 								}).catch(function (err) {
 									console.log(err);
 
 									task.pid = -1;
 									task.state = 'Failed';
 									task.save();
+									
+									if (err) {
+										channel.emit(task._id, err.toString());
+									}
+									
+									channel.emit(task._id, '========================================');
+									channel.emit(task._id, '===         Build Failed           === ');
+									channel.emit(task._id, '========================================');
+									channel.emit(task.project, 'run-task-finished');
 
-									channel.emit(task.project, 'active-task-change');
+									startJob();
 								});
 							} else {
 								task.pid = -1;
 								task.state = 'Failed';
 								task.save();
+								channel.emit(task.project, 'run-task-finished');
 							}
 						}
 					});
@@ -190,10 +199,17 @@ setInterval(function () {
 			}
 		});
 	});
+};
+
+setInterval(function () {
+	console.log('======================== Cron jonbs running ========================');
+	startJob();
 }, 30000);
 
 module.exports = {
-
+	startJob: function () {
+		startJob();
+	}
 };
 
 

@@ -9,6 +9,7 @@ detailPanel.directive("detailPanel", function($rootScope, $mdDialog, dataService
     	link: function (scope, element, attr) {
         scope.$on('project:select', function (event) {
           scope.project = dataService.getSelectedProject();
+          scope.panel.selectedIndex = 0;
         });
 
 		    scope.panel = {
@@ -31,6 +32,12 @@ detailPanel.directive("detailPanel", function($rootScope, $mdDialog, dataService
         }
         scope.openTerminal = function (event, task) {
           dataService.showTermainl(event, task);
+        }
+        scope.historyPrevPage = function () {
+          dataService.historyPrevPage();
+        }
+        scope.historyNextPage = function () {
+          dataService.historyNextPage();
         }
 	    }
   	};

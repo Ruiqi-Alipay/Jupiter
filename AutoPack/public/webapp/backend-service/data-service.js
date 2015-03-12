@@ -17,10 +17,14 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
       }
 
       socket.on(newProject._id, function(command) {
-        if (command == 'active-task-change') {
-          syncProjectActiveTasks(newProject._id);
-        } else if (command == 'history-task-change') {
-          syncProjectHistoryTasks(newProject._id);
+        if (isCurrentProject(newProject._id)) {
+          if (command == 'run-task-start') {
+            syncProjectActiveTasks(newProject._id);
+          } else if (command == 'run-task-finished') {
+            syncProjectActiveTasks(newProject._id);
+            historyTaskList.length = 0;
+            syncProjectHistoryTasks(newProject._id, true);
+          }
         }
       });
   };
@@ -113,7 +117,9 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
       						} else {
       							deferred.reject();
       						}
-      					});
+      					}, function () {
+                  scope.runningAction = true;
+                });
             	} else {
       					restService.createProject(result, function (newProject) {
       						if (newProject) {
@@ -121,16 +127,17 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
       						} else {
       							deferred.reject();
       						}
-      					});
+      					}, function () {
+                  scope.runningAction = true;
+                });
             	}
 
             	deferred.promise.then(function (project) {
             		updateProject(project);
+                scope.runningAction = false;
       					$mdDialog.hide();
       				}, function (reason) {
-      					
-      				}, function (update) {
-      				
+      					scope.runningAction = false;
       				});
             };
         },
@@ -218,9 +225,11 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
       });
     }
   };
-  var syncProjectHistoryTasks = function (projectId) {
+  var syncProjectHistoryTasks = function (projectId, next) {
     if (isCurrentProject(projectId)) {
-      restService.syncHistoryTasks(projectId, function (tasks) {
+      restService.syncHistoryTasks(projectId, next ? historyTaskList[historyTaskList.length - 1] : historyTaskList[0], next, function (tasks) {
+        if (!tasks || tasks.length == 0) return;
+        
         if (isCurrentProject(projectId)) {
           tasks.forEach(function (task) {
             task.action = findAction(selectedProject.actions, task.actionId);
@@ -265,7 +274,7 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
     activeTaskList.length = 0;
     historyTaskList.length = 0;
     syncProjectActiveTasks(project._id);
-    syncProjectHistoryTasks(project._id);
+    syncProjectHistoryTasks(project._id, true);
     $rootScope.$broadcast('project:select');
   };
   var findAction = function (actions, actionId) {
@@ -283,6 +292,12 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
     },
     getHistoryTaskList: function () {
       return historyTaskList;
+    },
+    historyNextPage: function () {
+      syncProjectHistoryTasks(selectedProject._id, true);
+    },
+    historyPrevPage: function () {
+      syncProjectHistoryTasks(selectedProject._id, false);
     },
 		createProject: function (ev) {
 			showProjectDialog(ev);

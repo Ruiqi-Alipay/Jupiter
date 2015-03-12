@@ -4,7 +4,7 @@
 	</md-content>
 	<md-content flex="90" layout-padding>
 		<md-list>
-		  <md-item ng-repeat="item in projects | orderBy: 'date': true">
+		  <md-item ng-repeat="item in projects">
 		    <md-item-content ng-click="onProjectClicked(item)">
 		      <div class="md-tile-content">
 		        <h3>{{item.name}}</h3>

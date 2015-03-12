@@ -61,12 +61,17 @@
       </md-tab>
 
       <md-tab label="{{panel.tab3}}">
-        <div layout="column" layout-fill>
-          <md-content style="height: 480px;" layout-padding>
-            <md-list>
+        <div style="height: 500px;" layout="column" layout-fill>
+          <md-content flex="10" layout="row" layout-padding>
+            <md-button class="md-raised" ng-click="historyPrevPage()" flex="20">上一页</md-button>
+            <div flex></div>
+            <md-button class="md-raised" ng-click="historyNextPage()" flex="20">下一页</md-button>
+          </md-content>
+          <md-content flex="80">
+            <md-list >
               <md-item ng-repeat="task in historyTasks">
                 <md-item-content layout-padding>
-                  <div class="md-tile-content" flex="80">
+                  <div class="md-tile-content" flex="90">
                     <h3>{{task.name + '  ( ' + task.state + ' )'}}</h3>
                     <h4>{{task.action.name}}</h4>
                     <p>{{task.date | date:'yyyy-MM-dd HH:mm:ss'}}</p>

@@ -35,33 +35,41 @@ module.exports = {
 		var output = path.join(__dirname, '..', 'Temp', currentDate.getTime() + '.json');
 		var functionJsonSvn = req.body.svn + req.body.packPath + 'function.json';
 		var command = 'svn export --username ' + req.body.username + ' --password ' + req.body.password + ' '+ functionJsonSvn + ' ' + output;
-		console.log('COMMAND: ' + command);
-		var child = exec(command, function (error, stdout, stderr){
-			if (!fs.existsSync(output)) {
-				return next(new Error('Export function.json file not found or username/password not correct!'));
-			}
 
-			var actions = fs.readJsonSync(output);
-			fs.remove(output);
-			if (!(actions instanceof Array) || actions.length == 0) {
-				return next(new Error('Can not extract actions from function.json!'));
-			}
-			for (var index in actions) {
-				var action = actions[index];
-				if (!action.name || !action.args) return next(new Error('Each action in function.json must have name and args property!'));
-				action.args = JSON.stringify(action.args);
-			}
+		try {
+			var child = exec(command, function (error, stdout, stderr){
+				if (!fs.existsSync(output)) {
+					return next(new Error('Export function.json file not found or username/password not correct!'));
+				}
 
-			var project = new Project(req.body);
-			project.date = new Date();
-			project.actions = actions;
-			project.save(function(err, item){
-				if (err) return next(new Error('Insert new project failed!'));
+				var actions = fs.readJsonSync(output);
+				fs.remove(output);
+				if (!(actions instanceof Array) || actions.length == 0) {
+					return next(new Error('Can not extract actions from function.json!'));
+				}
+				for (var index in actions) {
+					var action = actions[index];
+					if (!action.name || !action.args) return next(new Error('Each action in function.json must have name and args property!'));
+					action.args = JSON.stringify(action.args);
+				}
 
-			    res.json(item);
+				var project = new Project(req.body);
+				project.date = new Date();
+				project.actions = actions;
+				project.save(function(err, item){
+					if (err) return next(new Error('Insert new project failed!'));
+
+				    res.json(item);
+				});
 			});
-		});
-		console.log(child);
+
+			setTimeout(function (child, next) {
+				process.kill(child.pid);
+				next(new Error('Timeout! cannot get project information!'));
+			}, 60000, child, next);
+		} catch (err) {
+			next(err);
+		}
 	},
 	editProject: function (req, res, next) {
 		for (var key in req.body) {
@@ -80,8 +88,8 @@ module.exports = {
 	    if (err) { return next(err); }
 	    try {
 	    	var idString = req.project._id.toString();
-	    	fs.remove(path.join(__dirname, '..', 'Projects', idString));
-	    	fs.remove(path.join(__dirname, '..', 'download', idString));
+	    	exec('sudo rm -R ' + path.join(__dirname, '..', 'Projects', idString) + ' '
+	    				+ path.join(__dirname, '..', 'download', idString))
 	    } catch (err) {
 	    	return next(err);
 	    }
@@ -96,7 +104,7 @@ module.exports = {
 	  });
 	},
 	getProjects: function (req, res, next) {
-	    Project.find(function(err, items){
+	    Project.find().sort('-date').exec(function (err, items){
 	      if(err){ return next(err); }
 
 	      res.json(items);
