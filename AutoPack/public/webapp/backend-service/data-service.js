@@ -210,7 +210,11 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
 
           if (listenKey) {
             restService.getRecord(task._id, listenKey, function () {
-
+              $rootScope.$broadcast('terminal-output', {
+                  output: true,
+                  text: ['Loading...'],
+                  breakLine: true
+              });
             });
           }
         },
