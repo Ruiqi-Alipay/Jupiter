@@ -7,11 +7,10 @@ var lineReader = require('line-reader');
 
 var email   = require(path.join(__dirname, '..', 'node_modules', 'emailjs', "email.js"));
 var server  = email.server.connect({
-   user:    "sdkpack@alibaba-inc.com", 
-   password:"2014@sdk", 
-   host:    "smtp.zue.alipay.com",
-   port: 25,
-   ssl: false
+   user: "sdkpack@alibaba-inc.com", 
+   password: "2014@sdk", 
+   host: "smtp.zue.alipay.com",
+   ssl: true
 });
 
 module.exports = {
