@@ -6,6 +6,7 @@ var fs = require('fs');
 var exec = require('child_process').exec;
 var channel = require('./channel.js');
 var path = require('path');
+var qr = require('qr-image');
 
 // 	"args": {
 // 		"dir.spec": "$SVN_PATH",
@@ -86,9 +87,15 @@ var runTask = function (project, task, action) {
 										result.pkgs.forEach(function (pkgPath) {
 											fse.copySync(path.join(dir, pkgPath), saveDir);
 											var fileName = pkgPath.slice(pkgPath.lastIndexOf('/') + 1);
+											var link = 'http://autotest.d10970aqcn.alipay.net/autopack/download/' + task._id.toString() + '/' + fileName;
+
+											var code = qr.image(link, { type: 'svg' });
+											var output = fs.createWriteStream(path.join(saveDir, fileName + '.svg'));
+											code.pipe(output);
+
 											downlaodRecord.push({
 												name: fileName,
-												link: 'http://autotest.d10970aqcn.alipay.net/autopack/download/' + task._id.toString() + '/' + fileName
+												link: link
 											});
 										});
 

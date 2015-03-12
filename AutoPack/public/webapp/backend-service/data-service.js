@@ -212,6 +212,21 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
         targetEvent: ev,
       });
   };
+  var showTaskResult = function (ev, task) {
+      $mdDialog.show({
+        controller: function (scope, $mdDialog) {
+          scope.hide = function() {
+            $mdDialog.hide();
+          };
+          scope.cancel = function() {
+            $mdDialog.cancel();
+          };
+          scope.task = task;
+        },
+        templateUrl: 'webapp/detail-panel/result-dialog.html',
+        targetEvent: ev,
+      });
+  };
   var syncProjectActiveTasks = function (projectId) {
     if (isCurrentProject(projectId)) {
       restService.syncActiveTasks(projectId, function (tasks) {
@@ -233,6 +248,9 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
         if (isCurrentProject(projectId)) {
           tasks.forEach(function (task) {
             task.action = findAction(selectedProject.actions, task.actionId);
+            if (task.state == 'Success' && task.downloads) {
+              task.downloads = JSON.parse(task.downloads);
+            }
           });
           historyTaskList.length = 0;
           historyTaskList.push.apply(historyTaskList, tasks);
@@ -260,7 +278,13 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
         });
 
         deferred.promise.then(function (deletedItem) {
-          syncProjectActiveTasks(deletedItem.project);
+          if (deletedItem.state == 'Pennding' || deletedItem.state == 'Running') {
+            syncProjectActiveTasks(deletedItem.project);
+          } else {
+            historyTaskList.length = 0;
+            syncProjectHistoryTasks(deletedItem.project, true);
+          }
+          
           $mdDialog.cancel();
         }, function (reason) {
 
@@ -331,6 +355,9 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
     },
     showTermainl: function (ev, task) {
       showTermainl(ev, task);
+    },
+    showTaskResult: function (ev, task) {
+      showTaskResult(ev, task);
     }
 	};
 });
