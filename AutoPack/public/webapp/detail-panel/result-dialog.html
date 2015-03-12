@@ -3,13 +3,13 @@
 	    <md-list>
 	      <md-item ng-repeat="download in task.downloads">
 	        <md-content layout="row" layout-padding>
-	          <div flex="60">
+	          <md-content flex="60">
 			    <h3>{{download.name}}</h3>
 			    <a ng-href="{{download.link}}">{{download.link}}</a>
-	          </div>
-	          <div flex="40">
+	          </md-content>
+	          <md-content flex="40">
 	              <img ng-src="{{download.link}}.png">
-	          </div>
+	          </md-content>
 	        </md-content>
 	        <md-divider ng-if="!$last"></md-divider>
 	      </md-item>
