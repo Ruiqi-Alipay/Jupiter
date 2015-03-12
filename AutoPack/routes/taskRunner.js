@@ -101,7 +101,6 @@ var runTask = function (project, task, action) {
 									defer.reject(new Error('Result file not found!'));
 								}
 
-								exec('sudo rm -R ' + dir);
 								channel.emit(task._id, '*** Build execution ' + (true ? 'finished! ***' : 'failed! ***'));
 							});
 
@@ -159,9 +158,9 @@ var startJob = function () {
 							var action = findAction(project.actions, task.actionId);
 							if (action && action._id) {
 								runTask(project, task, action).then(function (finishedTask) {
-									task.pid = -1;
-									task.state = 'Success';
-									task.save();
+									finishedTask.pid = -1;
+									finishedTask.state = 'Success';
+									finishedTask.save();
 
 									channel.emit(task._id, '========================================');
 									channel.emit(task._id, '===         Build Success           === ');
