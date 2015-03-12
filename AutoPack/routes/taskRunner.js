@@ -71,6 +71,9 @@ var runTask = function (project, task, action) {
 					var args = makeArgs(dir, action);
 					var jarPath = path.join(dir, project.packPath);
 					var saveDir = path.join(__dirname, '..', 'download', task._id.toString());
+					if (!fs.existsSync(saveDir)) {
+						fs.mkdirSync(saveDir);
+					}
 					var child = exec('java -Dfile.encoding=UTF-8' + args + ' -jar pack.jar', {
 								cwd: jarPath,
 								maxBuffer: 200*1024*1024
