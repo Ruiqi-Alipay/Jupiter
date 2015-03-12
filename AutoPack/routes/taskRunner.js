@@ -90,8 +90,8 @@ var runTask = function (project, task, action) {
 											
 											var link = 'http://autotest.d10970aqcn.alipay.net/autopack/download/' + task._id.toString() + '/' + fileName;
 
-											var code = qr.image(link, { type: 'svg' });
-											var output = fs.createWriteStream(path.join(saveDir, fileName + '.svg'));
+											var code = qr.image(link, { type: 'png' });
+											var output = fs.createWriteStream(path.join(saveDir, fileName + '.png'));
 											code.pipe(output);
 
 											downlaodRecord.push({
