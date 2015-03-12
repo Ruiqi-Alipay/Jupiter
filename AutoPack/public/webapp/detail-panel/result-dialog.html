@@ -1,17 +1,15 @@
 <md-dialog aria-label="Result">
 	<md-content>
-      <md-item ng-repeat="download in task.downloads">
-        <md-content layout="row" layout-padding>
-          <md-content flex>
-		    <h3>{{download.name}}</h3>
+      <md-content layout="row" ng-repeat="download in task.downloads">
+        <div layout="column" flex>
+			<h3>{{download.name}}</h3>
 		    <p>{{download.link}}</p>
-          </md-content>
-          <md-content>
-              <img ng-src="{{download.link}}.png">
-          </md-content>
-        </md-content>
+        </div>
+    	<div>
+        	<img ng-src="{{download.link}}.png">
+    	</div>
         <md-divider ng-if="!$last"></md-divider>
-      </md-item>
+      </md-content>
 
 	    <md-content layout="row" layout-align="center center">
 		    <md-input-container flex>
