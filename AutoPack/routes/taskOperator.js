@@ -115,7 +115,7 @@ module.exports = {
 			var mailHtml = '<div>';
 			downloads.forEach(function (download) {
 				mailText += (download.name + '\r\n' + download.link + '\r\n');
-				mailHtml += ('<b>' + download.name + '</b><br><a href="' + download.link + '">' + download.link + '</a><br>');
+				mailHtml += ('<b>' + download.name + '</b><br><a href="' + download.link + '">' + download.link + '</a><br><img src="' + download.link + '.png"><br>');
 			});
 			mailHtml += '</div>';
 
@@ -127,11 +127,16 @@ module.exports = {
 			    html: mailHtml // html body
 			};
 
+			console.log(mailOptions);
+
 			// send mail with defined transport object
 			transporter.sendMail(mailOptions, function(error, info){
 			    if(error){
+			    	console.log(error);
 			        return next(error);
 			    }
+
+			    console.log(info);
 
 			    res.json(info);
 			});
