@@ -1,6 +1,7 @@
 var fs = require('fs')
 var path = require('path');
 var Task = require('../modules/task.js');
+var exec = require('child_process').exec;
 
 module.exports = {
 	taskId: function (req, res, next, taskId) {
