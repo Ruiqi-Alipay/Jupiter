@@ -1,6 +1,6 @@
 <md-dialog aria-label="Result">
 	<md-content layout="column" style="width: 600px; height: 400px;">
-	  <md-content flex="90" layout-padding>
+	  <md-content flex>
 	    <md-list>
 	      <md-item ng-repeat="download in task.downloads">
 	        <md-content layout="row" layout-padding>
@@ -16,7 +16,7 @@
 	      </md-item>
 	    </md-list>
 	  </md-content>
-	    <md-content flex="10" layout="row" layout-align="center center">
+	    <md-content layout="row" layout-align="center center">
 		    <md-input-container flex>
 		      <label>Email Address, split by ','</label>
 		      <input ng-model="email.address" ng-disabled="runningAction">
