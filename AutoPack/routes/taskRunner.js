@@ -57,73 +57,73 @@ var runTask = function (project, task, action) {
 	try {
 		channel.emit(task._id, 'Preparing for task: ' + task.name);
 		var dir = path.join(__dirname, '..', 'Projects', task.project);
-		if (fse.existsSync(dir)) {
-			fse.removeSync(dir);
-		}
+		exec('sudo rm -R ' + dir, function (error, stdout, stderr) {
+			if (error) return defer.reject(error);
 
-		channel.emit(task._id, 'SVN checking out: ' + project.svn);
-		var command = 'svn checkout --username ' + project.username + ' --password ' + project.password
-				+ ' ' + project.svn + ' ' + dir;
-		var child = exec(command, {
-				maxBuffer: 200*1024*1024
-			}, function (error, stdout, stderr){
-				channel.emit(task._id, 'SVN checking complate! preparing to build project...');
+			channel.emit(task._id, 'SVN checking out: ' + project.svn);
+			var command = 'svn checkout --username ' + project.username + ' --password ' + project.password
+					+ ' ' + project.svn + ' ' + dir;
+			var child = exec(command, {
+					maxBuffer: 200*1024*1024
+				}, function (error, stdout, stderr){
+					channel.emit(task._id, 'SVN checking complate! preparing to build project...');
 
-				var args = makeArgs(dir, action);
-				var jarPath = path.join(dir, project.packPath);
-				var child = exec('java -Dfile.encoding=UTF-8' + args + ' -jar pack.jar', {
-							cwd: jarPath,
-							maxBuffer: 200*1024*1024
-						}, function (error, stdout, stderr){
-							if (error) console.log(error);
-							if (stderr) console.log(stderr);
+					var args = makeArgs(dir, action);
+					var jarPath = path.join(dir, project.packPath);
+					var child = exec('java -Dfile.encoding=UTF-8' + args + ' -jar pack.jar', {
+								cwd: jarPath,
+								maxBuffer: 200*1024*1024
+							}, function (error, stdout, stderr){
+								if (error) console.log(error);
+								if (stderr) console.log(stderr);
 
-							var result = path.join(__dirname, '..', 'Projects', task.project, project.packPath, 'result.json');
-							if (fse.existsSync(result)) {
-								var result = fse.readJson(result);
-								if (result && result.result) {
-									// var saveDir = path.join(__dirname, '..', 'download', task._id.toString());
-									// fse.copySync(, saveDir);
-									// var fileList = [];
-									// var downlaodRecord = [];
-									// collectFiles(fileList, saveDir, '');
-									// fileList.forEach(function (path) {
-									// 	downlaodRecord.push({
-									// 		name: path.slice(path.lastIndexOf('/') + 1),
-									// 		path: path
-									// 	})
-									// })
-									// task.downloads = JSON.stringify(downlaodRecord);
-									defer.resolve(task);
+								var result = path.join(__dirname, '..', 'Projects', task.project, project.packPath, 'result.json');
+								if (fse.existsSync(result)) {
+									var result = fse.readJson(result);
+									if (result && result.result) {
+										// var saveDir = path.join(__dirname, '..', 'download', task._id.toString());
+										// fse.copySync(, saveDir);
+										// var fileList = [];
+										// var downlaodRecord = [];
+										// collectFiles(fileList, saveDir, '');
+										// fileList.forEach(function (path) {
+										// 	downlaodRecord.push({
+										// 		name: path.slice(path.lastIndexOf('/') + 1),
+										// 		path: path
+										// 	})
+										// })
+										// task.downloads = JSON.stringify(downlaodRecord);
+										defer.resolve(task);
+									} else {
+										defer.reject(new Error('Pack failed!'));
+									}
 								} else {
-									defer.reject(new Error('Pack failed!'));
+									defer.reject(new Error('Result file not found!'));
 								}
-							} else {
-								defer.reject(new Error('Result file not found!'));
-							}
 
-							if (fse.existsSync(dir)) {
-								// fse.remove(dir);
-							}
-							channel.emit(task._id, '*** Build execution ' + (true ? 'finished! ***' : 'failed! ***'));
-						});
+								if (fse.existsSync(dir)) {
+									// fse.remove(dir);
+								}
+								channel.emit(task._id, '*** Build execution ' + (true ? 'finished! ***' : 'failed! ***'));
+							});
 
-				child.stdout.on('data', function (data) {
-					channel.emit(task._id, data);
+					child.stdout.on('data', function (data) {
+						channel.emit(task._id, data);
+					});
+
+					task.pid = child.pid;
+					task.state = 'Running';
+					task.save();
 				});
 
-				task.pid = child.pid;
-				task.state = 'Running';
-				task.save();
+			child.stdout.on('data', function (data) {
+				channel.emit(task._id, data);
 			});
 
-		child.stdout.on('data', function (data) {
-			channel.emit(task._id, data);
+			task.pid = child.pid;
+			task.state = 'Running';
+			task.save();
 		});
-
-		task.pid = child.pid;
-		task.state = 'Running';
-		task.save();
 	} catch (err) {
 		console.log(err);
 
