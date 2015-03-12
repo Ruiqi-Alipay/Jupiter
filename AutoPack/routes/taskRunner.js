@@ -85,13 +85,14 @@ var runTask = function (project, task, action) {
 										var saveDir = path.join(__dirname, '..', 'download', task._id.toString());
 										var downlaodRecord = [];
 										result.pkgs.forEach(function (pkgPath) {
-											fse.copySync(path.join(dir, pkgPath), saveDir);
 											var fileName = pkgPath.slice(pkgPath.lastIndexOf('/') + 1);
+											fse.copySync(path.join(dir, pkgPath), path.join(saveDir, fileName));
+											
 											var link = 'http://autotest.d10970aqcn.alipay.net/autopack/download/' + task._id.toString() + '/' + fileName;
 
-											//var code = qr.image(link, { type: 'svg' });
-											//var output = fs.createWriteStream(path.join(saveDir, fileName.slice(0, fileName.lastIndexOf('.')) + '.svg'));
-											//code.pipe(output);
+											var code = qr.image(link, { type: 'svg' });
+											var output = fs.createWriteStream(path.join(saveDir, fileName.slice(0, fileName + '.svg'));
+											code.pipe(output);
 
 											downlaodRecord.push({
 												name: fileName,
