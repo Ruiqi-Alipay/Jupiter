@@ -1,4 +1,4 @@
-var app = angular.module('autopackApp', ['ngMaterial', 'dash-board', 'detail-panel']);
+var app = angular.module('autopackApp', ['ngMaterial', 'dash-board', 'detail-panel', 'vtortola.ng-terminal']);
 
 app.controller("mainController", function($mdToast, $animate, $scope) {
     var showToast = function (text) {
