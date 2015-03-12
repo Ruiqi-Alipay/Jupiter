@@ -80,7 +80,7 @@ var runTask = function (project, task, action) {
 								var result = path.join(__dirname, '..', 'Projects', task.project, project.packPath, 'result.json');
 								if (fse.existsSync(result)) {
 									var result = fse.readJson(result);
-									if (result.result) {
+									if (result && result.result) {
 										// var saveDir = path.join(__dirname, '..', 'download', task._id.toString());
 										// fse.copySync(, saveDir);
 										// var fileList = [];
