@@ -3,15 +3,15 @@ var path = require('path');
 var Task = require('../modules/task.js');
 var Project = require('../modules/project.js');
 var exec = require('child_process').exec;
-var nodemailer = require('nodemailer');
 var lineReader = require('line-reader');
 
-var transporter = nodemailer.createTransport({
-    service: 'Alipay',
-    auth: {
-        user: 'sdkpack@alibaba-inc.com',
-        pass: '2014@sdk'
-    }
+var email   = require(path.join(__dirname, '..', 'node_dodules', 'emailjs', "email.js");
+var server  = email.server.connect({
+   user:    "sdkpack@alibaba-inc.com", 
+   password:"2014@sdk", 
+   host:    "smtp.zue.alipay.com",
+   port: 25,
+   ssl: false
 });
 
 module.exports = {
@@ -120,26 +120,25 @@ module.exports = {
 			});
 			mailHtml += '</div>';
 
-			var mailOptions = {
-			    from: 'Autopack Server <sdkpack@alibaba-inc.com>', // sender address
-			    to: req.body.address, // list of receivers
-			    subject: '在线打包：' + req.task.name + '(' + findAction.name + ')', // Subject line
-			    text: mailText, // plaintext body
-			    html: mailHtml // html body
+			var message = {
+			   text: mailText, 
+			   from: 'SDK PACK SERVER <sdkpack@alibaba-inc.com>', 
+			   to: req.body.address,
+			   subject: '在线打包：' + req.task.name + '(' + findAction.name + ')',
+			   attachment: 
+			   [
+			      {data: mailHtml, alternative:true}
+			   ]
 			};
 
-			console.log(mailOptions);
-
-			// send mail with defined transport object
-			transporter.sendMail(mailOptions, function(error, info){
-			    if(error){
-			    	console.log(error);
-			        return next(error);
+			// send the message and get a callback with an error or details of the message that was sent
+			server.send(message, function(err, message) {
+			    if(err){
+			    	console.log(err);
+			        return next(err);
 			    }
 
-			    console.log(info);
-
-			    res.json(info);
+				res.json(message);
 			});
 		});
 	},
