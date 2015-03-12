@@ -7,10 +7,10 @@ var nodemailer = require('nodemailer');
 var lineReader = require('line-reader');
 
 var transporter = nodemailer.createTransport({
-    service: 'Gmail',
+    service: 'Alipay',
     auth: {
-        user: 'ruiqi.sg@gmail.com',
-        pass: '0293248094'
+        user: 'sdkpack@alibaba-inc.com',
+        pass: '2014@sdk'
     }
 });
 
@@ -121,7 +121,7 @@ module.exports = {
 			mailHtml += '</div>';
 
 			var mailOptions = {
-			    from: 'Autopack Server <ruiqi.sg@gmail.com>', // sender address
+			    from: 'Autopack Server <sdkpack@alibaba-inc.com>', // sender address
 			    to: req.body.address, // list of receivers
 			    subject: '在线打包：' + req.task.name + '(' + findAction.name + ')', // Subject line
 			    text: mailText, // plaintext body
