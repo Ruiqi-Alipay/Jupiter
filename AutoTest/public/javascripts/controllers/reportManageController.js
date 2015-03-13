@@ -28,12 +28,12 @@ autotestApp.controller("reportManageController", function($rootScope, $scope, $u
 	$scope.viewProfermenceReport = function(type, dayIndex, index) {
 		var title = $scope.reportByDays[dayIndex].reports[index].title;
 		$window.open($location.$$protocol + '://' + $location.$$host
-			+ '/reporter#?title=' + encodeURIComponent(title) + '&type=' + type, '_blank');
+			+ '/autotest/reporter#?title=' + encodeURIComponent(title) + '&type=' + type, '_blank');
 	};
 
 	$scope.viewTaskReport = function(dayIndex, index) {
 		var title = $scope.reportByDays[dayIndex].reports[index].title;
-		$window.open($location.$$protocol + '://' + $location.$$host + '/reporter/reports/' + encodeURIComponent(title) + '/index.html', '_blank');
+		$window.open($location.$$protocol + '://' + $location.$$host + '/autotest/reporter/reports/' + encodeURIComponent(title) + '/index.html', '_blank');
 	};
 
 	$scope.deleteReport = function(dayIndex, index) {
@@ -47,7 +47,7 @@ autotestApp.controller("reportManageController", function($rootScope, $scope, $u
 		if (files) {
 			$rootScope.$broadcast('toastMessage', '报告上传中...');
 			$upload.upload({
-			  url: '/api/report',
+			  url: './api/report',
 			  method: 'POST',
 			  file: files
 			}).progress(function (evt) {

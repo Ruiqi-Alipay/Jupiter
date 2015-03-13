@@ -131,13 +131,13 @@ reporterApp.controller("reporterController", function($scope, $location, restSer
     refresh();
 });
 
-reporterApp.factory("restService", function($http) {
+reporterApp.factory("restService", function($http, $location) {
     return {
         getReport: function(title, callback) {
-            $http.get('./api/testreport?title=' + encodeURIComponent(title)).success(callback);
+            $http.get($location.$$protocol + '://' + $location.$$host + '/autotest/api/testreport?title=' + encodeURIComponent(title)).success(callback);
         },
         getReportData: function(file, index, callback) {
-            $http.get('./api/reportdata?file=' + encodeURIComponent(file) + '&index=' + index).success(callback);
+            $http.get($location.$$protocol + '://' + $location.$$host + '/autotest/api/reportdata?file=' + encodeURIComponent(file) + '&index=' + index).success(callback);
         }
     };
 });

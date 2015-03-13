@@ -1,4 +1,7 @@
 require('../models/TestReport');
+var targz = require('tar.gz');
+var moment = require('moment');
+var path = require('path');
 
 var mongoose = require('mongoose');
 var TestReport = mongoose.model('TestReport');
@@ -33,17 +36,18 @@ module.exports = {
 	},
 	newReport: function (req, res, next) {
 	  try {
-	    var file = req.files.file;
+	  	var file = req.files.file;
+	    var compress = new targz().extract(file.path, path.join(__dirname, '..', 'reports', file.name), function(err){
+		    if (fs.existsSync(file.path)) {
+		  		fs.remove(file.path);
+		  	}
 
-	    console.log('uplaoding:');
-
-	    var compress = new targz().extract(file.path, './reports/' + file.name, function(err){
 	        if(err) {
 	          console.log(err);
 	          return next(err);
 	        }
 
-	        fs.readFile('./reports/' + file.name + '/performance.report', function(err, data) {
+	        fs.readFile(path.join(__dirname, '..', 'reports', file.name, 'performance.report'), function(err, data) {
 	          if (err) {
 	            console.log(err);
 	            return next(err);
@@ -77,16 +81,7 @@ module.exports = {
 	  }
 	},
 	deleteReport: function (req, res, next) {
-	  fs.remove('uploads/' + req.testreport.title, function(err) {
-	    if (err) return console.error(err)
-
-	    console.log("Delete source gz success")
-	  });
-	  fs.remove('reports/' + req.testreport.title, function(err) {
-	    if (err) return console.error(err)
-
-	    console.log("Delete extracted content success")
-	  })
+	  fs.remove(path.join(__dirname, '..', 'reports', req.testreport.title));
 	  req.testreport.remove(function(err, report){
 	    if (err) { return next(err); }
 
@@ -97,7 +92,7 @@ module.exports = {
 	  var file = decodeURIComponent(req.query.file);
 	  var index = req.query.index;
 
-	  fs.readFile('./reports/' + file + '/performance.report', function(err, data) {
+	  fs.readFile(path.join(__dirname, '..', 'reports', file, performance.report), function(err, data) {
 	    if (err) { return next(err); }
 
 	    var report = JSON.parse(data);
