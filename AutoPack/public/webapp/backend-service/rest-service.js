@@ -69,10 +69,13 @@ backendService.factory('restService', function ($http, $rootScope) {
 		  	});
 		  	if (start) start();
 		},
-		syncHistoryTasks: function (projectId, starterTask, orlder, finished, start) {
+		syncHistoryTasks: function (projectId, starterTask, orlder, actionId, finished, start) {
 			var pagePrarm = '';
 			if (starterTask) {
-				pagePrarm = '&' + (orlder ? 'next=' : 'prev=') + encodeURIComponent(starterTask.date);
+				pagePrarm += '&' + (orlder ? 'next=' : 'prev=') + encodeURIComponent(starterTask.date);
+			}
+			if (actionId) {
+				pagePrarm += '&actionId=' + actionId;
 			}
 			$http.get('./api/task/history?project=' + projectId + pagePrarm).success(function(tasks){
 				finished(tasks);

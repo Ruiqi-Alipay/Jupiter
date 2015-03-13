@@ -1,6 +1,6 @@
 <md-card ng-show="project">
   <md-content layout-fill>
-    <md-tabs md-selected="selectedIndex" flex>
+    <md-tabs md-selected="panel.selectedIndex" flex>
 
       <md-tab label="{{panel.tab1}}">
         <div layout="column" layout-fill>
@@ -63,10 +63,14 @@
 
       <md-tab label="{{panel.tab3}}">
         <div style="height: 500px;" layout="column" layout-fill>
-          <md-content flex="10" layout="row" layout-padding>
-            <md-button class="md-raised" ng-click="historyPrevPage()" flex="20">上一页</md-button>
+          <md-content flex="10" layout="row" layout-padding layout-align="center center">
+            <md-select ng-model="panel.historyType" style="margin-top: 0px;" ng-change="historyTypeChange(panel.historyType)">
+              <md-option value="ALL_TYPE" ng-selected="true">所有类型</md-option>
+              <md-option ng-value="action._id" ng-repeat="action in project.actions">{{action.name}}</md-option>
+            </md-select>
             <div flex></div>
-            <md-button class="md-raised" ng-click="historyNextPage()" flex="20">下一页</md-button>
+            <md-button class="md-raised" ng-click="historyPrevPage()" flex="20">上一页</md-button>
+            <md-button class="md-raised" ng-click="historyNextPage()" flex="20" style="margin-left: 20px;">下一页</md-button>
           </md-content>
           <md-content flex="80">
             <md-list >

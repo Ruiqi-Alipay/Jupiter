@@ -4,6 +4,7 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
   var activeTaskList = [];
   var historyTaskList = [];
   var selectedProject;
+  var histroyType = 'ALL_TYPE';
 
   var socket = io();
 
@@ -260,7 +261,8 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
   };
   var syncProjectHistoryTasks = function (projectId, next) {
     if (isCurrentProject(projectId)) {
-      restService.syncHistoryTasks(projectId, next ? historyTaskList[historyTaskList.length - 1] : historyTaskList[0], next, function (tasks) {
+      restService.syncHistoryTasks(projectId, next ? historyTaskList[historyTaskList.length - 1] : historyTaskList[0],
+            next, histroyType == 'ALL_TYPE' ? undefined : histroyType, function (tasks) {
         if (!tasks || tasks.length == 0) return;
         
         if (isCurrentProject(projectId)) {
@@ -315,6 +317,7 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
     selectedProject = project;
     activeTaskList.length = 0;
     historyTaskList.length = 0;
+    histroyType = 'ALL_TYPE';
     syncProjectActiveTasks(project._id);
     syncProjectHistoryTasks(project._id, true);
     $rootScope.$broadcast('project:select');
@@ -334,6 +337,11 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
     },
     getHistoryTaskList: function () {
       return historyTaskList;
+    },
+    changeHistoryType: function (newType) {
+      histroyType = newType;
+      historyTaskList.length = 0;
+      syncProjectHistoryTasks(selectedProject._id, true);
     },
     historyNextPage: function () {
       syncProjectHistoryTasks(selectedProject._id, true);

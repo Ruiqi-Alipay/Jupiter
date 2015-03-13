@@ -68,12 +68,17 @@ module.exports = {
 	getProjectHistoryTasks: function (req, res, next) {
 		if (!req.param('project')) return next(new Error('Unformated prameter for query task!'));
 
+		var actionId = req.param('actionId');
 		var next = req.param('next');
 		var prev = req.param('prev');
 		var selection = {
 			'project': req.param('project'),
 			'state': {$nin: ['Running', 'Pennding']}
 		};
+		if (actionId) {
+			selection['actionId'] = actionId;
+		}
+
 		if (prev) {
 			selection['date'] ={
 				$gt: decodeURIComponent(prev)

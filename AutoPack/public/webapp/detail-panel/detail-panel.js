@@ -10,12 +10,14 @@ detailPanel.directive("detailPanel", function($rootScope, $mdDialog, dataService
         scope.$on('project:select', function (event) {
           scope.project = dataService.getSelectedProject();
           scope.panel.selectedIndex = 0;
+          scope.panel.historyType = 'ALL_TYPE';
         });
 
 		    scope.panel = {
 		    	tab1: '工程详情',
 		    	tab2: '打包队列',
 		    	tab3: '打包历史',
+          historyType: 'ALL_TYPE',
 		    	selectedIndex: 0
 		    };
         scope.activeTasks = dataService.getActiveTaskList();
@@ -44,6 +46,9 @@ detailPanel.directive("detailPanel", function($rootScope, $mdDialog, dataService
         }
         scope.viewLog = function (event, task) {
           dataService.showLogRecord(event, task);
+        }
+        scope.historyTypeChange = function (newtype) {
+          dataService.changeHistoryType(newtype);
         }
 	    }
   	};
