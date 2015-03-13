@@ -211,8 +211,18 @@ router.post('/feedback', function (req, res, next) {
     for (var index in feedbacks) {
         var feedback = feedbacks[index];
         if (!feedback.title || !feedback.content || !feedback.apptype || !feedback.semanticCategory) {
-            return res({
-                msg: '参数非法：反馈的title, content, apptype, semanticCategory属性不得为空!'
+            var msg = '参数非法：';
+            if (!feedback.title) {
+                msg += 'title 为空';
+            } else if (!feedback.content) {
+                msg += 'content 为空';
+            } else if (!feedback.apptype) {
+                msg += 'apptype 为空';
+            } else if (!feedback.semanticCategory) {
+                msg += 'semanticCategory 为空';
+            }
+            return res.json({
+                msg: msg
             });
         }
     }
