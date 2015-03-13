@@ -5,7 +5,7 @@ backendService.factory('backendService', function ($http) {
 			$http.post('./api/feedback', data).success(function(data){
 				finished(data.msg);
 		  	}).error(function(data, status, headers, config) {
-		  		error(data);
+		  		finished(data);
 		  	});
 		}
 	};

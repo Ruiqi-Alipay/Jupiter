@@ -14,7 +14,15 @@ var azureRequestDetails = "grant_type=client_credentials&client_id="
                             + encodeURIComponent(azureClientID) + "&client_secret="
                             + encodeURIComponent(azureClientSecret) + "&scope=http://api.microsofttranslator.com";
 
-var azureTranslate = function (array, manualInput, callback) {
+var getPrefixContent = function (inputTpye) {
+    switch(inputTpye) {
+        case 'manual': return '【WEB手动导入】';
+        case 'google': return '【Google Play爬虫导入】';
+        case 'batch': return '【AE反馈批量导入】';
+    }
+};
+
+var azureTranslate = function (array, inputTpye, callback) {
     request.post({
         url: azureTranslatorURI,
         headers: {
@@ -23,7 +31,7 @@ var azureTranslate = function (array, manualInput, callback) {
         },
         body: azureRequestDetails
         }, function(err, httpResponse, body){
-            var contentPrefix = manualInput ? '【WEB手动导入】' : '【AE反馈批量导入】';
+            var contentPrefix = getPrefixContent(inputTpye);
             var response = JSON.parse(body);
             var to = "zh-CHS";
 
@@ -78,9 +86,10 @@ var azureTranslate = function (array, manualInput, callback) {
     );
 };
 
-var baiduTranslate = function (array, manualInput, callback) {
+var baiduTranslate = function (array, inputTpye, callback) {
     var finished = 0;
     var finishedmap = {};
+    var prefixContent = getPrefixContent(inputTpye);
 
     for (var i = 0; i < array.length; i+=10) {
         var j = i;
@@ -123,11 +132,11 @@ var baiduTranslate = function (array, manualInput, callback) {
                                 if (!contentTranslate && item.content == result.src) {
                                     contentTranslate = true;
                                     if (item.content != result.dst) {
-                                        item.content = (manualInput ? '【WEB手动导入】' : '【AE反馈批量导入】')
+                                        item.content = prefixContent
                                                 + String.fromCharCode(13) + '【' + result.dst + '】'
                                                 + String.fromCharCode(13) + item.content;
                                     } else {
-                                        item.content = (manualInput ? '【WEB手动导入】' : '【AE反馈批量导入】')
+                                        item.content = prefixContent
                                                 + String.fromCharCode(13) + item.content;
                                     }
                                 }
@@ -149,28 +158,32 @@ var baiduTranslate = function (array, manualInput, callback) {
     }
 }
 
-var saveToMPop = function (array, manualInput, callback) {
-    azureTranslate(array, manualInput, function (results) {
+var paymentRelated = function (item) {
+    var title = item.title.toLowerCase();
+    var content = item.content.toLowerCase();
+    if (title.indexOf('pay') > 0 || title.indexOf('支付') > 0 || title.indexOf('款') > 0 || title.indexOf('收银') > 0
+        || content.indexOf('pay') > 0 || content.indexOf('支付') > 0 || content.indexOf('款') > 0 || title.indexOf('收银') > 0) {
+        return true
+    } else {
+        return false;
+    }
+}
+
+var saveToMPop = function (array, inputTpye, callback) {
+    azureTranslate(array, inputTpye, function (results) {
         var d = new Date();
         var filePath = path.join(__dirname, '..', 'libs', d.getTime() + '.json');
 
         var paymentFeedbacks = [];
-        if (manualInput) {
-            paymentFeedbacks = results;
-        } else {
-            results.forEach(function (item) {
-                var title = item.title.toLowerCase();
-                var content = item.content.toLowerCase();
-                if (title.indexOf('pay') > 0 || title.indexOf('支付') > 0 || title.indexOf('款') > 0
-                    || content.indexOf('pay') > 0 || content.indexOf('支付') > 0 || content.indexOf('款') > 0) {
-                    paymentFeedbacks.push(item);
-                }
-            });
-        }
+        results.forEach(function (item) {
+            if (paymentRelated(item)) {
+                paymentFeedbacks.push(item);
+            }
+        });
 
         if (paymentFeedbacks.length == 0) {
             return callback({
-                msg: '没有包含，pay或“支付”的反馈，导入取消！'
+                msg: '平台只接受内容或翻译后内容包含 "支付"，"款"，"收银"， 或 "pay" 的反馈'
             });
         }
 
@@ -207,27 +220,28 @@ var saveToMPop = function (array, manualInput, callback) {
 router.post('/feedback', function (req, res, next) {
 	if (!req.body) return next(new Error('Request body is empty!'));
 
-    var feedbacks = (req.body instanceof Array) ? req.body : [req.body];
-    for (var index in feedbacks) {
-        var feedback = feedbacks[index];
-        if (!feedback.title || !feedback.content || !feedback.apptype || !feedback.semanticCategory) {
-            var msg = '参数非法：';
-            if (!feedback.title) {
-                msg += 'title 为空';
-            } else if (!feedback.content) {
-                msg += 'content 为空';
-            } else if (!feedback.apptype) {
-                msg += 'apptype 为空';
-            } else if (!feedback.semanticCategory) {
-                msg += 'semanticCategory 为空';
+    var manualInput = !(req.body instanceof Array);
+    var feedbacks = manualInput ? [req.body] : req.body;
+    var formatedFeedbacks = [];
+    feedbacks.forEach(function(feedback) {
+        if (feedback.title && feedback.content && feedback.apptype && feedback.semanticCategory) {
+            if (feedback.title.length > 288) {
+                feedback.title = feedback.title.slice(0, 288);
             }
-            return res.json({
-                msg: msg
-            });
+            if (feedback.content.length > 288) {
+                feedback.content = feedback.content.slice(0, 288);
+            }
+            formatedFeedbacks.push(feedback);
         }
+    });
+
+    if (formatedFeedbacks.length == 0) {
+        return res.json({
+            msg: '数据非法：反馈数据需包含 title, content, apptype和semanticCategory字段'
+        });
     }
 
-	saveToMPop(feedbacks, true, function (result) {
+	saveToMPop(formatedFeedbacks, manualInput ? 'manual' : 'google', function (result) {
 		res.json(result);
 	});
 });
@@ -355,7 +369,7 @@ router.post('/upload', function (req, res, next) {
 
         fs.unlink(file.path);
 
-        saveToMPop(feedbacks, false, function (result) {
+        saveToMPop(feedbacks, 'batch', function (result) {
             res.json(result);
         });
     } catch (err) {
