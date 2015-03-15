@@ -1,0 +1,27 @@
+/* Avatar */
+.avatar {
+	border: solid 3px silver;
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    background: #9e9e9e url() center center no-repeat;
+    background-size: contain;
+}
+
+.navbarItem {
+	margin-left: 20px;
+  	user-select: none;
+}
+
+.mainText {
+
+}
+
+.subText {
+	font-size: 14px;
+}
+
+#drawerTitle {
+	color: white;
+	background-image: url('../../images/background.jpg');
+}

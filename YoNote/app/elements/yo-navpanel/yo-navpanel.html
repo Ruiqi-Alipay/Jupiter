@@ -1,0 +1,41 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/core-toolbar/core-toolbar.html">
+<link rel="import" href="../../bower_components/core-icon/core-icon.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-shadow/paper-shadow.html">
+
+<polymer-element name="yo-navpanel" attributes="user">
+	<template>
+		<link rel="stylesheet" href="yo-navpanel.css">
+
+	    <core-toolbar id="drawerTitle" class="tall" mode="standard" layout horizontal center>
+    		<div class="avatar" style="background-image: url({{user.header}})"></div>
+    		<div layout vertical>
+    			<div>{{user.name}}</div>
+    			<div class="subText">{{user.description}}</div>
+    		</div>
+	    </core-toolbar>
+	    <div layout vertical>
+	   		<template repeat="{{action in user.actions}}">
+		      <paper-item>
+		        <core-icon icon="{{action.image}}"></core-icon>
+		        <div class="navbarItem">{{action.name}}</div>
+		      </paper-item>
+	   		</template>
+	   		<p class="navbarItem">加入的群组：</p>
+	   		<template repeat="{{group in user.groups}}">
+		      <paper-item>
+		        <div class="navbarItem">{{group.name}}</div>
+		      </paper-item>
+	   		</template>
+	    </div>
+
+	</template>
+	<script>
+	(function() {
+		Polymer({
+			
+		});
+	})();
+	</script>
+</polymer-element>
