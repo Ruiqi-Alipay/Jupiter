@@ -28,19 +28,19 @@
 		    <core-animated-pages main id="pages" flex selected="{{curPage}}" on-core-animated-pages-transition-end="{{transitionend}}" transitions="cross-fade-all hero-transition">
 
 				<section vertical layout>
-					<yo-grouplist groups="{{user.groups}}" on-select-group="{{onSelectGroup}}"></yo-grouplist>
+					<yo-grouplist groups="{{user.groups}}" userId="{{user.id}}" on-select-group="{{onSelectGroup}}" on-user-error="{{handleError}}"></yo-grouplist>
 				</section>
 
 				<section vertical layout>
-					<yo-messagelist group="{{selectedGroup}}" on-back="{{onback}}"></yo-messagelist>
+					<yo-messagelist group="{{selectedGroup}}" on-back="{{onback}}" on-user-error="{{handleError}}"></yo-messagelist>
 				</section>
 
 		    </core-animated-pages>
 
 		</core-drawer-panel>
 
-		<core-ajax id="httpHelper" url="/api/user/TEST" method="GET" handleAs="json"
-		    on-core-response="{{handleResponse}}" on-core-error="{{handleError}}"></core-ajax>
+		<core-ajax id="httpHelper" url="{{request.url}}" method="{{request.method}}" handleAs="json"
+				params="{{request.params}}" on-core-response="{{handleResponse}}" on-core-error="{{handleError}}"></core-ajax>
 		<paper-toast id="toast" class="capsule" text="{{toastMessage}}" style="padding-right: 60px;"></paper-toast>
 	</template>
 	<script>
@@ -49,6 +49,14 @@
 			ready: function () {
 				this.loading = true;
 				this.curPage = 0;
+
+				this.request = {
+					url: '/api/user',
+					method: 'GET',
+					params: {
+						extid: 'TEST'
+					}
+				};
 				this.$.httpHelper.go();
 			},
 			onSelectGroup: function (event, detail, sender) {

@@ -60,12 +60,5 @@ module.exports = {
 	},
 	messagesDBToClient: function (messages, fragment) {
 		return messagesDBToClient(messages, fragment);
-	},
-	findUserByExtId: function (extId, callback) {
-		User.findOne({'extId': extId}, function (err, item) {
-			if (err) return callback();
-
-			return callback(item);
-		});
 	}
 };

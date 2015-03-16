@@ -1,11 +1,25 @@
 <link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/core-icon/core-icon.html">
+<link rel="import" href="../../../bower_components/core-ajax/core-ajax.html">
 <link rel="import" href="../../../bower_components/paper-shadow/paper-shadow.html">
+<link rel="import" href="../../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../../bower_components/paper-ripple/paper-ripple.html">
+<link rel="import" href="../../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../../bower_components/paper-spinner/paper-spinner.html">
 
-<polymer-element name="yo-grouplist" attributes="groups">
+<polymer-element name="yo-grouplist" attributes="groups userId">
 	<template>
 		<link rel="stylesheet" href="yo-grouplist.css">
 
-		<div id="groupParent" horizontal around-justified wrap layout fit hero-p>
+		<div id="groupParent" horizontal wrap layout fit hero-p>
+		    <paper-shadow class="card addCard" z="1" on-tap="{{showGroupDialog}}">
+			    <div vertical layout center center-justified fit>
+			    	<core-icon class="addCardIcon" icon="add-circle-outline"></core-icon>
+			    	创建群笔记
+			    </div>
+			    <paper-ripple fit></paper-ripple>
+		    </paper-shadow>
 			<template repeat="{{group in groups}}">
 			    <paper-shadow class="card" z="1" on-tap="{{selectGroup}}">
 				    <div layout vertical cross-fade fit hero-id="group-{{group._id}}" hero?="{{selectedGroup._id == group._id}}">
@@ -21,6 +35,27 @@
 			</template>
 		</div>
 
+	    <paper-dialog id="groupDialog" transition="core-transition-center" style="width: 700px;">
+
+	    	<div layout horizontal center>
+	    		<h3 flex>创建群笔记</h3>
+	    		<paper-spinner class="blue" active?="{{busy}}"></paper-spinner>
+	    	</div>
+
+	      	<form name="groupForm">
+				<paper-input-decorator label="群名称" floatingLabel error="请输入群组名称!" autoValidate>
+				  	<input is="core-input" value="{{newGroup.name}}" disabled?="{{busy}}" required>
+				</paper-input-decorator>
+				<div horizontal layout reverse>
+				    <paper-button class="colored" disabled?="{{!newGroup.name || busy}}" on-tap="{{createGroup}}">确定</paper-button>
+				    <paper-button disabled?="{{busy}}" on-tap="{{cancelDialog}}">取消</paper-button>
+				</div>
+	      	</form>
+
+	    </paper-dialog>
+
+	    <core-ajax id="request" url="{{request.url}}" method="{{request.method}}" handleAs="json" contentType="application/json"
+		    body="{{request.body}}" on-core-response="{{handleResponse}}" on-core-error="{{handleError}}"></core-ajax>
 	</template>
 	<script>
 	(function() {
@@ -28,6 +63,38 @@
 			selectGroup: function (event, detail, sender) {
 				this.selectedGroup = event.target.templateInstance.model.group;
 				this.fire('select-group', this.selectedGroup);
+			},
+			showGroupDialog: function (event, detail, sender) {
+				this.newGroup = {};
+				this.$.groupDialog.open();
+			},
+			cancelDialog: function (event, detail, sender) {
+				this.$.groupDialog.close();
+			},
+			createGroup: function (event, detail, sender) {
+				this.busy = true;
+				this.newGroup.userid = this.userId;
+
+				this.request = {
+					url: '/api/group',
+					method: 'POST',
+					body: JSON.stringify(this.newGroup)
+				};
+
+				this.$.request.go();
+			},
+			handleResponse: function (event, detail, sender) {
+				this.busy = false;
+				if (detail.response.success) {
+					this.groups.push(detail.response.data);
+					this.$.groupDialog.close();
+				} else {
+					this.fire('user-error', detail.response.data);
+				}
+			},
+			handleError: function (event, detail, sender) {
+				this.busy = false;
+				this.fire('user-error', detail.toString());
 			}
 		});
 	})();
