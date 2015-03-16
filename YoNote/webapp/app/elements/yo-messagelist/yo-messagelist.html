@@ -1,0 +1,75 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/core-header-panel/core-header-panel.html">
+<link rel="import" href="../../../bower_components/core-toolbar/core-toolbar.html">
+<link rel="import" href="../../../bower_components/core-field/core-field.html">
+<link rel="import" href="../../../bower_components/core-icon-button/core-icon-button.html">
+<link rel="import" href="../../../bower_components/core-scroll-threshold/core-scroll-threshold.html">
+<link rel="import" href="../../../bower_components/paper-shadow/paper-shadow.html">
+<link rel="import" href="../../../bower_components/paper-ripple/paper-ripple.html">
+<link rel="import" href="../../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../../bower_components/paper-fab/paper-fab.html">
+
+<polymer-element name="yo-messagelist" attributes="group">
+  <template>
+    <link rel="stylesheet" href="yo-messagelist.css">
+
+    <div layout vertical fit hero-id="group-{{group._id}}" hero>
+        <core-header-panel flex fixed>
+          <core-toolbar mode="standard">
+
+            <core-icon-button icon="arrow-back" on-tap="{{onback}}"></core-icon-button>
+            <div flex></div>
+            <core-icon-button icon="search"></core-icon-button>
+            <core-icon-button icon="more-vert"></core-icon-button>
+            <div class="bottom indent">{{group.name}}</div>
+
+          </core-toolbar>
+
+          <core-scroll-threshold id="threshold" scrollTarget="{{$.scroller}}" lowerThreshold="100" on-lower-trigger="{{loadMore}}" fit></core-scroll-threshold>
+          <div id="scroller" layout vertical>
+            <template repeat="{{msg in group.messages}}">
+              <div class="messageContainer" layout horizontal>
+                <div class="middle avatar" style="background-image: url({{msg.header}})"></div>
+                <paper-shadow class="card" z="1" flex>
+                  <div layout vertical cross-fade>
+                    <div layout horizontal center class="title">
+                      <template repeat="{{tag in msg.tags}}">
+                        <paper-button class="tag-button">{{tag}}</paper-button>
+                      </template>
+                      <div flex></div>
+                      <div class="date">{{msg.date}}</div>
+                    </div>
+                    <div layout vertical flex class="content">
+                      {{msg.content}}
+                    </div>
+                  </div>
+                </paper-shadow>
+              </div>
+            </template>
+            <div hidden?="{{!$.threshold.lowerTriggered}}">Please wait...</div>
+          </div>
+        </core-header-panel>
+
+        <footer>
+          <div id="editorFooter" layout horizontal end>
+            <core-field style="width: 100%;">
+              <textarea id="textEditor" style="width: 100%;"></textarea>
+            </core-field>
+            <paper-fab icon="arrow-forward" class="blue" title="arrow-forward"></paper-fab>
+          </div>
+        </footer>
+    </div>
+  </template>
+  <script>
+    (function () {
+      Polymer({
+        ready: function () {
+
+        },
+        onback: function (event, detail, sender) {
+          this.fire('back');
+        }
+      });
+    })();
+  </script>
+</polymer-element>

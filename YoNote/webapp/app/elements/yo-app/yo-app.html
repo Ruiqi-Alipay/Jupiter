@@ -1,0 +1,93 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/core-drawer-panel/core-drawer-panel.html">
+<link rel="import" href="../../../bower_components/core-header-panel/core-header-panel.html">
+<link rel="import" href="../../../bower_components/core-animated-pages/core-animated-pages.html">
+<link rel="import" href="../../../bower_components/core-ajax/core-ajax.html">
+<link rel="import" href="../../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../yo-navpanel/yo-navpanel.html">
+<link rel="import" href="../yo-grouplist/yo-grouplist.html">
+<link rel="import" href="../yo-messagelist/yo-messagelist.html">
+
+<polymer-element name="yo-app">
+	<template>
+		<link rel="stylesheet" href="yo-app.css">
+
+		<div horizontal layout center fit cross-fade class="loadingBacktround" hidden?="{{!loading}}">
+			<div class="spinner">
+			  <div class="dot1"></div>
+			  <div class="dot2"></div>
+			</div>
+		</div>
+
+		<core-drawer-panel cross-fade hidden?="{{loading}}">
+
+			<core-header-panel drawer flex fixed>
+				<yo-navpanel user="{{user}}"></yo-navpanel>
+			</core-header-panel>
+
+		    <core-animated-pages main id="pages" flex selected="{{curPage}}" on-core-animated-pages-transition-end="{{transitionend}}" transitions="cross-fade-all hero-transition">
+
+				<section vertical layout>
+					<yo-grouplist groups="{{user.groups}}" on-select-group="{{onSelectGroup}}"></yo-grouplist>
+				</section>
+
+				<section vertical layout>
+					<yo-messagelist group="{{selectedGroup}}" on-back="{{onback}}"></yo-messagelist>
+				</section>
+
+		    </core-animated-pages>
+
+		</core-drawer-panel>
+
+		<core-ajax id="httpHelper" url="/api/user/TEST" method="GET" handleAs="json"
+		    on-core-response="{{handleResponse}}" on-core-error="{{handleError}}"></core-ajax>
+		<paper-toast id="toast" class="capsule" text="{{toastMessage}}" style="padding-right: 60px;"></paper-toast>
+	</template>
+	<script>
+	(function () {
+		Polymer({
+			ready: function () {
+				this.loading = true;
+				this.curPage = 0;
+				this.$.httpHelper.go();
+			},
+			onSelectGroup: function (event, detail, sender) {
+				this.selectedGroup = detail;
+				this.curPage = 1;
+			},
+			transitionend: function (event, detail, sender) {
+				// body...
+			},
+			onback: function (event, detail, sender) {
+				this.selectedGroup = undefined;
+				this.curPage = 0;
+			},
+			handleResponse: function (event, detail, sender) {
+				if (detail.response.success) {
+					this.loading = false;
+					this.user = detail.response.data;
+				} else {
+					this.toastMessage = detail.response.data;
+					this.$.toast.show();
+				}
+			},
+			handleError: function (event, detail, sender) {
+				this.toastMessage = detail.toString();
+				this.$.toast.show();
+			}
+		});
+	})();
+	</script>
+</polymer-element>
+
+
+
+
+
+
+
+
+
+
+
+
