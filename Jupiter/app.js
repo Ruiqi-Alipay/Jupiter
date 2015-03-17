@@ -22,8 +22,7 @@ app.use('/sdkeditor', adkEditor);
 app.use('/autopack', autoPack);
 app.use('/feedback', feedbackCenter);
 app.use('/note', yoNote);
-app.use('/bower_components',  express.static(path.join(__dirname, '/bower_components')));
-app.use('/environment', express.static(path.join(__dirname, '..', 'AutoTest', 'environment')));
+app.use('/jupiter/bower_components',  express.static(path.join(__dirname, '/bower_components')));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
