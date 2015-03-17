@@ -14,6 +14,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use('/api', require(path.join(__dirname, 'server', 'api.js')));
+app.use('/bower_components',  express.static(path.join(__dirname, 'webapp', 'bower_components')));
 app.use('/', express.static(path.join(__dirname, 'webapp')));
 
 app.get('/', function(req, res){

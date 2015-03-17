@@ -125,7 +125,7 @@
             makeRequest(this, function (scope, messages) {
               scope.messages = messages.concat(scope.messages);
               scope.loading = false;
-            }, '/note/api/group/' + this.group.id + '/message', 'GET', {
+            }, '/api/group/' + this.group.id + '/message', 'GET', {
               userid: this.userId,
               last: this.messages.length > 0 ? this.messages[0].timestamp : undefined
             });
@@ -139,7 +139,7 @@
               scope.messages = messages.concat(scope.messages);
             }
             scope.$.headerPanel.scroller.scrollTop = 0;
-          }, '/note/api/group/' + this.group.id + '/message', 'POST', undefined, {
+          }, '/api/group/' + this.group.id + '/message', 'POST', undefined, {
             userid: this.userId,
             content: this.newMessage
           });
@@ -167,7 +167,7 @@
             }
             scope.loading = false;
             scope.$.threshold.clearLower();
-          }, '/note/api/group/' + this.group.id + '/message', 'GET', {
+          }, '/api/group/' + this.group.id + '/message', 'GET', {
             userid: this.userId,
             last: this.messages.length > 0 ? this.messages[this.messages.length - 1].timestamp : undefined
           });
@@ -187,7 +187,7 @@
                   scope.messages = messages;
                 }
                 scope.loading = false;
-              }, '/note/api/group/' + this.group.id + '/message/contentsearch', 'GET', {
+              }, '/api/group/' + this.group.id + '/message/contentsearch', 'GET', {
                 userid: this.userId,
                 q: encoded
               });
