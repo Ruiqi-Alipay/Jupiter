@@ -24,6 +24,28 @@ var groupOperateParamCheck = function (req, res) {
 	return true;
 }
 
+var messageOperateCheck = function (req, res) {
+	if (!req.group) {
+		res.json({
+			success: false,
+			data: '操作失败：无效的群组'
+		})
+		return false;
+	}
+
+	var userid = req.query.userid ? req.query.userid : req.body.userid;
+
+	if (!userid || (req.group.creater != userid && (!req.group.members || req.group.members.indexOf(req.body.userid) < 0))) {
+		res.json({
+			success: false,
+			data: '操作失败：您没有权限这样做'
+		});
+		return false;
+	}	
+
+	return true;
+}
+
 module.exports = {
 	groupId: function (req, res, next, id) {
 		Group.findById(id, function (err, group) {
@@ -38,9 +60,10 @@ module.exports = {
 		if (!req.group) return next(new Error('Group not found!'));
 
 		Message.findById(id, function (err, message) {
-			if (err || message.groupId != req.group._id) return next(new Error('Message not found!'));
+			if (!err && message.groupId == req.group._id) {
+				req.message = message;
+			}
 
-			req.message = message;
 			return next();
 		});
 	},
@@ -170,64 +193,103 @@ module.exports = {
 		})
 	},
 	createMessage: function (req, res, next) {
-		if (!req.group) return next(new Error('Group not found!'));
+		if (!messageOperateCheck(req, res)) return;
 
-		var userId = req.query.userId;
-		if (!userId) return next(new Error('None userId found for creating message!'));
-		if (req.group.creater != userId && (!req.group.members || req.group.members.indexOf(userId) < 0)) return next(new Error('User not in this group, can not create messages!'));
-		if (!req.body.content) return next(new Error('New message must has contents!'));
+		if (!req.body.content) {
+			return res.json({
+				success: false,
+				data: '操作失败：消息内容不得为空'
+			});
+		}
 
 		var currentDate = new Date();
 		var newMessage = new Message({
 			groupId: req.group._id,
-			userId: userId,
+			userId: req.body.userid,
 			date: currentDate,
 			timestamp: currentDate.getTime(),
-			content: req.body.content
+			content: req.body.content,
+			tags: req.body.tags
 		});
 
-		if (req.body.tags) {
-			newMessage.tags = req.body.tags;
-		}
-
 		newMessage.save(function (err, message) {
-			if (err) return next(new Error('Create new message failed: ' + err));
+			if (err) return res.json({
+				success: false,
+				data: '操作失败：' + err.toString()
+			});
 
 			var lastTimestamp = req.query.last;
 			if (lastTimestamp) {
-				Message.find({'timestamp': {$gt: lastTimestamp}}).sort('timestamp').exec(function (err, messages) {
-					if (err) return next(err);
+				Message.find({'timestamp': {$gt: lastTimestamp}}).sort('-timestamp').exec(function (err, messages) {
+					if (err) return res.json({
+						success: false,
+						data: '操作失败：' + err.toString()
+					});
 
-					return res.json(utils.messagesDBToClient(messages, true));
+					res.json({
+						success: true,
+						data: utils.messagesDBToClient(messages, true)
+					});
 				});
 			} else {
-				return res.json(utils.messageDBToClient(message, true));
+				res.json({
+					success: true,
+					data: [utils.messageDBToClient(message, true)]
+				});
 			}
 		});
 	},
 	getMessages: function (req, res, next) {
-		if (!req.group) return next(new Error('Group not found!'));
+		if (!messageOperateCheck(req, res)) return;
 
-		var userId = req.query.userId;
-		if (!userId) return next(new Error('None userId found for creating message!'));
-		if (req.group.creater != userId && (!req.group.members || req.group.members.indexOf(userId) < 0)) return next(new Error('User not in this group, can not get messages!'));
-		
 		var timestamp = req.query.last;
 		var find = {};
 		if (timestamp) {
 			find.timestamp = {
-				$gt: timestamp
+				$lt: timestamp
 			}
 		}
 
-		Message.find(find).sort('timestamp').limit(10).exec(function (err, messages) {
-			if (err) return next(err);
+		Message.find(find).sort('-timestamp').limit(10).exec(function (err, messages) {
+			if (err) return res.json({
+				success: false,
+				data: '操作失败：' + err.toString()
+			});
 
-			return res.json(utils.messagesDBToClient(messages, true));
+			res.json({
+				success: true,
+				data: utils.messagesDBToClient(messages, true)
+			});
 		});
 	},
 	geMessage: function (req, res, next) {
+		if (!messageOperateCheck(req, res)) return;
+
 		return res.json(utils.messageDBToClient(req.message));
+	},
+	searchContent: function (req, res, next) {
+		if (!messageOperateCheck(req, res)) return;
+		if (!req.query.q) return res.json({
+			success: false,
+			data: '查询内容不可为空'
+		});
+
+		var seatchText = decodeURIComponent(req.query.q);
+		console.log('SEARCH: ' + '\"' + seatchText + '\"');
+		Message.find({'content': new RegExp('.*' + seatchText + '.*')}, function (err, items) {
+			if (err) return res.json({
+				success: false,
+				data: '操作失败：' + err.toString()
+			});
+
+			res.json({
+				success: true,
+				data: items
+			});
+		});
+	},
+	searchTags: function (req, res, next) {
+
 	}
 };
 

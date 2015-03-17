@@ -24,7 +24,7 @@
 	   		</template>
 	   		<p class="navbarItem">加入的群组：</p>
 	   		<template repeat="{{group in user.groups}}">
-		      <paper-item>
+		      <paper-item on-tap="{{selectGroup}}">
 		        <div class="navbarItem">{{group.name}}</div>
 		      </paper-item>
 	   		</template>
@@ -41,7 +41,11 @@
 					{name: '热门关键词', image: 'translate'},
 					{name: '草稿', image: 'drafts'}
 				];
-			}
+			},
+			selectGroup: function (event, detail, sender) {
+				this.selectedGroup = event.target.templateInstance.model.group;
+				this.fire('select-group', this.selectedGroup);
+			},
 		});
 	})();
 	</script>

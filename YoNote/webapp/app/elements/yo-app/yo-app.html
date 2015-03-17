@@ -22,7 +22,7 @@
 		<core-drawer-panel cross-fade hidden?="{{loading}}">
 
 			<core-header-panel drawer flex fixed>
-				<yo-navpanel user="{{user}}"></yo-navpanel>
+				<yo-navpanel user="{{user}}" on-select-group="{{onSelectGroup}}"></yo-navpanel>
 			</core-header-panel>
 
 		    <core-animated-pages main id="pages" flex selected="{{curPage}}" on-core-animated-pages-transition-end="{{transitionend}}" transitions="cross-fade-all hero-transition">
@@ -32,7 +32,7 @@
 				</section>
 
 				<section vertical layout>
-					<yo-messagelist group="{{selectedGroup}}" on-back="{{onback}}" on-user-error="{{handleError}}"></yo-messagelist>
+					<yo-messagelist group="{{selectedGroup}}" userId="{{user.id}}" on-back="{{onback}}" on-user-error="{{handleError}}"></yo-messagelist>
 				</section>
 
 		    </core-animated-pages>
@@ -51,7 +51,7 @@
 				this.curPage = 0;
 
 				this.request = {
-					url: '/api/user',
+					url: '/note/api/user',
 					method: 'GET',
 					params: {
 						extid: 'TEST'

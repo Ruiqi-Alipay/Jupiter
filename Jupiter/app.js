@@ -8,6 +8,7 @@ var autoTest = require('../AutoTest/app.js');
 var adkEditor = require('../SDKEditor/app.js');
 var autoPack = require('../AutoPack/app.js').app;
 var feedbackCenter = require('../FeedbackCenter/app.js');
+var yoNote = require('../YoNote/app.js');
 
 var app = express();
 
@@ -20,6 +21,7 @@ app.use('/autotest', autoTest);
 app.use('/sdkeditor', adkEditor);
 app.use('/autopack', autoPack);
 app.use('/feedback', feedbackCenter);
+app.use('/note', yoNote);
 app.use('/bower_components',  express.static(path.join(__dirname, '/bower_components')));
 app.use('/environment', express.static(path.join(__dirname, '..', 'AutoTest', 'environment')));
 

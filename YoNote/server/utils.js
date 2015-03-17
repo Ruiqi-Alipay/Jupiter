@@ -25,12 +25,14 @@ var messageDBToClient = function (message, fragment) {
 		date: message.date
 	};
 
+	clientMsg.timestamp = message.timestamp;
+	clientMsg.tags = message.tags;
+	clientMsg.userId = message.userId;
+
 	if (fragment) {
-		clientMsg.content = message.content.slice(0, 140) + '...';
+		clientMsg.content = message.content.length > 140 ? (message.content.slice(0, 140) + '...') : message.content;
 	} else {
-		clientMsg.userId = message.userId;
 		clientMsg.content = message.content;
-		clientMsg.tags = message.tags;
 	}
 
 	return clientMsg;
