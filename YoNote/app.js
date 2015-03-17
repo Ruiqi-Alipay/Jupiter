@@ -17,7 +17,7 @@ app.use('/api', require(path.join(__dirname, 'server', 'api.js')));
 app.use('/', express.static(path.join(__dirname, 'webapp')));
 
 app.get('/', function(req, res){
-	res.sendFile(path.join(__dirname, 'webapp', 'app', 'index.html'));
+	res.sendFile(path.join(__dirname, 'webapp', 'index.html'));
 });
 
 // catch 404 and forward to error handler
