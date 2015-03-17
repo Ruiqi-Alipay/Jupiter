@@ -243,7 +243,9 @@ module.exports = {
 		if (!messageOperateCheck(req, res)) return;
 
 		var timestamp = req.query.last;
-		var find = {};
+		var find = {
+			groupId: req.group._id
+		};
 		if (timestamp) {
 			find.timestamp = {
 				$lt: timestamp
