@@ -1,10 +1,11 @@
 <link rel="import" href="../../../components/polymer/polymer.html">
 <link rel="import" href="../../../components/core-drawer-panel/core-drawer-panel.html">
-<link rel="import" href="../../../components/core-header-panel/core-header-panel.html">
 <link rel="import" href="../../../components/core-animated-pages/core-animated-pages.html">
+<link rel="import" href="../../../components/core-animated-pages/transitions/cross-fade.html">
 <link rel="import" href="../../../components/core-ajax/core-ajax.html">
 <link rel="import" href="../../../components/paper-toast/paper-toast.html">
 <link rel="import" href="../yo-navpanel/yo-navpanel.html">
+<link rel="import" href="../yo-grouppanel/yo-grouppanel.html">
 <link rel="import" href="../yo-grouplist/yo-grouplist.html">
 <link rel="import" href="../yo-messagelist/yo-messagelist.html">
 
@@ -21,19 +22,16 @@
 
 		<core-drawer-panel cross-fade hidden?="{{loading}}">
 
-			<core-header-panel drawer flex fixed>
+			<core-animated-pages drawer selected="{{curPage}}" transitions="cross-fade-all" flex>
 				<yo-navpanel user="{{user}}" on-select-group="{{onSelectGroup}}"></yo-navpanel>
-			</core-header-panel>
+				<yo-grouppanel group="{{selectedGroup}}"></yo-grouppanel>
+			</core-animated-pages>
 
-		    <core-animated-pages main id="pages" flex selected="{{curPage}}" on-core-animated-pages-transition-end="{{transitionend}}" transitions="cross-fade-all hero-transition">
+		    <core-animated-pages main id="pages" selected="{{curPage}}" transitions="cross-fade-all hero-transition" flex>
 
-				<section vertical layout>
-					<yo-grouplist groups="{{user.groups}}" userId="{{user.id}}" on-select-group="{{onSelectGroup}}" on-user-error="{{handleError}}"></yo-grouplist>
-				</section>
+				<yo-grouplist groups="{{user.groups}}" userId="{{user.id}}" on-select-group="{{onSelectGroup}}" on-user-error="{{handleError}}"></yo-grouplist>
 
-				<section vertical layout>
-					<yo-messagelist group="{{selectedGroup}}" userId="{{user.id}}" on-back="{{onback}}" on-user-error="{{handleError}}"></yo-messagelist>
-				</section>
+				<yo-messagelist group="{{selectedGroup}}" userId="{{user.id}}" on-back="{{onback}}" on-user-error="{{handleError}}"></yo-messagelist>
 
 		    </core-animated-pages>
 
@@ -51,7 +49,7 @@
 				this.curPage = 0;
 
 				this.request = {
-					url: '/api/user',
+					url: '/note/api/user',
 					method: 'GET',
 					params: {
 						extid: 'TEST'
@@ -63,11 +61,7 @@
 				this.selectedGroup = detail;
 				this.curPage = 1;
 			},
-			transitionend: function (event, detail, sender) {
-				// body...
-			},
 			onback: function (event, detail, sender) {
-				this.selectedGroup = undefined;
 				this.curPage = 0;
 			},
 			handleResponse: function (event, detail, sender) {

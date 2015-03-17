@@ -1,0 +1,47 @@
+<link rel="import" href="../../../components/polymer/polymer.html">
+<link rel="import" href="../../../components/paper-input/paper-input.html">
+<link rel="import" href="../../../components/paper-button/paper-button.html">
+<link rel="import" href="../../../components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../../../components/paper-dialog/paper-action-dialog.html">
+
+<polymer-element name="yo-groupdialog" attributes="subject">
+	<template>
+		<link rel="stylesheet" href="yo-groupdialog.css">
+
+	    <paper-action-dialog id="dialog" heading="{{subject}}" transition="core-transition-center" style="width: 700px;">
+
+			<paper-input-decorator label="群名称" floatingLabel error="请输入群组名称!" autoValidate>
+			  	<input is="core-input" value="{{groupName}}" disabled?="{{busy}}" required>
+			</paper-input-decorator>
+
+			<div layout horizontal flex end-justified>
+				<paper-spinner active?="{{busy}}"></paper-spinner>
+				<paper-button on-click="{{cancelDialog}}">取消</paper-button>
+				<paper-button autofocus disabled?="{{!groupName || busy}}" on-click="{{onConfirm}}">确定</paper-button>
+			</div>
+	    </paper-action-dialog>
+
+	</template>
+	<script>
+	(function() {
+		Polymer({
+			ready: function () {
+				this.busy = false;
+			},
+			onConfirm: function (event, detail, sender) {
+				this.busy = true;
+				this.fire('action-confirm', this.groupName);
+			},
+			showDialog: function (groupName) {
+				this.groupName = groupName;
+				this.busy = false;
+				this.$.dialog.open();
+			},
+			closeDialog: function () {
+				this.busy = false;
+				this.$.dialog.close();
+			}
+		});
+	})();
+	</script>
+</polymer-element>

@@ -5,16 +5,14 @@
 <link rel="import" href="../../../components/paper-item/paper-item.html">
 <link rel="import" href="../../../components/paper-shadow/paper-shadow.html">
 
-<polymer-element name="yo-navpanel" attributes="user">
+<polymer-element name="yo-grouppanel" attributes="group">
 	<template>
-		<link rel="stylesheet" href="yo-navpanel.css">
+		<link rel="stylesheet" href="yo-grouppanel.css">
 
 		<core-header-panel fit fixed>
 		    <core-toolbar id="drawerTitle" class="tall" mode="standard" layout horizontal center>
-	    		<div class="avatar" style="background-image: url({{user.header}})"></div>
 	    		<div layout vertical>
-	    			<div>{{user.name}}</div>
-	    			<div class="subText">{{user.description}}</div>
+	    			<div class="subText">{{group.name}}</div>
 	    		</div>
 		    </core-toolbar>
 		    <div layout vertical>

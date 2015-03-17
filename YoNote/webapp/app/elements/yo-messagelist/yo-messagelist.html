@@ -3,6 +3,7 @@
 <link rel="import" href="../../../components/core-header-panel/core-header-panel.html">
 <link rel="import" href="../../../components/core-toolbar/core-toolbar.html">
 <link rel="import" href="../../../components/core-field/core-field.html">
+<link rel="import" href="../../../components/core-animation/core-animation.html">
 <link rel="import" href="../../../components/core-icon-button/core-icon-button.html">
 <link rel="import" href="../../../components/core-scroll-threshold/core-scroll-threshold.html">
 <link rel="import" href="../../../components/paper-shadow/paper-shadow.html">
@@ -13,14 +14,17 @@
 <link rel="import" href="../../../components/paper-input/paper-input-decorator.html">
 <link rel="import" href="../../../components/paper-input/paper-input.html">
 <link rel="import" href="../../../components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../../../components/paper-item/paper-item.html">
+<link rel="import" href="../../../components/paper-dropdown/paper-dropdown.html">
+<link rel="import" href="../yo-groupdialog/yo-groupdialog.html">
 
 <polymer-element name="yo-messagelist" attributes="group userId">
   <template>
     <link rel="stylesheet" href="yo-messagelist.css">
 
-    <div layout vertical fit hero-id="group-{{group._id}}" hero>
+    <div layout vertical fit hero-id="group-{{group.id}}" hero>
         <div style="position: relative; height: 100%;" fit>
-          <core-scroll-threshold id="threshold" scrollTarget="{{$.headerPanel.scroller}}" lowerThreshold="50" on-lower-trigger="{{loadMore}}" fit></core-scroll-threshold>
+          <core-scroll-threshold id="threshold" scrollTarget="{{$.headerPanel.scroller}}" lowerThreshold="25" on-lower-trigger="{{loadMore}}" fit></core-scroll-threshold>
           <core-header-panel id="headerPanel" fit fixed>
             <core-toolbar mode="standard">
               <core-icon-button icon="arrow-back" on-tap="{{onback}}"></core-icon-button>
@@ -28,6 +32,14 @@
               <paper-input label="笔记查询" value="{{searchText}}" style="font-size: 16px;" hidden?="{{!searchMode}}"></paper-input>
               <core-icon-button icon="close" on-tap="{{exitSearchMode}}" title="关闭查询模式" hidden?="{{!searchMode}}"></core-icon-button>
               <core-icon-button icon="search" on-tap="{{enterSearchMode}}" title="进入查询模式" hidden?="{{searchMode}}"></core-icon-button>
+              <core-icon-button icon="more-vert" on-tap="{{menuClicked}}">
+                <paper-dropdown id="groupMenu" class="no-padding" halign="right">
+                  <div class="menu">
+                    <paper-item on-click="{{showEditDialog}}"><core-icon icon="input"></core-icon>编辑群组</paper-item>
+                    <paper-item on-click="{{showConfirmDialog}}"><core-icon icon="close"></core-icon>删除群组</paper-item>
+                  </div>
+                </paper-dropdown>
+              </core-icon-button>
               <div class="bottom indent">{{group.name}}</div>
             </core-toolbar>
 
@@ -68,6 +80,8 @@
         </footer>
     </div>
 
+    <yo-groupdialog id="editDialog" subject="编辑群组" on-action-confirm="{{onEditGroup}}"></yo-groupdialog>
+
     <core-ajax id="ajax" handleAs="json" contentType="application/json"></core-ajax>
   </template>
   <script>
@@ -101,11 +115,16 @@
         scope.$.ajax.go();
       };
 
-      var testLog = function (element) {
-        console.log(element.scrollTop);
-        if (element.parentElement) {
-          testLog(element.parentElement);
-        }
+      var scrollToTop = function (targetElement) {
+        var animation = new CoreAnimation();
+        animation.duration = 300;
+        animation.target = targetElement;
+        animation.fill = 'forwards';
+        var total = targetElement.scrollTop;
+        animation.customEffect = function(timeFraction, target, animation) {
+          target.scrollTop = (1 - timeFraction) * total;
+        };
+        animation.play();
       };
 
       Polymer({
@@ -125,7 +144,7 @@
             makeRequest(this, function (scope, messages) {
               scope.messages = messages.concat(scope.messages);
               scope.loading = false;
-            }, '/api/group/' + this.group.id + '/message', 'GET', {
+            }, '/note/api/group/' + this.group.id + '/message', 'GET', {
               userid: this.userId,
               last: this.messages.length > 0 ? this.messages[0].timestamp : undefined
             });
@@ -138,8 +157,8 @@
             if (messages) {
               scope.messages = messages.concat(scope.messages);
             }
-            scope.$.headerPanel.scroller.scrollTop = 0;
-          }, '/api/group/' + this.group.id + '/message', 'POST', undefined, {
+            scrollToTop(scope.$.headerPanel.scroller);
+          }, '/note/api/group/' + this.group.id + '/message', 'POST', undefined, {
             userid: this.userId,
             content: this.newMessage
           });
@@ -154,23 +173,25 @@
           if (this.allLoaded) return;
 
           this.loading = true;
-          makeRequest(this, function (scope, messages) {
-            if (messages) {
-              if (messages.length > 0) {
-                messages.forEach(function (item) {
-                  scope.messages.push(item);
-                });
-              } else {
-                scope.allLoaded = true;
-                scope.fire('user-error', '已加载全部历史记录');
+          this.async(function () {
+            makeRequest(this, function (scope, messages) {
+              if (messages) {
+                if (messages.length > 0) {
+                  messages.forEach(function (item) {
+                    scope.messages.push(item);
+                  });
+                } else {
+                  scope.allLoaded = true;
+                  scope.fire('user-error', '已加载全部历史记录');
+                }
               }
-            }
-            scope.loading = false;
-            scope.$.threshold.clearLower();
-          }, '/api/group/' + this.group.id + '/message', 'GET', {
-            userid: this.userId,
-            last: this.messages.length > 0 ? this.messages[this.messages.length - 1].timestamp : undefined
-          });
+              scope.loading = false;
+              scope.$.threshold.clearLower();
+            }, '/note/api/group/' + this.group.id + '/message', 'GET', {
+              userid: this.userId,
+              last: this.messages.length > 0 ? this.messages[this.messages.length - 1].timestamp : undefined
+            });
+          }, null, 1000);
         },
         searchTextChanged: function (oldValue, newValue) {
           if (newValue && oldValue != newValue) {
@@ -187,7 +208,7 @@
                   scope.messages = messages;
                 }
                 scope.loading = false;
-              }, '/api/group/' + this.group.id + '/message/contentsearch', 'GET', {
+              }, '/note/api/group/' + this.group.id + '/message/contentsearch', 'GET', {
                 userid: this.userId,
                 q: encoded
               });
@@ -203,7 +224,22 @@
           this.messages = this.restoreMessage;
           this.restoreMessage = undefined;
           this.searchMode = false;
-        }
+        },
+        menuClicked: function (event, detail, sender) {
+          this.$.groupMenu.toggle();
+        },
+        showEditDialog: function (event, detail, sender) {
+          this.$.editDialog.showDialog(this.group.name);
+        },
+        showConfirmDialog: function (event, detail, sender) {
+          this.$.groupMenu.toggle();
+        },
+        onEditGroup: function (event, detail, sender) {
+          this.$.groupMenu.toggle();
+        },
+        onDeleteGroup: function (event, detail, sender) {
+          this.$.groupMenu.toggle();
+        },
       });
     })();
   </script>
