@@ -16,13 +16,13 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-app.use('/', root);
+app.use('/note', yoNote);
 app.use('/autotest', autoTest);
 app.use('/sdkeditor', adkEditor);
 app.use('/autopack', autoPack);
 app.use('/feedback', feedbackCenter);
-app.use('/note', yoNote);
 app.use('/jupiter/bower_components',  express.static(path.join(__dirname, '/bower_components')));
+app.use('/', root);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
