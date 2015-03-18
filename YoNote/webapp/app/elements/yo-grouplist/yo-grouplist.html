@@ -19,7 +19,7 @@
 		    </paper-shadow>
 			<template repeat="{{group in groups}}">
 			    <paper-shadow class="card" z="1" on-tap="{{selectGroup}}"
-			    	hero-id="group-{{group.id}}" hero?="{{selectedGroup.id == group.id}}">
+			    	hero-id="group-{{group._id}}" hero?="{{selectedGroup._id == group._id}}">
 				    <div layout vertical cross-fade fit>
 						<div class="title" horizontal layout center>
 							{{group.name}}
@@ -46,7 +46,7 @@
 				this.fire('select-group', this.selectedGroup);
 			},
 			showGroupDialog: function (event, detail, sender) {
-				this.$.dialog.showDialog();
+				this.$.dialog.showDialog(true);
 			},
 			cancelDialog: function (event, detail, sender) {
 				this.$.dialog.closeDialog();
@@ -57,7 +57,7 @@
 					method: 'POST',
 					body: JSON.stringify({
 						userid: this.userId,
-						name: detail
+						name: detail.name
 					})
 				};
 

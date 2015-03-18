@@ -5,7 +5,7 @@
 <link rel="import" href="../../../components/paper-item/paper-item.html">
 <link rel="import" href="../../../components/paper-shadow/paper-shadow.html">
 
-<polymer-element name="yo-navpanel" attributes="user">
+<polymer-element name="yo-navpanel" attributes="user groups">
 	<template>
 		<link rel="stylesheet" href="yo-navpanel.css">
 
@@ -25,7 +25,7 @@
 			      </paper-item>
 		   		</template>
 		   		<p class="navbarItem">加入的群组：</p>
-		   		<template repeat="{{group in user.groups}}">
+		   		<template repeat="{{group in groups}}">
 			      <paper-item on-tap="{{selectGroup}}">
 			        <div class="navbarItem">{{group.name}}</div>
 			      </paper-item>

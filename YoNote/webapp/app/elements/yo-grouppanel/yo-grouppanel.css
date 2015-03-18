@@ -13,12 +13,11 @@
   	user-select: none;
 }
 
-.mainText {
-
-}
-
-.subText {
-	font-size: 14px;
+.tagItem {
+    border-radius: 20px;
+    background: white;
+    padding: 4px 8px;
+    margin: 4px;
 }
 
 #drawerTitle {

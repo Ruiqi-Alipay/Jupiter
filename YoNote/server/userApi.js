@@ -8,19 +8,18 @@ var q = require('q');
 var prepareUserGroups = function (userId) {
 	var defered = q.defer();
 
-	Group.find({$or: [{'members': userId}, {'creater': userId}]}, function (err, groups) {
-		var clientGroups = [];
+	Group.find({$or: [{'members': userId}, {'creater': userId}]}).sort('date').exec(function (err, groups) {
 		if (!groups || groups.length == 0) {
-			return defered.resolve(clientGroups);
+			return defered.resolve(groups);
 		}
 
+		var task = groups.length;
 		groups.forEach(function (group) {
-			Message.find({'groupId': group._id}).sort('-date').limit(2).exec(function (err, messages) {
-				var clientGroup = utils.groupDBToClient(group);
-				clientGroup.recents = utils.messagesDBToClient(messages, true);
-				clientGroups.push(clientGroup);
+			Message.find({'groupId': group._id}).sort('-timestamp').limit(2).exec(function (err, messages) {
+				group.recents = utils.cutMessages(messages);
 
-				if (clientGroups.length == groups.length) defered.resolve(clientGroups);
+				task--;
+				if (task == 0) defered.resolve(groups);
 			});
 		});
 	});
@@ -31,12 +30,10 @@ var prepareUserGroups = function (userId) {
 module.exports = {
 	getUser: function (req, res, next) {
 		var extid = req.query.extid;
-		if (!extid) {
-			return res.json({
-				success: false,
-				data: '请求参数错误：没有内外Token'
-			})
-		}
+		if (!extid) return res.json({
+			success: false,
+			data: '请求参数错误：没有内外Token'
+		});
 
 		User.findOne({'extId': extid}, function (err, user) {
 			if (!user) {
@@ -46,21 +43,24 @@ module.exports = {
 					extId: extid
 				});
 				user.save(function (err, newUser) {
-					if (err) return next(err);
+					if (err) return res.json({
+						success: false,
+						data: '新建用户错误：' + err.toString()
+					});
 
 					res.json({
 						success: true,
-						data : utils.userDBToClient(newUser)
+						data : newUser
 					});
 				});
 			} else {
 				prepareUserGroups(user._id.toString()).then(function (groups) {
-					var clientUser = utils.userDBToClient(user);
-					clientUser.groups = groups;
-
 					res.json({
 						success: true,
-						data: clientUser
+						data: {
+							user: user,
+							groups: groups
+						}
 					});
 				}).catch(function (err) {
 					res.json({

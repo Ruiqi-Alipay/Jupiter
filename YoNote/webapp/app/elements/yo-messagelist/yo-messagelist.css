@@ -6,10 +6,19 @@
   display: block;
 }
 
+#sendButton {
+	margin-top: 4px;
+	margin-right: 25px;
+}
+
 #editorFooter {
 	box-shadow: 0px -2px 6px 0px rgba(128,133,135,1);
 	padding-left: 15px;
 	padding-right: 15px;
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	background: white;
 }
 
 #messageEditor {
@@ -31,8 +40,7 @@
 
 #scroller {
 	padding-top: 30px;
-	padding-bottom: 30px;
-	overflow: auto;
+	padding-bottom: 130px;
 }
 
 .messageContainer {
@@ -80,4 +88,14 @@
 
 .tag-button:hover {
   background: #eee;
+}
+
+.tagToggle {
+  color: #4285f4;
+  height: 30px;
+  font-size: 14px;
+}
+
+paper-fab.blue {
+  background: #5677fc;
 }

@@ -18,81 +18,88 @@
 <link rel="import" href="../../../components/paper-dropdown/paper-dropdown.html">
 <link rel="import" href="../yo-groupdialog/yo-groupdialog.html">
 
-<polymer-element name="yo-messagelist" attributes="group userId">
+<polymer-element name="yo-messagelist" attributes="group userId selectedTags">
   <template>
     <link rel="stylesheet" href="yo-messagelist.css">
 
-    <div layout vertical fit hero-id="group-{{group.id}}" hero>
-        <div style="position: relative; height: 100%;" fit>
-          <core-scroll-threshold id="threshold" scrollTarget="{{$.headerPanel.scroller}}" lowerThreshold="25" on-lower-trigger="{{loadMore}}" fit></core-scroll-threshold>
-          <core-header-panel id="headerPanel" fit fixed>
-            <core-toolbar mode="standard">
-              <core-icon-button icon="arrow-back" on-tap="{{onback}}"></core-icon-button>
-              <div flex></div>
-              <paper-input label="笔记查询" value="{{searchText}}" style="font-size: 16px;" hidden?="{{!searchMode}}"></paper-input>
-              <core-icon-button icon="close" on-tap="{{exitSearchMode}}" title="关闭查询模式" hidden?="{{!searchMode}}"></core-icon-button>
-              <core-icon-button icon="search" on-tap="{{enterSearchMode}}" title="进入查询模式" hidden?="{{searchMode}}"></core-icon-button>
-              <core-icon-button icon="more-vert" on-tap="{{menuClicked}}">
-                <paper-dropdown id="groupMenu" class="no-padding" halign="right">
-                  <div class="menu">
-                    <paper-item on-click="{{showEditDialog}}"><core-icon icon="input"></core-icon>编辑群组</paper-item>
-                    <paper-item on-click="{{showConfirmDialog}}"><core-icon icon="close"></core-icon>删除群组</paper-item>
+    <div layout vertical style="position: relative; height: 100%;" fit hero-id="group-{{group._id}}" hero>
+      <core-scroll-threshold id="threshold" scrollTarget="{{$.headerPanel.scroller}}" lowerThreshold="25" on-lower-trigger="{{loadMore}}" fit></core-scroll-threshold>
+      <core-header-panel id="headerPanel" fit fixed>
+        <core-toolbar mode="standard">
+          <core-icon-button icon="arrow-back" on-tap="{{onback}}"></core-icon-button>
+          <div flex></div>
+          <paper-input label="笔记查询" value="{{searchText}}" style="font-size: 16px;" hidden?="{{!searchMode}}"></paper-input>
+          <core-icon-button icon="close" on-tap="{{exitSearchMode}}" title="关闭查询模式" hidden?="{{!searchMode}}"></core-icon-button>
+          <core-icon-button icon="search" on-tap="{{enterSearchMode}}" title="进入查询模式" hidden?="{{searchMode}}"></core-icon-button>
+          <core-icon-button icon="more-vert" on-tap="{{menuClicked}}">
+            <paper-dropdown id="groupMenu" class="no-padding" halign="right">
+              <div class="menu">
+                <paper-item on-click="{{showEditDialog}}"><core-icon icon="input"></core-icon>编辑群组</paper-item>
+                <paper-item on-click="{{showConfirmDialog}}"><core-icon icon="close"></core-icon>删除群组</paper-item>
+              </div>
+            </paper-dropdown>
+          </core-icon-button>
+        </core-toolbar>
+
+        <div id="scroller" layout vertical>
+          <template repeat="{{msg in messages}}">
+            <div class="messageContainer" layout horizontal>
+              <div class="middle avatar" style="background-image: url({{msg.header}})"></div>
+              <paper-shadow class="card" z="1" layout vertical cross-fade flex on-tap="{{onMessageClicked}}">
+                  <div layout horizontal center class="title">
+                    <template repeat="{{tag in msg.tags}}">
+                      <paper-button class="tag-button">{{tag}}</paper-button>
+                    </template>
+                    <div flex></div>
+                    <div class="date">{{msg.date}}</div>
                   </div>
-                </paper-dropdown>
-              </core-icon-button>
-              <div class="bottom indent">{{group.name}}</div>
-            </core-toolbar>
-
-            <div id="scroller" layout vertical>
-              <template repeat="{{msg in messages}}">
-                <div class="messageContainer" layout horizontal>
-                  <div class="middle avatar" style="background-image: url({{msg.header}})"></div>
-                  <paper-shadow class="card" z="1" layout vertical cross-fade flex on-tap="{{onMessageClicked}}">
-                      <div layout horizontal center class="title">
-                        <template repeat="{{tag in msg.tags}}">
-                          <paper-button class="tag-button">{{tag}}</paper-button>
-                        </template>
-                        <div flex></div>
-                        <div class="date">{{msg.date}}</div>
-                      </div>
-                      <div layout vertical flex class="content">
-                        <pre style="margin: 1em 1em;">{{msg.content}}</pre>
-                      </div>
-                  </paper-shadow>
-                </div>
-              </template>
-              <paper-spinner active?="{{loading}}" style="margin: 20px;" self-center></paper-spinner>
+                  <div layout vertical flex class="content">
+                    <pre style="margin: 1em 1em;">{{msg.content}}</pre>
+                  </div>
+              </paper-shadow>
             </div>
-          </core-header-panel>
-          <paper-spinner active?="{{refreshing}}" style="position: absolute; right: 20px; bottom: 20px;"></paper-spinner>
+          </template>
+          <paper-spinner active?="{{loading}}" style="margin: 20px;" self-center></paper-spinner>
         </div>
+      </core-header-panel>
+      <paper-spinner active?="{{refreshing}}" style="position: absolute; right: 20px; bottom: 20px;"></paper-spinner>
 
-        <footer>
-          <div id="editorFooter" layout horizontal center>
-            <paper-input-decorator id="messageEditor" label="笔记内容" floatingLabel flex>
-              <paper-autogrow-textarea maxRows="10">
-                <textarea value="{{newMessage}}"></textarea>
-              </paper-autogrow-textarea>
+      <div id="editorFooter" layout horizontal>
+        <div layout vertical flex>
+          <div layout horizontal wrap center>
+            <template repeat="{{tag in newMsgTags}}">
+              <paper-button toggle active class="tagToggle">{{tag}}</paper-button>
+            </template>
+            <paper-input-decorator label="添加标签">
+              <input is="core-input" value="{{newTag}}">
             </paper-input-decorator>
-            <paper-fab icon="arrow-forward" class="blue" title="arrow-forward"
-                on-tap="{{sendMessage}}" disabled?="{{!newMessage}}"></paper-fab>
+            <core-icon-button icon="add" disabled?="{{!newTag}}" on-click="{{createNewTag}}"></core-icon-button>
           </div>
-        </footer>
+          <paper-input-decorator id="messageEditor" label="笔记内容" floatingLabel>
+            <paper-autogrow-textarea maxRows="10">
+              <textarea value="{{newMessage}}"></textarea>
+            </paper-autogrow-textarea>
+          </paper-input-decorator>
+        </div>
+        
+        <paper-fab id="sendButton" icon="create" class="blue" title="确认"
+              on-tap="{{sendMessage}}" disabled?="{{!newMessage}}"></paper-fab>
+      </div>
     </div>
 
-    <yo-groupdialog id="editDialog" subject="编辑群组" on-action-confirm="{{onEditGroup}}"></yo-groupdialog>
+    <yo-groupdialog id="editDialog" subject="{{dialogSubject}}" on-action-confirm="{{onActionConfirm}}"></yo-groupdialog>
 
-    <core-ajax id="ajax" handleAs="json" contentType="application/json"></core-ajax>
+    <core-ajax id="ajax" handleAs="json"></core-ajax>
   </template>
   <script>
     (function () {
-      var makeRequest = function (scope, callback, url, method, params, body) {
+      var makeRequest = function (scope, callback, url, method, params, body, contentType) {
         var responseCallback = function (event) {
           scope.$.ajax.removeEventListener('core-response', responseCallback);
           scope.$.ajax.removeEventListener('core-error', errorCallback);
 
           if (event.detail.response.success) {
-            callback(scope, event.detail.response.data);
+            callback(scope, event.detail.response.data, event.detail.response.ext);
           } else {
             scope.fire('user-error', event.detail.response.toString());
             callback(scope);
@@ -107,6 +114,12 @@
         };
 
         scope.$.ajax.url = url;
+        if (contentType) {
+          scope.$.ajax.contentType = contentType;
+        } else {
+          scope.$.ajax.contentType = 'application/x-www-form-urlencoded';
+        }
+        
         scope.$.ajax.method = method;
         scope.$.ajax.params = params;
         scope.$.ajax.body = body ? JSON.stringify(body) : undefined;
@@ -127,41 +140,68 @@
         animation.play();
       };
 
+      var encodeQueyTags = function (selectedTags) {
+        if (!selectedTags) return;
+
+        var tags = [];
+        selectedTags.forEach(function (item) {
+          if (item.select) {
+            tags.push(item.name);
+          }
+        });
+
+        if (tags.length > 0) return encodeURIComponent(tags.join(','));
+      };
+
+      var refreshMessage = function (scope) {
+          scope.loading = true;
+          makeRequest(scope, function (scope, messages) {
+            scope.messages = messages;
+            scope.loading = false;
+          }, '/note/api/group/' + scope.group._id + '/message', 'GET', {
+            userid: scope.userId,
+            last: scope.messages.length > 0 ? scope.messages[0].timestamp : undefined,
+            tags: encodeQueyTags(scope.selectedTags)
+          });
+      };
+
       Polymer({
         ready: function () {
           this.loading = false;
           this.refreshing = false;
           this.allLoaded = false;
           this.searchMode = false;
+          this.newMsgTags = [];
         },
         onback: function (event, detail, sender) {
           this.fire('back');
         },
         groupChanged: function (oldValue, newValue) {
-          this.messages = [];
-          if (newValue) {
-            this.loading = true;
-            makeRequest(this, function (scope, messages) {
-              scope.messages = messages.concat(scope.messages);
-              scope.loading = false;
-            }, '/note/api/group/' + this.group.id + '/message', 'GET', {
-              userid: this.userId,
-              last: this.messages.length > 0 ? this.messages[0].timestamp : undefined
-            });
+          if (!oldValue || oldValue._id != newValue._id) {
+            this.messages = [];
+            refreshMessage(this);
           }
         },
         sendMessage: function (event, detail, sender) {
           this.refreshing = true;
-          makeRequest(this, function (scope, messages) {
+          makeRequest(this, function (scope, messages, newGroup) {
             scope.refreshing = false;
             if (messages) {
-              scope.messages = messages.concat(scope.messages);
+              messages.reverse();
+              messages.forEach(function (item) {
+                scope.messages.unshift(item);
+              });
             }
             scrollToTop(scope.$.headerPanel.scroller);
-          }, '/note/api/group/' + this.group.id + '/message', 'POST', undefined, {
+
+            if (newGroup) {
+              scope.group = newGroup;
+            }
+          }, '/note/api/group/' + this.group._id + '/message', 'POST', undefined, {
             userid: this.userId,
-            content: this.newMessage
-          });
+            content: this.newMessage,
+            tags: this.newMsgTags
+          }, 'application/json');
 
           this.newMessage = '';
         },
@@ -187,8 +227,9 @@
               }
               scope.loading = false;
               scope.$.threshold.clearLower();
-            }, '/note/api/group/' + this.group.id + '/message', 'GET', {
+            }, '/note/api/group/' + this.group._id + '/message', 'GET', {
               userid: this.userId,
+              tags: encodeQueyTags(this.selectedTags),
               last: this.messages.length > 0 ? this.messages[this.messages.length - 1].timestamp : undefined
             });
           }, null, 1000);
@@ -208,7 +249,7 @@
                   scope.messages = messages;
                 }
                 scope.loading = false;
-              }, '/note/api/group/' + this.group.id + '/message/contentsearch', 'GET', {
+              }, '/note/api/group/' + this.group._id + '/message/contentsearch', 'GET', {
                 userid: this.userId,
                 q: encoded
               });
@@ -229,17 +270,46 @@
           this.$.groupMenu.toggle();
         },
         showEditDialog: function (event, detail, sender) {
-          this.$.editDialog.showDialog(this.group.name);
+          this.dialogSubject = '编辑群组';
+          this.$.editDialog.showDialog(true, this.group.name);
         },
         showConfirmDialog: function (event, detail, sender) {
-          this.$.groupMenu.toggle();
+          this.dialogSubject = '确定删除群组 "' + this.group.name + '" ?';
+          this.$.editDialog.showDialog(false);
         },
-        onEditGroup: function (event, detail, sender) {
-          this.$.groupMenu.toggle();
+        onActionConfirm: function (event, detail, sender) {
+          if (detail.editor) {
+            makeRequest(this, function (scope, group) {
+              if (group) {
+                scope.fire('group-updated', group);
+              }
+              scope.$.editDialog.closeDialog();
+            }, '/note/api/group/' + this.group._id, 'POST', undefined, {
+              userid: this.userId,
+              name: detail.name
+            }, 'application/json');
+          } else {
+            makeRequest(this, function (scope, group) {
+              if (group) {
+                scope.fire('group-deleted', group);
+              }
+              scope.$.editDialog.closeDialog();
+            }, '/note/api/group/' + this.group._id, 'DELETE', {
+              userid: this.userId
+            });
+          }
         },
-        onDeleteGroup: function (event, detail, sender) {
-          this.$.groupMenu.toggle();
+        createNewTag: function (event, detail, sender) {
+          this.newMsgTags.push(this.newTag);
+          this.newTag = '';
         },
+        selectedTagsChanged: function (oldValue, newValue) {
+          console.log(newValue);
+        },
+        refreshList: function () {
+          this.messages = [];
+          refreshMessage(this);
+        }
       });
     })();
   </script>

@@ -1,4 +1,5 @@
 var path = require('path');
+var moment = require('moment');
 var utils = require('./utils.js');
 var Group = require(path.join(__dirname, '..', 'mongo', 'group.js'));
 var User = require(path.join(__dirname, '..', 'mongo', 'user.js'));
@@ -13,7 +14,10 @@ var groupOperateParamCheck = function (req, res) {
 		return false;
 	}
 
-	if (req.group.creater != req.body.userid) {
+	console.log(req.query);
+	console.log(req.body);
+
+	if (req.group.creater != req.body.userid && req.group.creater != req.query.userid) {
 		res.json({
 			success: false,
 			data: '操作失败：您没有权限这样做'
@@ -68,7 +72,7 @@ module.exports = {
 		});
 	},
 	createGroup: function (req, res, next) {
-		if (!req.body.name) return res.json({
+		if (!req.body.name || req.body.name.length == 0) return res.json({
 			success: false,
 			data: '操作失败：新群组名称为空！'
 		});
@@ -84,7 +88,10 @@ module.exports = {
 			var newGroup = new Group({
 				name: req.body.name,
 				creater: req.body.userid,
-				members: []
+				date: moment(),
+				members: [],
+				msgTags: [],
+				counts: 0
 			});
 
 			newGroup.save(function (err, group) {
@@ -95,7 +102,7 @@ module.exports = {
 
 				res.json({
 					success: true,
-					data: utils.groupDBToClient(group)
+					data: group
 				});
 			});
 		});
@@ -109,16 +116,18 @@ module.exports = {
 				data: '操作失败：' + err.toString()
 			});
 
+			Message.remove({groupId: removedItem._id});
+
 			res.json({
 				success: true,
-				data: utils.groupDBToClient(removedItem)
+				data: removedItem
 			});
 		})
 	},
 	updateGroup: function (req, res, next) {
 		if (!groupOperateParamCheck(req, res)) return;
 
-		if (req.body.name) {
+		if (req.body.name && req.body.name.length > 0) {
 			req.group.name = req.body.name;
 		}
 
@@ -130,7 +139,7 @@ module.exports = {
 
 			res.json({
 				success: true,
-				data: utils.groupDBToClient(group)
+				data: group
 			});
 		});
 	},
@@ -163,7 +172,7 @@ module.exports = {
 
 				res.json({
 					success: true,
-					data: utils.groupDBToClient(updatedGroup)
+					data: updatedGroup
 				});
 			})
 		});
@@ -188,7 +197,7 @@ module.exports = {
 
 			res.json({
 				success: true,
-				data: utils.groupDBToClient(updatedGroup)
+				data: updatedGroup
 			});
 		})
 	},
@@ -202,12 +211,12 @@ module.exports = {
 			});
 		}
 
-		var currentDate = new Date();
+		var date = moment();
 		var newMessage = new Message({
 			groupId: req.group._id,
 			userId: req.body.userid,
-			date: currentDate,
-			timestamp: currentDate.getTime(),
+			date: date.format('YYYY 年 M 月 D 日，H:mm:ss'),
+			timestamp: date.format('x'),
 			content: req.body.content,
 			tags: req.body.tags
 		});
@@ -218,37 +227,71 @@ module.exports = {
 				data: '操作失败：' + err.toString()
 			});
 
-			var lastTimestamp = req.query.last;
-			if (lastTimestamp) {
-				Message.find({'timestamp': {$gt: lastTimestamp}}).sort('-timestamp').exec(function (err, messages) {
-					if (err) return res.json({
-						success: false,
-						data: '操作失败：' + err.toString()
-					});
+			Message.count({'groupId': req.group._id}, function (err, counts) {
+				var groupModified = false;
+				if (req.group.counts != counts) {
+					req.group.counts = counts;
+					groupModified = true;
+				}
 
+				if (message.tags) {
+					message.tags.forEach(function (tag) {
+						if (!req.group.msgTags || req.group.msgTags.indexOf(tag) < 0) {
+							if (!req.group.msgTags) {
+								req.group.msgTags = [];
+							}
+
+							req.group.msgTags.push(tag);
+							groupModified = true;
+						}
+					});
+				}
+
+				if (groupModified) {
+					req.group.save();
+				}
+
+				if (req.query.last) {
+					Message.find({'timestamp': {$gt: req.query.last}}).sort('-timestamp').exec(function (err, messages) {
+						if (err) return res.json({
+							success: false,
+							data: '操作失败：' + err.toString()
+						});
+
+						res.json({
+							success: true,
+							data: utils.cutMessages(messages),
+							ext: groupModified ? req.group : undefined
+						});
+					});
+				} else {
 					res.json({
 						success: true,
-						data: utils.messagesDBToClient(messages, true)
+						data: utils.cutMessages([message]),
+						ext: groupModified ? req.group : undefined
 					});
-				});
-			} else {
-				res.json({
-					success: true,
-					data: [utils.messageDBToClient(message, true)]
-				});
-			}
+				}
+			});
 		});
 	},
 	getMessages: function (req, res, next) {
 		if (!messageOperateCheck(req, res)) return;
 
-		var timestamp = req.query.last;
 		var find = {
 			groupId: req.group._id
 		};
-		if (timestamp) {
+		if (req.query.tags) {
+			var tags = decodeURIComponent(req.query.tags).split(',');
+			if (tags && tags.length > 0) {
+				console.log(tags);
+				find.tags = {
+					$elemMatch: { $in: tags }
+				};
+			}
+		}
+		if (req.query.last) {
 			find.timestamp = {
-				$lt: timestamp
+				$lt: req.query.last
 			}
 		}
 
@@ -260,14 +303,17 @@ module.exports = {
 
 			res.json({
 				success: true,
-				data: utils.messagesDBToClient(messages, true)
+				data: utils.cutMessages(messages)
 			});
 		});
 	},
 	geMessage: function (req, res, next) {
 		if (!messageOperateCheck(req, res)) return;
 
-		return res.json(utils.messageDBToClient(req.message));
+		res.json({
+			success: true,
+			data: req.message
+		});
 	},
 	searchContent: function (req, res, next) {
 		if (!messageOperateCheck(req, res)) return;
@@ -289,9 +335,6 @@ module.exports = {
 				data: items
 			});
 		});
-	},
-	searchTags: function (req, res, next) {
-
 	}
 };
 

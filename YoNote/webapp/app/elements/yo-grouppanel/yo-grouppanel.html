@@ -4,26 +4,30 @@
 <link rel="import" href="../../../components/core-icon/core-icon.html">
 <link rel="import" href="../../../components/paper-item/paper-item.html">
 <link rel="import" href="../../../components/paper-shadow/paper-shadow.html">
+<link rel="import" href="../../../components/paper-checkbox/paper-checkbox.html">
 
-<polymer-element name="yo-grouppanel" attributes="group">
+<polymer-element name="yo-grouppanel" attributes="group selectedTags">
 	<template>
 		<link rel="stylesheet" href="yo-grouppanel.css">
 
 		<core-header-panel fit fixed>
 		    <core-toolbar id="drawerTitle" class="tall" mode="standard" layout horizontal center>
 	    		<div layout vertical>
-	    			<div class="subText">{{group.name}}</div>
+	    			<h3>{{group.name}}</h3>
 	    		</div>
 		    </core-toolbar>
 		    <div layout vertical>
-		   		<template repeat="{{menu in menuList}}">
-			      <paper-item>
-			        <core-icon icon="{{menu.image}}"></core-icon>
-			        <div class="navbarItem">{{menu.name}}</div>
-			      </paper-item>
-		   		</template>
-		   		<p class="navbarItem">加入的群组：</p>
-		   		<template repeat="{{group in user.groups}}">
+		   		<p class="navbarItem">显示标签：</p>
+		   		<div layout horizontal wrap>
+			   		<template repeat="{{tag in selectedTags}}">
+			   			<paper-shadow class="tagItem" z="1">
+			   				<paper-checkbox for label="{{tag.name}}" checked="{{tag.select}}"
+			   					on-change="{{tagSelectChange}}"></paper-checkbox>
+			   			</paper-shadow>
+			   		</template>
+		   		</div>
+		   		<p class="navbarItem">群成员：</p>
+		   		<template repeat="{{member in group.members}}">
 			      <paper-item on-tap="{{selectGroup}}">
 			        <div class="navbarItem">{{group.name}}</div>
 			      </paper-item>
@@ -36,17 +40,40 @@
 	(function() {
 		Polymer({
 			ready: function () {
-				this.menuList = [
-					{name: '我赞过的', image: 'thumb-up'},
-					{name: '我标记过的', image: 'favorite'},
-					{name: '热门关键词', image: 'translate'},
-					{name: '草稿', image: 'drafts'}
-				];
+				this.selectedTags = [];
 			},
 			selectGroup: function (event, detail, sender) {
 				this.selectedGroup = event.target.templateInstance.model.group;
 				this.fire('select-group', this.selectedGroup);
 			},
+			groupChanged: function (oldValue, newValue) {
+				if (newValue) {
+					if (!oldValue || (newValue._id != oldValue._id)) {
+						this.selectedTags.length = 0;
+						if (newValue.msgTags) {
+							for (var index in newValue.msgTags) {
+								this.selectedTags.push({
+									name: newValue.msgTags[index],
+									select: true
+								});
+							}
+						}
+					} else if (oldValue && oldValue.msgTags != newValue.msgTags) {
+						for (var index in newValue.msgTags) {
+							var item = newValue.msgTags[index];
+							if (!oldValue.msgTags || oldValue.msgTags.indexOf(item) < 0) {
+								this.selectedTags.push({
+									name: item,
+									select: true
+								});
+							}
+						}
+					}
+				}
+			},
+			tagSelectChange: function (oldValue, newValue) {
+				this.fire('tag-change');
+			}
 		});
 	})();
 	</script>
