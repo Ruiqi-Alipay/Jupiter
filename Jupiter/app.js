@@ -10,8 +10,6 @@ var autoPack = require('../AutoPack/app.js').app;
 var feedbackCenter = require('../FeedbackCenter/app.js');
 var yoNote = require('../YoNote/app.js');
 
-process.env['LC_CTYPE'] = 'UTF-8';
-
 var app = express();
 
 // view engine setup

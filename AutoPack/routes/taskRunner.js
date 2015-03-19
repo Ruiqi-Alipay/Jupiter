@@ -68,6 +68,7 @@ var runTask = function (project, task, action) {
 			fs.mkdirSync(saveDir);
 		}
 
+		process.env['LC_CTYPE'] = 'UTF-8';
 		channel.emit(task._id, 'Deleting old svn files...: ');
 		var child = exec('sudo rm -R ' + dir, function (error, stdout, stderr) {
 
