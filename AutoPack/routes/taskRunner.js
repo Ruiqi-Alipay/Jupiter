@@ -7,7 +7,6 @@ var exec = require('child_process').exec;
 var channel = require('./channel.js');
 var path = require('path');
 var qr = require('qr-image');
-var Regex = require("regex");
 
 // 	"args": {
 // 		"dir.spec": "$SVN_PATH",
@@ -74,16 +73,15 @@ var runTask = function (project, task, action) {
 					maxBuffer: 200*1024*1024
 				}, function (error, stdout, stderr){
 
-				// channel.emit(task._id, 'SVN sync complate! checking svn current reversion...');
-				// var child = exec('svn log -l 1 ' + project.svn, function (error, stdout, stderr) {
+				channel.emit(task._id, 'SVN sync complate! checking svn current reversion...');
+				var child = exec('svn log -l 1 ' + project.svn, function (error, stdout, stderr) {
 
-				// 	var versionMessage = stdout;
-				// 	var arrMatches = versionMessage.match(new Regex(/r\d*/));
-				// 	var version = arrMatches[0].slice(1);
+					var versionMessage = stdout;
+					var versionNumber = versionMessage.slice(versionMessage.indexOf('r') + 1, versionMessage.indexOf('|') - 1);
 
-				// 	channel.emit(task._id, 'SVN current version is: ' + version + '; starting build process...');
-				// 	var child = exec('svn diff -c ' + version + ' ' + project.svn + ' --summarize', function(error, stdout, stderr) {
-				// 		versionMessage += ('\r\n' + stdout);
+					channel.emit(task._id, 'SVN current version is: ' + versionNumber + '; starting build process...');
+					var child = exec('svn diff -c ' + versionNumber + ' ' + project.svn + ' --summarize', function(error, stdout, stderr) {
+						versionMessage += ('\r\n' + stdout);
 
 						var args = makeArgs(dir, action);
 						var jarPath = path.join(dir, project.packPath);
@@ -140,12 +138,12 @@ var runTask = function (project, task, action) {
 						child.stdout.pipe(fs.createWriteStream(path.join(saveDir, 'record.log')));
 
 						updateRunningState(task, child);
-				// 	});
+					});
 
-				// 	updateRunningState(task, child);
-				// });
+					updateRunningState(task, child);
+				});
 
-				// updateRunningState(task, child);
+				updateRunningState(task, child);
 			});
 
 			child.stdout.on('data', function (data) {
