@@ -75,6 +75,9 @@ var runTask = function (project, task, action) {
 
 				channel.emit(task._id, 'SVN sync complate! checking svn current reversion...');
 				var child = exec('svn log -l 1 ' + project.svn, function (error, stdout, stderr) {
+					console.log(error);
+					console.log(stderr);
+					console.log(stdout);
 
 					var versionMessage = stdout;
 					var versionNumber = versionMessage.slice(versionMessage.indexOf('r') + 1, versionMessage.indexOf('|') - 1);
