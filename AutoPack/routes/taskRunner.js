@@ -62,15 +62,15 @@ var runTask = function (project, task, action) {
 	var defer = q.defer();
 
 	try {
-		var child = exec('svn log -l 1 ' + project.svn, function (error, stdout, stderr) {
-			var versionMessage = stdout;
+		// var child = exec('svn log -l 1 ' + project.svn, function (error, stdout, stderr) {
+		// 	var versionMessage = stdout;
 
-			var rePattern = new RegExp(/r\d*/);
-			var arrMatches = versionMessage.match(rePattern);
-			var version = arrMatches[0].slice(1);
+		// 	var rePattern = new RegExp(/r\d*/);
+		// 	var arrMatches = versionMessage.match(rePattern);
+		// 	var version = arrMatches[0].slice(1);
 
-			var child = exec('svn diff -c ' + version + ' ' + project.svn + ' --summarize', function(error, stdout, stderr) {
-				versionMessage += ('\r\n' + stdout);
+		// 	var child = exec('svn diff -c ' + version + ' ' + project.svn + ' --summarize', function(error, stdout, stderr) {
+		// 		versionMessage += ('\r\n' + stdout);
 
 				channel.emit(task._id, 'Preparing for task: ' + task.name);
 				var dir = path.join(__dirname, '..', 'Projects', task.project);
@@ -119,7 +119,7 @@ var runTask = function (project, task, action) {
 													});
 												});
 
-												task.svnStat = versionMessage;
+												// task.svnStat = versionMessage;
 												task.downloads = JSON.stringify(downlaodRecord);
 												defer.resolve(task);
 											} else {
@@ -149,13 +149,14 @@ var runTask = function (project, task, action) {
 				});
 
 				updateRunningState(task, child);
-			});
+				channel.emit(task.project, 'run-task-start');
+		// 	});
 
-			updateRunningState(task, child);
-		});
+		// 	updateRunningState(task, child);
+		// });
 
-		updateRunningState(task, child);
-		channel.emit(task.project, 'run-task-start');
+		// updateRunningState(task, child);
+		// channel.emit(task.project, 'run-task-start');
 	} catch (err) {
 		console.log(err);
 
