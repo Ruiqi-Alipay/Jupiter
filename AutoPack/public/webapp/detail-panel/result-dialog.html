@@ -1,8 +1,8 @@
 <md-dialog aria-label="Result">
-	<md-content>
+	<md-content layout="column" style="width: 800px; height: 500px;">
 		<md-tabs md-selected="0" flex>
 			<md-tab label="打包结果">
-				<div layout="row" ng-repeat="download in task.downloads">
+				<div layout="row" ng-repeat="download in task.downloads" flex>
 			      <md-card-content flex>
 			        <h2>{{download.name}}</h2>
 			        <a ng-href="{{download.link}}" style="word-wrap: break-word;">{{download.link}}</a>
@@ -11,7 +11,7 @@
 			    </div>
 			</md-tab>
 			<md-tab label="SVN快照">
-				<md-content>
+				<md-content flex>
 					<pre>{{task.svnStat}}</pre>
 				</md-content>
 			</md-tab>
