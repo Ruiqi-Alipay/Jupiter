@@ -74,16 +74,13 @@ var runTask = function (project, task, action) {
 				}, function (error, stdout, stderr){
 
 				channel.emit(task._id, 'SVN sync complate! checking svn current reversion...');
-				var child = exec('svn log -l 1 ' + project.svn, function (error, stdout, stderr) {
-					console.log(error);
-					console.log(stderr);
-					console.log(stdout);
+				var child = exec('svn log -l 1 --username ' + project.username + ' --password ' + project.password + ' ' + project.svn, function (error, stdout, stderr) {
 
 					var versionMessage = stdout;
 					var versionNumber = versionMessage.slice(versionMessage.indexOf('r') + 1, versionMessage.indexOf('|') - 1);
 
 					channel.emit(task._id, 'SVN current version is: ' + versionNumber + '; starting build process...');
-					var child = exec('svn diff -c ' + versionNumber + ' ' + project.svn + ' --summarize', function(error, stdout, stderr) {
+					var child = exec('svn diff -c ' + versionNumber + ' --username ' + project.username + ' --password ' + project.password + ' ' +  + project.svn + ' --summarize', function(error, stdout, stderr) {
 						versionMessage += ('\r\n' + stdout);
 
 						var args = makeArgs(dir, action);
