@@ -5,16 +5,17 @@
       <md-tab label="{{panel.tab1}}">
         <div layout="column" layout-fill>
           <md-toolbar class="md-tall" md-scroll-shrink>
-            <h2 class="md-toolbar-tools">
-              <span>{{project.name}}</span>
-            </h2>
+            <div layout="row" layout-align="center center">
+              <h2 class="md-toolbar-tools" flex>
+                <span>{{project.name}}</span>
+              </h2>
+              <md-button class="md-raised" ng-click="editProject($event, project)" style="height: 35px; font-size: 16px; margin-right: 15px;">编辑项目</md-button>
+            </div>
+
             <span flex></span>
             <h2 class="md-toolbar-tools md-toolbar-tools-bottom" style="font-size: 0.7em;">
               <span class="md-flex">{{project.description}}</span>
             </h2>
-            <md-button class="md-fab md-fab-top-right right md-primary md-hue-3" ng-click="editProject($event, project)" style="height: 40px; width: 40px;">
-              E
-            </md-button>
           </md-toolbar>
           <md-content layout="column" style="height: 400px;" layout-padding>
             <md-list flex="80">

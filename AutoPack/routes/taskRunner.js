@@ -74,17 +74,20 @@ var runTask = function (project, task, action) {
 			channel.emit(task._id, 'SVN checking out: ' + project.svn);
 			var child = exec('svn checkout --username ' + project.username + ' --password ' + project.password
 					+ ' ' + project.svn + ' ' + dir, {
+					encoding: 'utf8',
 					maxBuffer: 200*1024*1024
 				}, function (error, stdout, stderr){
 
 				channel.emit(task._id, 'SVN sync complate! checking svn current reversion...');
-				var child = exec('svn log -l 1 --username ' + project.username + ' --password ' + project.password + ' ' + project.svn, function (error, stdout, stderr) {
+				var child = exec('svn log -l 1 --username ' + project.username + ' --password ' + project.password + ' ' + project.svn,
+						{ encoding: 'utf8' },
+						function (error, stdout, stderr) {
 					
 					var versionNumber = stdout.slice(stdout.indexOf('r') + 1, stdout.indexOf('|') - 1);
 					channel.emit(task._id, 'SVN current version is: ' + versionNumber + '; starting build process...');
 					var command = 'svn diff -c ' + versionNumber + ' --username ' + project.username
 							+ ' --password ' + project.password + ' ' + project.svn + ' --summarize';
-					var child = exec(command, function(error, stdout, stderr) {
+					var child = exec(command, { encoding: 'utf8' }, function(error, stdout, stderr) {
 
 						var args = makeArgs(dir, action);
 						var jarPath = path.join(dir, project.packPath);
@@ -138,12 +141,12 @@ var runTask = function (project, task, action) {
 						updateRunningState(task, child);
 					});
 
-					child.stdout.pipe(fs.createWriteStream(path.join(saveDir, 'record.svn'), {'flags': 'a'}));
+					child.stdout.pipe(fs.createWriteStream(path.join(saveDir, 'record.svn'), {'flags': 'a', 'encoding': 'utf8'}));
 
 					updateRunningState(task, child);
 				});
 
-				child.stdout.pipe(fs.createWriteStream(path.join(saveDir, 'record.svn')));
+				child.stdout.pipe(fs.createWriteStream(path.join(saveDir, 'record.svn'), {'encoding': 'utf8'}));
 
 				updateRunningState(task, child);
 			});
