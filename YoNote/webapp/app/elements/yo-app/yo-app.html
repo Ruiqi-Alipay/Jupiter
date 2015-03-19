@@ -25,7 +25,7 @@
 			<core-animated-pages drawer selected="{{curPage}}" transitions="cross-fade-all" flex>
 				<yo-navpanel user="{{user}}" groups="{{groups}}" on-select-group="{{onSelectGroup}}"></yo-navpanel>
 				<yo-grouppanel group="{{selectedGroup}}" selectedTags="{{selectedTags}}"
-					on-tag-change="{{onTagFilterChange}}"></yo-grouppanel>
+					userId="{{user._id}}" on-tag-change="{{onTagFilterChange}}"></yo-grouppanel>
 			</core-animated-pages>
 
 		    <core-animated-pages main id="pages" selected="{{curPage}}" transitions="cross-fade-all hero-transition" flex>
@@ -59,14 +59,18 @@
 				this.loading = true;
 				this.curPage = 0;
 
-				this.request = {
-					url: '/note/api/user',
-					method: 'GET',
-					params: {
-						extid: 'TEST'
-					}
-				};
-				this.$.httpHelper.go();
+				var search = window.location.search;
+				if (search && search.indexOf('user=') >= 0 && search.slice(search.indexOf('user=') + 5)) {
+					var user = search.slice(search.indexOf('user=') + 5);
+					this.request = {
+						url: '/note/api/user',
+						method: 'GET',
+						params: {
+							extid: user
+						}
+					};
+					this.$.httpHelper.go();
+				}
 			},
 			onSelectGroup: function (event, detail, sender) {
 				this.selectedGroup = detail;

@@ -18,8 +18,12 @@ var prepareUserGroups = function (userId) {
 			Message.find({'groupId': group._id}).sort('-timestamp').limit(2).exec(function (err, messages) {
 				group.recents = utils.cutMessages(messages);
 
-				task--;
-				if (task == 0) defered.resolve(groups);
+				User.find({'_id': {$in: group.members}}, function (err, users) {
+					group.members = users;
+					
+					task--;
+					if (task == 0) defered.resolve(groups);
+				});
 			});
 		});
 	});
@@ -38,7 +42,7 @@ module.exports = {
 		User.findOne({'extId': extid}, function (err, user) {
 			if (!user) {
 				var user = new User({
-					name: '李瑞骐',
+					name: extid,
 					description: '职位描述',
 					extId: extid
 				});
@@ -50,7 +54,10 @@ module.exports = {
 
 					res.json({
 						success: true,
-						data : newUser
+						data: {
+							user: newUser,
+							groups: []
+						}
 					});
 				});
 			} else {
@@ -69,6 +76,20 @@ module.exports = {
 					})
 				});
 			}
+		});
+	},
+	searchUser: function (req, res, next) {
+		var user = req.query.user;
+		if (!user) return res.json({
+			success: false,
+			data: '查询内容不可为空'
+		});
+
+		User.findOne({'name':  decodeURIComponent(user)}, function (err, user) {
+			res.json({
+				success: true,
+				data: user
+			});
 		});
 	}
 };

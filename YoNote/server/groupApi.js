@@ -14,7 +14,6 @@ var groupOperateParamCheck = function (req, res) {
 		return false;
 	}
 
-	console.log(req.query);
 	console.log(req.body);
 
 	if (req.group.creater != req.body.userid && req.group.creater != req.query.userid) {
@@ -146,23 +145,24 @@ module.exports = {
 	addMember: function (req, res, next) {
 		if (!groupOperateParamCheck(req, res)) return;
 
-		if (!(req.body instanceof Array)) return next(new Error('Add members: body is not a array!'));
+		if (!req.body.memberId) return next(new Error('New member ID is empty!'));
+		if (req.group.creater == req.body.memberId) return res.json({
+			success: true
+		});
 
-		User.find({'_id': {$in: req.body}}, function (err, users) {
-			if (err || users.length != req.body.length) return res.json({
+		User.findById(req.body.memberId, function (err, user) {
+			if (err || !user) return res.json({
 				success: false,
-				data: '操作失败：无效的用户'
+				data: '没有找到改用户'
 			});
 
 			if (!req.group.members) {
 				req.group.members = [];
 			}
 
-			req.body.forEach(function (groupId) {
-				if (req.group.members.indexOf(groupId) < 0) {
-					req.group.members.push(groupId);
-				}
-			});
+			if (req.group.members.indexOf(user._id.toString()) < 0) {
+				req.group.members.push(user._id.toString());
+			}
 
 			req.group.save(function (err, updatedGroup) {
 				if (err) return res.json({
@@ -170,9 +170,12 @@ module.exports = {
 					data: '操作失败：' + err.toString()
 				});
 
-				res.json({
-					success: true,
-					data: updatedGroup
+				User.find({'_id': {$in: updatedGroup.members}}, function (err, users) {
+					res.json({
+						success: true,
+						data: updatedGroup,
+						ext: users
+					});
 				});
 			})
 		});
@@ -323,7 +326,6 @@ module.exports = {
 		});
 
 		var seatchText = decodeURIComponent(req.query.q);
-		console.log('SEARCH: ' + '\"' + seatchText + '\"');
 		Message.find({'content': new RegExp('.*' + seatchText + '.*')}, function (err, items) {
 			if (err) return res.json({
 				success: false,
