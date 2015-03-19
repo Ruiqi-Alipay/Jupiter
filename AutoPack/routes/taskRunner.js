@@ -68,6 +68,10 @@ var runTask = function (project, task, action) {
 				}, function (error, stdout, stderr){
 					channel.emit(task._id, 'SVN checking complate! preparing to build project...');
 
+					// exec("svn info -r 'HEAD' " + project.svn, function (error, stdout, stderr)) {
+
+					// };
+
 					var args = makeArgs(dir, action);
 					var jarPath = path.join(dir, project.packPath);
 					var saveDir = path.join(__dirname, '..', 'download', task._id.toString());
