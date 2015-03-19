@@ -21,7 +21,7 @@ app.use('/autotest', autoTest);
 app.use('/sdkeditor', adkEditor);
 app.use('/autopack', autoPack);
 app.use('/feedback', feedbackCenter);
-app.use('/environment',  express.static(path.join(__dirname, '/autotest/environment')));
+app.use('/environment',  express.static(path.join(__dirname, '..', 'AutoTest' 'environment')));
 app.use('/jupiter/bower_components',  express.static(path.join(__dirname, '/bower_components')));
 app.use('/', root);
 
