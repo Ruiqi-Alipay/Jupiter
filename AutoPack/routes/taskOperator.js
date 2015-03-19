@@ -171,7 +171,12 @@ module.exports = {
 		var recordPath = path.join(__dirname, '..', 'download', req.task._id.toString(), 'record.svn');
 		if (!fs.existsSync(recordPath)) return next(new Error('Record not found!'));
 
-		res.sendFile(recordPath);
+		res.set('Content-Type', 'text/plain; charset=utf-8');
+		res.sendFile(recordPath, {
+			headers: {
+				'Content-Type': 'text/plain; charset=utf-8'
+			}
+		});
 	}
 };
 
