@@ -63,6 +63,10 @@ var runTask = function (project, task, action) {
 
 	try {
 		var dir = path.join(__dirname, '..', 'Projects', task.project);
+		var saveDir = path.join(__dirname, '..', 'download', task._id.toString());
+		if (!fs.existsSync(saveDir)) {
+			fs.mkdirSync(saveDir);
+		}
 
 		channel.emit(task._id, 'Deleting old svn files...: ');
 		var child = exec('sudo rm -R ' + dir, function (error, stdout, stderr) {
@@ -75,20 +79,15 @@ var runTask = function (project, task, action) {
 
 				channel.emit(task._id, 'SVN sync complate! checking svn current reversion...');
 				var child = exec('svn log -l 1 --username ' + project.username + ' --password ' + project.password + ' ' + project.svn, function (error, stdout, stderr) {
-
-					var versionMessage = stdout;
-					var versionNumber = versionMessage.slice(versionMessage.indexOf('r') + 1, versionMessage.indexOf('|') - 1);
-
+					
+					var versionNumber = stdout.slice(stdout.indexOf('r') + 1, stdout.indexOf('|') - 1);
 					channel.emit(task._id, 'SVN current version is: ' + versionNumber + '; starting build process...');
-					var child = exec('svn diff -c ' + versionNumber + ' --username ' + project.username + ' --password ' + project.password + ' ' +  + project.svn + ' --summarize', function(error, stdout, stderr) {
-						versionMessage += ('\r\n' + stdout);
+					var command = 'svn diff -c ' + versionNumber + ' --username ' + project.username
+							+ ' --password ' + project.password + ' ' + project.svn + ' --summarize';
+					var child = exec(command, function(error, stdout, stderr) {
 
 						var args = makeArgs(dir, action);
 						var jarPath = path.join(dir, project.packPath);
-						var saveDir = path.join(__dirname, '..', 'download', task._id.toString());
-						if (!fs.existsSync(saveDir)) {
-							fs.mkdirSync(saveDir);
-						}
 						var child = exec('java -Dfile.encoding=UTF-8' + args + ' -jar pack.jar', {
 									cwd: jarPath,
 									maxBuffer: 200*1024*1024
@@ -118,7 +117,6 @@ var runTask = function (project, task, action) {
 												});
 											});
 
-											task.svnStat = versionMessage;
 											task.downloads = JSON.stringify(downlaodRecord);
 											defer.resolve(task);
 										} else {
@@ -140,8 +138,12 @@ var runTask = function (project, task, action) {
 						updateRunningState(task, child);
 					});
 
+					child.stdout.pipe(fs.createWriteStream(path.join(saveDir, 'record.svn'), {'flags': 'a'}));
+
 					updateRunningState(task, child);
 				});
+
+				child.stdout.pipe(fs.createWriteStream(path.join(saveDir, 'record.svn')));
 
 				updateRunningState(task, child);
 			});
@@ -231,7 +233,7 @@ var startJob = function () {
 setInterval(function () {
 	console.log('======================== Cron jonbs running ========================');
 	startJob();
-}, 30000);
+}, 20000);
 
 module.exports = {
 	startJob: function () {

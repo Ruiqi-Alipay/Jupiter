@@ -157,24 +157,16 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
               $mdDialog.cancel();
             };
             scope.createTask = function(task) {
-              var deferred = $q.defer();
               task.actionId = action._id;
               restService.createTask(task, projectId, function (newTask) {
+                scope.runningAction = false;
                 if (newTask) {
-                  deferred.resolve(newTask);
-                } else {
-                  deferred.reject();
+                  syncProjectActiveTasks(projectId);
+                  $mdDialog.cancel();
+                  $rootScope.$broadcast('createtask-success');
                 }
               }, function () {
                 scope.runningAction = true;
-              });
-
-              deferred.promise.then(function (task) {
-                syncProjectActiveTasks(projectId);
-                scope.runningAction = false;
-                $mdDialog.cancel();
-              }, function (reason) {
-                scope.runningAction = false;
               });
             };
         },
@@ -241,6 +233,10 @@ dataService.factory('dataService', function ($rootScope, $mdDialog, $q, restServ
             })
           };
           scope.task = task;
+
+          restService.getSyncSnapshot(task._id, function (data) {
+            scope.svnSnapShot = data;
+          });
         },
         templateUrl: 'webapp/detail-panel/result-dialog.html',
         targetEvent: ev,

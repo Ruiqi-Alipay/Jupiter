@@ -23,6 +23,10 @@ detailPanel.directive("detailPanel", function($rootScope, $mdDialog, dataService
         scope.activeTasks = dataService.getActiveTaskList();
         scope.historyTasks = dataService.getHistoryTaskList();
 
+        scope.$on('createtask-success', function () {
+          scope.panel.selectedIndex = 1;
+        });
+
         scope.editProject = function (ev, project) {
           dataService.editProject(ev, project)
         }

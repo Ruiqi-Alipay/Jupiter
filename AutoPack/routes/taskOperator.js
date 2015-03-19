@@ -166,6 +166,12 @@ module.exports = {
 		res.json({
 			listener: listener
 		});
+	},
+	getSvnSnapshot: function (req, res, next) {
+		var recordPath = path.join(__dirname, '..', 'download', req.task._id.toString(), 'record.svn');
+		if (!fs.existsSync(recordPath)) return next(new Error('Record not found!'));
+
+		res.sendFile(recordPath);
 	}
 };
 

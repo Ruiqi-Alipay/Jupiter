@@ -107,6 +107,15 @@ backendService.factory('restService', function ($http, $rootScope) {
 		  		finished();
 		  	});
 		  	if (start) start();
+		},
+		getSyncSnapshot: function (taskId, finished, start) {
+			$http.get('./api/task/svnsnapshot/' + taskId).success(function(data){
+				finished(data);
+		  	}).error(function(error, status, headers, config) {
+		  		$rootScope.$broadcast('toast:show', '获取SVN快照：' + error);
+		  		finished();
+		  	});
+		  	if (start) start();
 		}
 	};
 });
