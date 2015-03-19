@@ -140,12 +140,14 @@ var runTask = function (project, task, action) {
 
 						updateRunningState(task, child);
 					});
-
+					
+					child.stdout.setEncoding('utf8');
 					child.stdout.pipe(fs.createWriteStream(path.join(saveDir, 'record.svn'), {'flags': 'a', 'encoding': 'utf8'}));
 
 					updateRunningState(task, child);
 				});
 
+				child.stdout.setEncoding('utf8');
 				child.stdout.pipe(fs.createWriteStream(path.join(saveDir, 'record.svn'), {'encoding': 'utf8'}));
 
 				updateRunningState(task, child);
