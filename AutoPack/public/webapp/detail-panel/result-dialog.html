@@ -1,12 +1,21 @@
 <md-dialog aria-label="Result">
 	<md-content>
-		<div layout="row" ng-repeat="download in task.downloads">
-	      <md-card-content flex>
-	        <h2>{{download.name}}</h2>
-	        <a ng-href="{{download.link}}" style="word-wrap: break-word;">{{download.link}}</a>
-	      </md-card-content>
-	      <img ng-src="{{download.link}}.png" style="width: 150px; height: 150px;">
-	    </div>
+		<md-tabs md-selected="0" flex>
+			<md-tab label="打包结果">
+				<div layout="row" ng-repeat="download in task.downloads">
+			      <md-card-content flex>
+			        <h2>{{download.name}}</h2>
+			        <a ng-href="{{download.link}}" style="word-wrap: break-word;">{{download.link}}</a>
+			      </md-card-content>
+			      <img ng-src="{{download.link}}.png" style="width: 150px; height: 150px;">
+			    </div>
+			</md-tab>
+			<md-tab label="SVN快照">
+				<md-content>
+					<pre>{{task.svnStat}}</pre>
+				</md-content>
+			</md-tab>
+		</md-tabs>
 	    <div layout="row" layout-align="center center">
 		    <md-input-container flex>
 		      <label>Email Address, split by ','</label>

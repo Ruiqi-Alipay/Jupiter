@@ -8,12 +8,12 @@ var q = require('q');
 var prepareUserGroups = function (userId) {
 	var defered = q.defer();
 
+	var clientGroups = [];
 	Group.find({$or: [{'members': userId}, {'creater': userId}]}).sort('date').exec(function (err, groups) {
 		if (!groups || groups.length == 0) {
-			return defered.resolve(groups);
+			return defered.resolve(clientGroups);
 		}
 
-		var task = groups.length;
 		groups.forEach(function (group) {
 			Message.find({'groupId': group._id}).sort('-timestamp').limit(2).exec(function (err, messages) {
 				group.recents = utils.cutMessages(messages);
@@ -21,8 +21,7 @@ var prepareUserGroups = function (userId) {
 				User.find({'_id': {$in: group.members}}, function (err, users) {
 					group.members = users;
 					
-					task--;
-					if (task == 0) defered.resolve(groups);
+					if (clientGroups.length == groups.length) defered.resolve(groups);
 				});
 			});
 		});

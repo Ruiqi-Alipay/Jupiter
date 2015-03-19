@@ -52,94 +52,110 @@ var correctRunningState = function (argument) {
 	return defer.promise;
 };
 
+var updateRunningState = function (task, child) {
+	task.pid = child.pid;
+	task.state = 'Running';
+	task.save();
+};
+
 var runTask = function (project, task, action) {
 	var defer = q.defer();
 
 	try {
-		channel.emit(task._id, 'Preparing for task: ' + task.name);
-		var dir = path.join(__dirname, '..', 'Projects', task.project);
+		var child = exec('svn log -l 1 ' + project.svn, function (error, stdout, stderr) {
+			var versionMessage = stdout;
 
-		exec('sudo rm -R ' + dir, function (error, stdout, stderr) {
-			channel.emit(task._id, 'SVN checking out: ' + project.svn);
-			var command = 'svn checkout --username ' + project.username + ' --password ' + project.password
-					+ ' ' + project.svn + ' ' + dir;
-			var child = exec(command, {
-					maxBuffer: 200*1024*1024
-				}, function (error, stdout, stderr){
-					channel.emit(task._id, 'SVN checking complate! preparing to build project...');
+			var rePattern = new RegExp(/r\d*/);
+			var arrMatches = versionMessage.match(rePattern);
+			var version = arrMatches[0].slice(1);
 
-					// exec("svn info -r 'HEAD' " + project.svn, function (error, stdout, stderr)) {
+			var child = exec('svn diff -c ' + version + ' ' + project.svn + ' --summarize', function(error, stdout, stderr) {
+				versionMessage += ('\r\n' + stdout);
 
-					// };
+				channel.emit(task._id, 'Preparing for task: ' + task.name);
+				var dir = path.join(__dirname, '..', 'Projects', task.project);
 
-					var args = makeArgs(dir, action);
-					var jarPath = path.join(dir, project.packPath);
-					var saveDir = path.join(__dirname, '..', 'download', task._id.toString());
-					if (!fs.existsSync(saveDir)) {
-						fs.mkdirSync(saveDir);
-					}
-					var child = exec('java -Dfile.encoding=UTF-8' + args + ' -jar pack.jar', {
-								cwd: jarPath,
-								maxBuffer: 200*1024*1024
-							}, function (error, stdout, stderr){
-								if (error) console.log(error);
-								if (stderr) console.log(stderr);
+				var child = exec('sudo rm -R ' + dir, function (error, stdout, stderr) {
+					channel.emit(task._id, 'SVN checking out: ' + project.svn);
+					var command = 'svn checkout --username ' + project.username + ' --password ' + project.password
+							+ ' ' + project.svn + ' ' + dir;
+					var child = exec(command, {
+							maxBuffer: 200*1024*1024
+						}, function (error, stdout, stderr){
+							channel.emit(task._id, 'SVN checking complate! preparing to build project...');
 
-								var result = path.join(__dirname, '..', 'Projects', task.project, project.packPath, 'result.json');
-								if (fs.existsSync(result)) {
-									var result = JSON.parse(fs.readFileSync(result));
-									if (result && result.result && result.pkgs) {
-										var fse = require('fs-extra');
-										var downlaodRecord = [];
-										result.pkgs.forEach(function (pkgPath) {
-											var fileName = pkgPath.slice(pkgPath.lastIndexOf('/') + 1);
-											fse.copySync(path.join(dir, pkgPath), path.join(saveDir, fileName));
-											
-											var link = 'http://autotest.d10970aqcn.alipay.net/autopack/download/' + task._id.toString() + '/' + fileName;
+							var args = makeArgs(dir, action);
+							var jarPath = path.join(dir, project.packPath);
+							var saveDir = path.join(__dirname, '..', 'download', task._id.toString());
+							if (!fs.existsSync(saveDir)) {
+								fs.mkdirSync(saveDir);
+							}
+							var child = exec('java -Dfile.encoding=UTF-8' + args + ' -jar pack.jar', {
+										cwd: jarPath,
+										maxBuffer: 200*1024*1024
+									}, function (error, stdout, stderr){
+										if (error) console.log(error);
+										if (stderr) console.log(stderr);
 
-											var code = qr.image(link, { type: 'png' });
-											var output = fs.createWriteStream(path.join(saveDir, fileName + '.png'));
-											code.pipe(output);
+										var result = path.join(__dirname, '..', 'Projects', task.project, project.packPath, 'result.json');
+										if (fs.existsSync(result)) {
+											var result = JSON.parse(fs.readFileSync(result));
+											if (result && result.result && result.pkgs) {
+												var fse = require('fs-extra');
+												var downlaodRecord = [];
+												result.pkgs.forEach(function (pkgPath) {
+													var fileName = pkgPath.slice(pkgPath.lastIndexOf('/') + 1);
+													fse.copySync(path.join(dir, pkgPath), path.join(saveDir, fileName));
+													
+													var link = 'http://autotest.d10970aqcn.alipay.net/autopack/download/' + task._id.toString() + '/' + fileName;
 
-											downlaodRecord.push({
-												name: fileName,
-												link: link
-											});
-										});
+													var code = qr.image(link, { type: 'png' });
+													var output = fs.createWriteStream(path.join(saveDir, fileName + '.png'));
+													code.pipe(output);
 
-										task.downloads = JSON.stringify(downlaodRecord);
-										defer.resolve(task);
-									} else {
-										defer.reject(new Error('Pack failed!'));
-									}
-								} else {
-									defer.reject(new Error('Result file not found!'));
-								}
+													downlaodRecord.push({
+														name: fileName,
+														link: link
+													});
+												});
 
-								channel.emit(task._id, '*** Build execution ' + (true ? 'finished! ***' : 'failed! ***'));
+												task.svnStat = versionMessage;
+												task.downloads = JSON.stringify(downlaodRecord);
+												defer.resolve(task);
+											} else {
+												defer.reject(new Error('Pack failed!'));
+											}
+										} else {
+											defer.reject(new Error('Result file not found!'));
+										}
+
+										channel.emit(task._id, '*** Build execution ' + (true ? 'finished! ***' : 'failed! ***'));
+									});
+
+							child.stdout.on('data', function (data) {
+								channel.emit(task._id, data);
 							});
+
+							child.stdout.pipe(fs.createWriteStream(path.join(saveDir, 'record.log')));
+
+							updateRunningState(task, child);
+						});
 
 					child.stdout.on('data', function (data) {
 						channel.emit(task._id, data);
 					});
 
-					child.stdout.pipe(fs.createWriteStream(path.join(saveDir, 'record.log')));
-
-					task.pid = child.pid;
-					task.state = 'Running';
-					task.save();
+					updateRunningState(task, child);
 				});
 
-			child.stdout.on('data', function (data) {
-				channel.emit(task._id, data);
+				updateRunningState(task, child);
 			});
 
-			task.pid = child.pid;
-			task.state = 'Running';
-			task.save();
-
-			channel.emit(task.project, 'run-task-start');
+			updateRunningState(task, child);
 		});
+
+		updateRunningState(task, child);
+		channel.emit(task.project, 'run-task-start');
 	} catch (err) {
 		console.log(err);
 

@@ -7,6 +7,7 @@ var Task = mongoose.model('Task', mongoose.Schema({
   date: Date,
   downloads: String,
   actionId: String,
+  svnStat: String,
   pid: Number
 }));
 
