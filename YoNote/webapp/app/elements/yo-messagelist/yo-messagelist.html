@@ -68,9 +68,10 @@
         <div layout vertical flex>
           <div layout horizontal wrap center>
             <template repeat="{{tag in newMsgTags}}">
-              <paper-button toggle active class="tagToggle">{{tag}}</paper-button>
+              <paper-button toggle active?="{{tag.select}}" class="tagToggle"
+                  on-click="{{onMsgTagClicked}}" style="margin: 5px 5px 0px 5px;">{{tag.name}}</paper-button>
             </template>
-            <paper-input-decorator label="添加标签">
+            <paper-input-decorator label="添加标签" style="padding: 2px;">
               <input is="core-input" value="{{newTag}}">
             </paper-input-decorator>
             <core-icon-button icon="add" disabled?="{{!newTag}}" on-click="{{createNewTag}}"></core-icon-button>
@@ -154,15 +155,27 @@
       };
 
       var refreshMessage = function (scope) {
-          scope.loading = true;
-          makeRequest(scope, function (scope, messages) {
-            scope.messages = messages;
-            scope.loading = false;
-          }, '/note/api/group/' + scope.group.id + '/message', 'GET', {
-            userid: scope.userId,
-            last: scope.messages.length > 0 ? scope.messages[0].timestamp : undefined,
-            tags: encodeQueyTags(scope.selectedTags)
+        scope.loading = true;
+        makeRequest(scope, function (scope, messages) {
+          scope.messages = messages;
+          scope.loading = false;
+        }, '/note/api/group/' + scope.group.id + '/message', 'GET', {
+          userid: scope.userId,
+          last: scope.messages.length > 0 ? scope.messages[0].timestamp : undefined,
+          tags: encodeQueyTags(scope.selectedTags)
+        });
+      };
+
+      var refreshNewMsgTags = function (scope) {
+        scope.newMsgTags = [];
+        if (scope.selectedTags) {
+          scope.selectedTags.forEach(function (item) {
+            scope.newMsgTags.push({
+              name: item.name,
+              select: false
+            })
           });
+        }
       };
 
       Polymer({
@@ -171,7 +184,6 @@
           this.refreshing = false;
           this.allLoaded = false;
           this.searchMode = false;
-          this.newMsgTags = [];
         },
         onback: function (event, detail, sender) {
           this.fire('back');
@@ -180,10 +192,18 @@
           if (!oldValue || oldValue.id != newValue.id) {
             this.messages = [];
             refreshMessage(this);
+            refreshNewMsgTags(this);
           }
         },
         sendMessage: function (event, detail, sender) {
           this.refreshing = true;
+
+          var useTags = [];
+          if (this.newMsgTags) {
+            this.newMsgTags.forEach(function (item) {
+              if (item.select) useTags.push(item.name);
+            });
+          }
           makeRequest(this, function (scope, messages, updatedGroup) {
             scope.refreshing = false;
             if (messages) {
@@ -198,13 +218,23 @@
               updatedGroup.members = scope.group.members;
               scope.group = updatedGroup;
             }
+
+            scope.newMsgTags = [];
+            if (updatedGroup.msgTags) {
+              updatedGroup.msgTags.forEach(function (item) {
+                scope.newMsgTags.push({
+                  name: item,
+                  select: false
+                })
+              });
+            }
           }, '/note/api/group/' + this.group.id + '/message', 'POST', undefined, {
             userid: this.userId,
             content: this.newMessage,
-            tags: this.newMsgTags
+            tags: useTags
           }, 'application/json');
 
-          this.newMessage = '';
+          this.newMessage = undefined;
         },
         onMessageClicked: function (event, detail, sender) {
           testLog(sender);
@@ -301,12 +331,18 @@
           }
         },
         createNewTag: function (event, detail, sender) {
-          this.newMsgTags.push(this.newTag);
+          this.newMsgTags.push({
+            name: this.newTag,
+            select: true
+          });
           this.newTag = '';
         },
         refreshList: function () {
           this.messages = [];
           refreshMessage(this);
+        },
+        onMsgTagClicked: function (event, detail, sender) {
+          event.target.templateInstance.model.tag.select = !event.target.templateInstance.model.tag.select;
         }
       });
     })();

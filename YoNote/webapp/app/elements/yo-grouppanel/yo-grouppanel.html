@@ -61,6 +61,8 @@
 										<div style="margin-bottom: 4px;">{{member.name}}</div>
 										<div style="font-size: 14px; color: gray;">{{member.description}}</div>
 									</div>
+									<core-icon-button icon="close" title="移除用户" on-click="{{removeMember}}"
+										hidden?="{{userId != group.creater || member.id == group.creater}}"></core-icon-button>
 								</div>
 					   		</template>
 						</div>
@@ -69,6 +71,7 @@
 		    </div>
 	    </core-header-panel>
 	    <core-ajax id="ajax" handleAs="json"></core-ajax>
+	    <yo-groupdialog id="confirmDialog" subject="{{dialogSubject}}" on-action-confirm="{{onActionConfirm}}"></yo-groupdialog>
 	</template>
 	<script>
 	(function() {
@@ -176,6 +179,21 @@
 				}, '/note/api/group/' + this.group.id + '/addmember', 'POST', undefined, {
 					userid: this.userId,
 					memberId: this.searchedUser.id
+				}, 'application/json');
+			},
+			removeMember: function (event, detail, sender) {
+				this.targetMember = event.target.templateInstance.model.member;
+				this.dialogSubject = '从群组中移除 "' + this.targetMember.name + '" ?';
+          		this.$.confirmDialog.showDialog(false);
+			},
+			onActionConfirm: function (event, detail, sender) {
+				makeRequest(this, function (scope, updatedGroup) {
+					scope.targetMember = undefined;
+					scope.group.members = updatedGroup.members;
+					scope.$.confirmDialog.closeDialog();
+				}, '/note/api/group/' + this.group.id + '/removemember', 'POST', undefined, {
+					userid: this.userId,
+					memberId: this.targetMember.id
 				}, 'application/json');
 			}
 		});
