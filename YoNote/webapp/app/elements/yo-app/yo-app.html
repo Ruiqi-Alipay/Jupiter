@@ -23,16 +23,16 @@
 		<core-drawer-panel cross-fade hidden?="{{loading}}">
 
 			<core-animated-pages drawer selected="{{curPage}}" transitions="cross-fade-all" flex>
-				<yo-navpanel user="{{user}}" groups="{{groups}}" on-select-group="{{onSelectGroup}}"></yo-navpanel>
+				<yo-navpanel user="{{user}}" on-select-group="{{onSelectGroup}}"></yo-navpanel>
 				<yo-grouppanel group="{{selectedGroup}}" selectedTags="{{selectedTags}}"
-					userId="{{user._id}}" on-tag-change="{{onTagFilterChange}}"></yo-grouppanel>
+					userId="{{user.id}}" on-tag-change="{{onTagFilterChange}}"></yo-grouppanel>
 			</core-animated-pages>
 
 		    <core-animated-pages main id="pages" selected="{{curPage}}" transitions="cross-fade-all hero-transition" flex>
 
-				<yo-grouplist groups="{{groups}}" userId="{{user._id}}" on-select-group="{{onSelectGroup}}" on-user-error="{{handleError}}"></yo-grouplist>
+				<yo-grouplist user="{{user}}" on-select-group="{{onSelectGroup}}" on-user-error="{{handleError}}"></yo-grouplist>
 
-				<yo-messagelist id="messageList" group="{{selectedGroup}}" userId="{{user._id}}" on-back="{{onback}}"
+				<yo-messagelist id="messageList" group="{{selectedGroup}}" userId="{{user.id}}" on-back="{{onback}}"
 					on-user-error="{{handleError}}" on-group-updated="{{onGroupUpdate}}"
 					on-group-deleted="{{onGroupDelete}}" selectedTags="{{selectedTags}}"></yo-messagelist>
 
@@ -49,7 +49,7 @@
 		var findIndex = function (groups, targetId) {
 			for (var index in groups) {
 				var group = groups[index];
-				if (group._id == targetId) {
+				if (group.id == targetId) {
 					return index;
 				}
 			}
@@ -82,8 +82,7 @@
 			handleResponse: function (event, detail, sender) {
 				if (detail.response.success) {
 					this.loading = false;
-					this.user = detail.response.data.user;
-					this.groups = detail.response.data.groups;
+					this.user = detail.response.data;
 				} else {
 					this.toastMessage = detail.response.data;
 					this.$.toast.show();
@@ -94,13 +93,13 @@
 				this.$.toast.show();
 			},
 			onGroupUpdate: function (event, detail, sender) {
-				var index = findIndex(this.groups, detail._id);
+				var index = findIndex(this.groups, detail.id);
 				if (index) {
 					this.groups[index] = detail;
 				}
 			},
 			onGroupDelete: function (event, detail, sender) {
-				var index = findIndex(this.groups, detail._id);
+				var index = findIndex(this.groups, detail.id);
 				if (index) {
 					this.groups.splice(index, 1);
 					this.curPage = 0;

@@ -39,28 +39,30 @@
 					<section>
 						<div layout vertical>
 				   			<paper-shadow class="searchItem" z="1" horizontal layout center hidden?="{{userId != group.creater}}">
-				   				<input id="searchMemberInput" is="core-input" placeholder="添加群成员" value="{{searchText}}" flex>
+				   				<input id="searchMemberInput" is="core-input" placeholder="添加群成员"
+				   					value="{{searchText}}" disabled?="{{adding}}" flex>
 				   				<paper-spinner active?="{{searching}}"></paper-spinner>
 				   			</paper-shadow>
-				   			<div style="position: relative">
-				   				<div layout vertical flex>
-							   		<template repeat="{{member in group.members}}">
-								      <paper-item on-tap="{{selectGroup}}">
-								        <div class="navbarItem">{{group.name}}</div>
-								      </paper-item>
-							   		</template>
-				   				</div>
-					   			<paper-shadow class="searchResultPanel" z="1" horizontal layout center hidden?="{{!searchedUser}}">
-									<div layout horizontal center flex>
-										<div class="avatar" style="background-image: url({{searchedUser.header}})"></div>
-										<div layout vertical flex>
-											<div style="margin-bottom: 4px;">{{searchedUser.name}}</div>
-											<div>{{searchedUser.description}}</div>
-										</div>
-										<paper-fab mini icon="add" class="blue" title="添加" on-click="{{addMember}}"></paper-fab>
+				   			<paper-shadow class="searchResultPanel" z="1" horizontal layout center hidden?="{{!searchedUser}}">
+								<div layout horizontal center flex>
+									<div class="avatar" style="background-image: url({{searchedUser.header}})"></div>
+									<div layout vertical flex>
+										<div style="margin-bottom: 4px;">{{searchedUser.name}}</div>
+										<div>{{searchedUser.description}}</div>
 									</div>
-					   			</paper-shadow>
-				   			</div>
+									<paper-fab mini icon="add" class="blue" title="添加" on-click="{{addMember}}" hidden?="{{adding}}"></paper-fab>
+									<paper-spinner active?="{{adding}}" hidden?="{{!adding}}"></paper-spinner>
+								</div>
+				   			</paper-shadow>
+					   		<template repeat="{{member in group.members}}">
+								<div layout horizontal center style="padding: 10px 15px;">
+									<div class="avatar" style="background-image: url({{member.header}})"></div>
+									<div layout vertical flex>
+										<div style="margin-bottom: 4px;">{{member.name}}</div>
+										<div style="font-size: 14px; color: gray;">{{member.description}}</div>
+									</div>
+								</div>
+					   		</template>
 						</div>
 					</section>
 				</core-animated-pages>
@@ -111,13 +113,9 @@
 				this.groupTabSelection = 0;
 				this.searching = false;
 			},
-			selectGroup: function (event, detail, sender) {
-				this.selectedGroup = event.target.templateInstance.model.group;
-				this.fire('select-group', this.selectedGroup);
-			},
 			groupChanged: function (oldValue, newValue) {
 				if (newValue) {
-					if (!oldValue || (newValue._id != oldValue._id)) {
+					if (!oldValue || (newValue.id != oldValue.id)) {
 						this.selectedTags.length = 0;
 						if (newValue.msgTags) {
 							for (var index in newValue.msgTags) {
@@ -127,6 +125,12 @@
 								});
 							}
 						}
+
+						makeRequest(this, function (scope, members) {
+							scope.group.members = members;
+						}, '/note/api/group/' + newValue.id + '/members', 'GET', {
+							userid: this.userId
+						});
 					} else if (oldValue && oldValue.msgTags != newValue.msgTags) {
 						for (var index in newValue.msgTags) {
 							var item = newValue.msgTags[index];
@@ -163,11 +167,15 @@
 				}
 			},
 			addMember: function (event, detail, sender) {
+				this.adding = true;
 				makeRequest(this, function (scope, result) {
-					console.log(result);
-				}, '/note/api/group/' + this.group._id + '/addmember', 'POST', undefined, {
+					scope.adding = false;
+					scope.searchedUser = undefined;
+					scope.searchText = undefined;
+					scope.group.members = result.members;
+				}, '/note/api/group/' + this.group.id + '/addmember', 'POST', undefined, {
 					userid: this.userId,
-					memberId: this.searchedUser._id
+					memberId: this.searchedUser.id
 				}, 'application/json');
 			}
 		});

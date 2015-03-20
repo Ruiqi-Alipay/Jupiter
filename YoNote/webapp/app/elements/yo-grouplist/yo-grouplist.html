@@ -5,7 +5,7 @@
 <link rel="import" href="../../../components/paper-ripple/paper-ripple.html">
 <link rel="import" href="../yo-groupdialog/yo-groupdialog.html">
 
-<polymer-element name="yo-grouplist" attributes="groups userId">
+<polymer-element name="yo-grouplist" attributes="user">
 	<template>
 		<link rel="stylesheet" href="yo-grouplist.css">
 
@@ -17,15 +17,22 @@
 			    </div>
 			    <paper-ripple fit></paper-ripple>
 		    </paper-shadow>
-			<template repeat="{{group in groups}}">
+			<template repeat="{{group in user.groups}}">
 			    <paper-shadow class="card" z="1" on-tap="{{selectGroup}}"
-			    	hero-id="group-{{group._id}}" hero?="{{selectedGroup._id == group._id}}">
+			    	hero-id="group-{{group.id}}" hero?="{{selectedGroup.id == group.id}}">
 				    <div layout vertical cross-fade fit>
 						<div class="title" horizontal layout center>
 							{{group.name}}
 						</div>
-						<div class="content" flex>
-							{{group.name}}
+						<div class="content" layout vertical flex>
+							<div layout vertical flex style="border-bottom: 1px dotted #ddd;">
+								<p flex>{{group.recents[0].content}}</p>
+								<div class="cardDate" self-end>{{group.recents[0].date}}</div>
+							</div>
+							<div layout vertical flex>
+								<p flex>{{group.recents[1].content}}</p>
+								<div class="cardDate" self-end>{{group.recents[1].date}}</div>
+							</div>
 						</div>
 				    </div>
 				    <paper-ripple fit></paper-ripple>
@@ -56,7 +63,7 @@
 					url: '/note/api/group',
 					method: 'POST',
 					body: JSON.stringify({
-						userid: this.userId,
+						userid: this.user.id,
 						name: detail.name
 					})
 				};
@@ -66,10 +73,7 @@
 			handleResponse: function (event, detail, sender) {
 				this.$.dialog.closeDialog();
 				if (detail.response.success) {
-					if (!this.groups) {
-						this.groups = [];
-					}
-					this.groups.push(detail.response.data);
+					this.user.groups.push(detail.response.data);
 				} else {
 					this.fire('user-error', detail.response.data);
 				}

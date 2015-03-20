@@ -14,8 +14,6 @@ var groupOperateParamCheck = function (req, res) {
 		return false;
 	}
 
-	console.log(req.body);
-
 	if (req.group.creater != req.body.userid && req.group.creater != req.query.userid) {
 		res.json({
 			success: false,
@@ -38,7 +36,7 @@ var messageOperateCheck = function (req, res) {
 
 	var userid = req.query.userid ? req.query.userid : req.body.userid;
 
-	if (!userid || (req.group.creater != userid && (!req.group.members || req.group.members.indexOf(req.body.userid) < 0))) {
+	if (!userid || req.group.members.indexOf(userid) < 0) {
 		res.json({
 			success: false,
 			data: '操作失败：您没有权限这样做'
@@ -88,7 +86,7 @@ module.exports = {
 				name: req.body.name,
 				creater: req.body.userid,
 				date: moment(),
-				members: [],
+				members: [req.body.userid],
 				msgTags: [],
 				counts: 0
 			});
@@ -101,7 +99,7 @@ module.exports = {
 
 				res.json({
 					success: true,
-					data: group
+					data: utils.createClientGroup(group)
 				});
 			});
 		});
@@ -119,7 +117,7 @@ module.exports = {
 
 			res.json({
 				success: true,
-				data: removedItem
+				data: utils.createClientGroup(removedItem)
 			});
 		})
 	},
@@ -138,7 +136,22 @@ module.exports = {
 
 			res.json({
 				success: true,
-				data: group
+				data: utils.createClientGroup(group)
+			});
+		});
+	},
+	getGroupMembers: function (req, res, next) {
+		if (!messageOperateCheck(req, res)) return;
+
+		if (!req.group.members) return {
+			success: true,
+			data: []
+		};
+
+		User.find({'_id': {$in: req.group.members}}, function (err, users) {
+			res.json({
+				success: true,
+				data: utils.createClientUserBatch(users)
 			});
 		});
 	},
@@ -162,6 +175,10 @@ module.exports = {
 
 			if (req.group.members.indexOf(user._id.toString()) < 0) {
 				req.group.members.push(user._id.toString());
+			} else {
+				return res.json({
+					success: true
+				});
 			}
 
 			req.group.save(function (err, updatedGroup) {
@@ -171,26 +188,25 @@ module.exports = {
 				});
 
 				User.find({'_id': {$in: updatedGroup.members}}, function (err, users) {
+					var clientGroup = utils.createClientGroup(updatedGroup);
+					clientGroup.members = utils.createClientUserBatch(users);
 					res.json({
 						success: true,
-						data: updatedGroup,
-						ext: users
+						data: clientGroup
 					});
 				});
-			})
+			});
 		});
 	},
 	removeMember: function (req, res, next) {
 		if (!groupOperateParamCheck(req, res)) return;
 
-		if (!(req.body instanceof Array)) return next(new Error('Please place the member id which you want to remove in post body in Array format!'));
-
-		req.body.forEach(function (groupId) {
-			var index = req.group.members.indexOf(groupId);
-			if (index >= 0) {
-				req.group.members.splice(index, 1);
-			}
+		if (!req.body.memberId) return next(new Error('New member ID is empty!'));
+		if (!req.group.members || req.group.members.indexOf(req.body.memberId) < 0) return res.json({
+			success: true
 		});
+
+		req.group.members.splice(req.group.members.indexOf(req.body.memberId), 1);
 
 		req.group.save(function (err, updatedGroup) {
 			if (err) return res.json({
@@ -198,9 +214,13 @@ module.exports = {
 				data: '操作失败：' + err.toString()
 			});
 
-			res.json({
-				success: true,
-				data: updatedGroup
+			User.find({'_id': {$in: updatedGroup.members}}, function (err, users) {
+				var clientGroup = utils.createClientGroup(updatedGroup);
+				clientGroup.members = utils.createClientUserBatch(users);
+				res.json({
+					success: true,
+					data: clientGroup
+				});
 			});
 		})
 	},
@@ -212,6 +232,10 @@ module.exports = {
 				success: false,
 				data: '操作失败：消息内容不得为空'
 			});
+		}
+
+		if (!req.body.tags || req.body.tags.length == 0) {
+			req.body.tags = ['无标签'];
 		}
 
 		var date = moment();
@@ -263,15 +287,15 @@ module.exports = {
 
 						res.json({
 							success: true,
-							data: utils.cutMessages(messages),
-							ext: groupModified ? req.group : undefined
+							data: utils.createClientMessageBatch(messages),
+							ext: groupModified ? utils.createClientGroup(req.group) : undefined
 						});
 					});
 				} else {
 					res.json({
 						success: true,
-						data: utils.cutMessages([message]),
-						ext: groupModified ? req.group : undefined
+						data: utils.createClientMessageBatch([message]),
+						ext: groupModified ? utils.createClientGroup(req.group) : undefined
 					});
 				}
 			});
@@ -306,16 +330,8 @@ module.exports = {
 
 			res.json({
 				success: true,
-				data: utils.cutMessages(messages)
+				data: utils.createClientMessageBatch(messages)
 			});
-		});
-	},
-	geMessage: function (req, res, next) {
-		if (!messageOperateCheck(req, res)) return;
-
-		res.json({
-			success: true,
-			data: req.message
 		});
 	},
 	searchContent: function (req, res, next) {

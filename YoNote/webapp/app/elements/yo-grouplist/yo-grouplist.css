@@ -35,3 +35,8 @@
 .content {
 	padding: 8px;
 }
+
+.cardDate {
+	font-size: 14px;
+	color: gray;
+}

@@ -16,13 +16,11 @@ var prepareUserGroups = function (userId) {
 
 		groups.forEach(function (group) {
 			Message.find({'groupId': group._id}).sort('-timestamp').limit(2).exec(function (err, messages) {
-				group.recents = utils.cutMessages(messages);
-
-				User.find({'_id': {$in: group.members}}, function (err, users) {
-					group.members = users;
+				var clientGroup = utils.createClientGroup(group);
+				clientGroup.recents = utils.createClientMessageBatch(messages);
+				clientGroups.push(clientGroup);
 					
-					if (clientGroups.length == groups.length) defered.resolve(groups);
-				});
+				if (clientGroups.length == groups.length) defered.resolve(clientGroups);
 			});
 		});
 	});
@@ -51,22 +49,22 @@ module.exports = {
 						data: '新建用户错误：' + err.toString()
 					});
 
+					var clientUser = utils.createClientUser(newUser);
+					clientUser.groups = [];
+
 					res.json({
 						success: true,
-						data: {
-							user: newUser,
-							groups: []
-						}
+						data: clientUser
 					});
 				});
 			} else {
 				prepareUserGroups(user._id.toString()).then(function (groups) {
+					var clientUser = utils.createClientUser(user);
+					clientUser.groups = groups;
+
 					res.json({
 						success: true,
-						data: {
-							user: user,
-							groups: groups
-						}
+						data: clientUser
 					});
 				}).catch(function (err) {
 					res.json({
@@ -87,7 +85,7 @@ module.exports = {
 		User.findOne({'name':  decodeURIComponent(user)}, function (err, user) {
 			res.json({
 				success: true,
-				data: user
+				data: user ? utils.createClientUser(user) : user
 			});
 		});
 	}

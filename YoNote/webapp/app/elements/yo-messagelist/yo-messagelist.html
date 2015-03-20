@@ -22,7 +22,7 @@
   <template>
     <link rel="stylesheet" href="yo-messagelist.css">
 
-    <div layout vertical style="position: relative; height: 100%;" fit hero-id="group-{{group._id}}" hero>
+    <div layout vertical style="position: relative; height: 100%;" fit hero-id="group-{{group.id}}" hero>
       <core-scroll-threshold id="threshold" scrollTarget="{{$.headerPanel.scroller}}" lowerThreshold="25" on-lower-trigger="{{loadMore}}" fit></core-scroll-threshold>
       <core-header-panel id="headerPanel" fit fixed>
         <core-toolbar mode="standard">
@@ -158,7 +158,7 @@
           makeRequest(scope, function (scope, messages) {
             scope.messages = messages;
             scope.loading = false;
-          }, '/note/api/group/' + scope.group._id + '/message', 'GET', {
+          }, '/note/api/group/' + scope.group.id + '/message', 'GET', {
             userid: scope.userId,
             last: scope.messages.length > 0 ? scope.messages[0].timestamp : undefined,
             tags: encodeQueyTags(scope.selectedTags)
@@ -177,14 +177,14 @@
           this.fire('back');
         },
         groupChanged: function (oldValue, newValue) {
-          if (!oldValue || oldValue._id != newValue._id) {
+          if (!oldValue || oldValue.id != newValue.id) {
             this.messages = [];
             refreshMessage(this);
           }
         },
         sendMessage: function (event, detail, sender) {
           this.refreshing = true;
-          makeRequest(this, function (scope, messages, newGroup) {
+          makeRequest(this, function (scope, messages, updatedGroup) {
             scope.refreshing = false;
             if (messages) {
               messages.reverse();
@@ -194,10 +194,11 @@
             }
             scrollToTop(scope.$.headerPanel.scroller);
 
-            if (newGroup) {
-              scope.group = newGroup;
+            if (updatedGroup) {
+              updatedGroup.members = scope.group.members;
+              scope.group = updatedGroup;
             }
-          }, '/note/api/group/' + this.group._id + '/message', 'POST', undefined, {
+          }, '/note/api/group/' + this.group.id + '/message', 'POST', undefined, {
             userid: this.userId,
             content: this.newMessage,
             tags: this.newMsgTags
@@ -227,7 +228,7 @@
               }
               scope.loading = false;
               scope.$.threshold.clearLower();
-            }, '/note/api/group/' + this.group._id + '/message', 'GET', {
+            }, '/note/api/group/' + this.group.id + '/message', 'GET', {
               userid: this.userId,
               tags: encodeQueyTags(this.selectedTags),
               last: this.messages.length > 0 ? this.messages[this.messages.length - 1].timestamp : undefined
@@ -249,7 +250,7 @@
                   scope.messages = messages;
                 }
                 scope.loading = false;
-              }, '/note/api/group/' + this.group._id + '/message/contentsearch', 'GET', {
+              }, '/note/api/group/' + this.group.id + '/message/contentsearch', 'GET', {
                 userid: this.userId,
                 q: encoded
               });
@@ -284,7 +285,7 @@
                 scope.fire('group-updated', group);
               }
               scope.$.editDialog.closeDialog();
-            }, '/note/api/group/' + this.group._id, 'POST', undefined, {
+            }, '/note/api/group/' + this.group.id, 'POST', undefined, {
               userid: this.userId,
               name: detail.name
             }, 'application/json');
@@ -294,7 +295,7 @@
                 scope.fire('group-deleted', group);
               }
               scope.$.editDialog.closeDialog();
-            }, '/note/api/group/' + this.group._id, 'DELETE', {
+            }, '/note/api/group/' + this.group.id, 'DELETE', {
               userid: this.userId
             });
           }
