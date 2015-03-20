@@ -93,15 +93,15 @@
 				this.$.toast.show();
 			},
 			onGroupUpdate: function (event, detail, sender) {
-				var index = findIndex(this.groups, detail.id);
+				var index = findIndex(this.user.groups, detail.id);
 				if (index) {
-					this.groups[index] = detail;
+					this.user.groups[index] = detail;
 				}
 			},
 			onGroupDelete: function (event, detail, sender) {
-				var index = findIndex(this.groups, detail.id);
+				var index = findIndex(this.user.groups, detail.id);
 				if (index) {
-					this.groups.splice(index, 1);
+					this.user.groups.splice(index, 1);
 					this.curPage = 0;
 				}
 			},

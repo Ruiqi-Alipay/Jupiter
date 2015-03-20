@@ -40,3 +40,9 @@
 	font-size: 14px;
 	color: gray;
 }
+
+.testOverflow {
+	text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}

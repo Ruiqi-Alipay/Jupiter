@@ -211,6 +211,21 @@
               messages.forEach(function (item) {
                 scope.messages.unshift(item);
               });
+
+              if (!scope.group.recents) {
+                scope.group.recents = [];
+              }
+
+              if (messages.length == 1) {
+                scope.group.recents.unshift(messages[0]);
+              } else if (messages.length >= 2) {
+                scope.group.recents.unshift(messages[1]);
+                scope.group.recents.unshift(messages[0]);
+              }
+
+              if (scope.group.recents.length > 2) {
+                scope.group.recents.splice(2);
+              }
             }
             scrollToTop(scope.$.headerPanel.scroller);
 
