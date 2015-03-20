@@ -342,7 +342,7 @@ module.exports = {
 		});
 
 		var seatchText = decodeURIComponent(req.query.q);
-		Message.find({'content': new RegExp('.*' + seatchText + '.*')}, function (err, items) {
+		Message.find({'content': new RegExp('.*' + seatchText + '.*'), 'groupId': req.group._id}, function (err, items) {
 			if (err) return res.json({
 				success: false,
 				data: '操作失败：' + err.toString()
