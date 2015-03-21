@@ -42,10 +42,10 @@
               <option value="monospace">Monospace</option>
             </select>
             <select title="Size" class="ql-size">
-              <option value="10px">Small</option>
-              <option value="13px" selected>Normal</option>
-              <option value="18px">Large</option>
-              <option value="32px">Huge</option>
+              <option value="10px">小文本</option>
+              <option value="13px" selected>文本</option>
+              <option value="18px">小标题</option>
+              <option value="32px">大标题</option>
             </select>
           </span>
           <span class="ql-format-group">
@@ -153,7 +153,6 @@
           </span>
         </div>
         <div id="editor" class="editor">
-          <p>在这里输入..</p>
         </div>      
       </div>
       <paper-fab mini icon="close" class="editor-close" onclick="toggleEditor(container, false);"></paper-fab>
@@ -198,6 +197,7 @@
     var container = document.getElementById('editor-container');
     container.style.top = '-3000px';
     container.showEditor = function (tags, groupId, userId) {
+      quill.setText('');
       toggleEditor(container, true);
       var tagbar = document.getElementById('yo-tagbar');
       tagbar.newMsgTags = tags;
