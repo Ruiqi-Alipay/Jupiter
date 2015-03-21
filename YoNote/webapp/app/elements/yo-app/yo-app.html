@@ -13,14 +13,7 @@
 	<template>
 		<link rel="stylesheet" href="yo-app.css">
 
-		<div horizontal layout center fit cross-fade class="loadingBacktround" hidden?="{{!loading}}">
-			<div class="spinner">
-			  <div class="dot1"></div>
-			  <div class="dot2"></div>
-			</div>
-		</div>
-
-		<core-drawer-panel cross-fade hidden?="{{loading}}">
+		<core-drawer-panel id="mainPage" cross-fade hidden>
 
 			<core-animated-pages drawer selected="{{curPage}}" transitions="cross-fade-all" flex>
 				<yo-navpanel user="{{user}}" on-select-group="{{onSelectGroup}}"></yo-navpanel>
@@ -40,6 +33,13 @@
 
 		</core-drawer-panel>
 
+		<div id="loadingPage" horizontal layout center fit cross-fade class="loadingBacktround">
+			<div class="spinner">
+			  <div class="dot1"></div>
+			  <div class="dot2"></div>
+			</div>
+		</div>
+
 		<core-ajax id="httpHelper" url="{{request.url}}" method="{{request.method}}" handleAs="json"
 				params="{{request.params}}" on-core-response="{{handleResponse}}" on-core-error="{{handleError}}"></core-ajax>
 		<paper-toast id="toast" class="capsule" text="{{toastMessage}}" style="padding-right: 60px;"></paper-toast>
@@ -56,7 +56,6 @@
 		};
 		Polymer({
 			ready: function () {
-				this.loading = true;
 				this.curPage = 0;
 
 				var search = window.location.search;
@@ -81,8 +80,22 @@
 			},
 			handleResponse: function (event, detail, sender) {
 				if (detail.response.success) {
-					this.loading = false;
 					this.user = detail.response.data;
+					this.async(function () {
+					  var scope = this;
+					  scope.$.mainPage.hidden = false;
+
+				      var player = scope.$.loadingPage.animate([
+				        {opacity: "1.0"},
+				        {opacity: "0.0"}
+				      ], {
+				        direction: "alternate", duration: 600, fill: 'forwards'
+				      });
+
+				      player.onfinish = function(e) {
+				        scope.$.loadingPage.hidden = true;
+				      };
+					}, null, 1500);
 				} else {
 					this.toastMessage = detail.response.data;
 					this.$.toast.show();
