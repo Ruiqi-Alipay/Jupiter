@@ -11,7 +11,8 @@ var createClientMessage = function (message) {
 		id: message._id.toString(),
 		date: message.date,
 		timestamp: message.timestamp,
-		content: message.content,
+		text: message.text,
+		html: message.html,
 		tags: message.tags
 	}
 };
@@ -23,6 +24,12 @@ var createClientGroup = function (group) {
 		counts: group.counts,
 		msgTags: group.msgTags,
 		date: group.date
+	}
+};
+var findUser = function (users, userId) {
+	if (!users) return;
+	for (var index in users) {
+		if (users[index]._id == userId) return users[index];
 	}
 };
 
@@ -64,11 +71,18 @@ module.exports = {
 	createClientMessage: function (message) {
 		return createClientMessage(message);
 	},
-	createClientMessageBatch: function (messages) {
+	createClientMessageBatch: function (messages, users) {
 		var result = [];
 		if (messages) {
 			messages.forEach(function (item) {
-				result.push(createClientMessage(item));
+				var client = createClientMessage(item);
+				var sender = findUser(users, item.userId);
+				if (sender) {
+					client.senderName = sender.name;
+					client.senderHeader = sender.header;
+				}
+				
+				result.push(client);
 			});
 		}
 		return result;

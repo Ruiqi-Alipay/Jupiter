@@ -2,6 +2,7 @@
 <link rel="import" href="../../../components/core-ajax/core-ajax.html">
 <link rel="import" href="../../../components/paper-fab/paper-fab.html">
 <link rel="import" href="../../../components/paper-spinner/paper-spinner.html">
+<link rel="import" href="../../../components/paper-toast/paper-toast.html">
 
 <polymer-element name="yo-senderbtn">
 	<template layout horizontal end>
@@ -9,6 +10,7 @@
 		<paper-spinner active?="{{sending}}"></paper-spinner>
 		<paper-fab icon="send" class="editFab green" title="发送" on-click="{{sendMessage}}" hidden?="{{sending}}"></paper-fab>
 		<core-ajax id="ajax" handleAs="json"></core-ajax>
+		<paper-toast id="toast" class="capsule" text="日志内容不可为空" style="padding-right: 60px;"></paper-toast>
 	</template>
 	<script>
 	(function () {
@@ -61,14 +63,23 @@
 					});
 				}
 
-				var result = quill.getHTML();
+				var html = quill.getHTML();
+				var text = quill.getText();
+
+				if (text.replace(/ /g,'').length < 2) {
+					this.sending = false;
+					this.$.toast.show();
+					return;
+				}
 
 				makeRequest(this, function (scope, messages, updatedGroup) {
 					scope.sending = false;
-
+					toggleEditor(document.getElementById('editor-container'), false);
+					document.getElementById('yo-app').onSendFinished(messages, updatedGroup);
 				}, '/note/api/group/' + tagbar.groupId + '/message', 'POST', undefined, {
 					userid: tagbar.userId,
-					content: result,
+					text: text,
+					html: html,
 					tags: useTags
 				}, 'application/json');
 			}

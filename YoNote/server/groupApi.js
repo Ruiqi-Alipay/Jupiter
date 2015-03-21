@@ -47,6 +47,28 @@ var messageOperateCheck = function (req, res) {
 	return true;
 }
 
+var processMessageResult = function (messages, res, ext) {
+	var userIds = [];
+	if (messages) {
+		messages.forEach(function (item) {
+			if (userIds.indexOf(item.userId) < 0) userIds.push(item.userId);
+		});
+
+		User.find({'_id': {$in: userIds}}, function (err, users) {
+			res.json({
+				success: true,
+				data: utils.createClientMessageBatch(messages, users),
+				ext: ext
+			});
+		});
+	} else {
+		res.json({
+			success: true,
+			data: []
+		});
+	}
+};
+
 module.exports = {
 	groupId: function (req, res, next, id) {
 		Group.findById(id, function (err, group) {
@@ -227,7 +249,7 @@ module.exports = {
 	createMessage: function (req, res, next) {
 		if (!messageOperateCheck(req, res)) return;
 
-		if (!req.body.content) {
+		if (!req.body.html || !req.body.text) {
 			return res.json({
 				success: false,
 				data: '操作失败：消息内容不得为空'
@@ -244,7 +266,8 @@ module.exports = {
 			userId: req.body.userid,
 			date: date.format('YYYY 年 M 月 D 日，H:mm:ss'),
 			timestamp: date.format('x'),
-			content: req.body.content,
+			text: req.body.text,
+			html: req.body.html,
 			tags: req.body.tags
 		});
 
@@ -285,18 +308,10 @@ module.exports = {
 							data: '操作失败：' + err.toString()
 						});
 
-						res.json({
-							success: true,
-							data: utils.createClientMessageBatch(messages),
-							ext: groupModified ? utils.createClientGroup(req.group) : undefined
-						});
+						processMessageResult(messages, res, groupModified ? utils.createClientGroup(req.group) : undefined);
 					});
 				} else {
-					res.json({
-						success: true,
-						data: utils.createClientMessageBatch([message]),
-						ext: groupModified ? utils.createClientGroup(req.group) : undefined
-					});
+					processMessageResult([message], res, groupModified ? utils.createClientGroup(req.group) : undefined);
 				}
 			});
 		});
@@ -328,10 +343,7 @@ module.exports = {
 				data: '操作失败：' + err.toString()
 			});
 
-			res.json({
-				success: true,
-				data: utils.createClientMessageBatch(messages)
-			});
+			processMessageResult(messages, res);
 		});
 	},
 	searchContent: function (req, res, next) {
@@ -342,16 +354,14 @@ module.exports = {
 		});
 
 		var seatchText = decodeURIComponent(req.query.q);
-		Message.find({'content': new RegExp('.*' + seatchText + '.*'), 'groupId': req.group._id}, function (err, items) {
+		Message.find({'text': new RegExp('.*' + seatchText + '.*'), 'groupId': req.group._id})
+				.sort('-date').exec(function (err, messages) {
 			if (err) return res.json({
 				success: false,
 				data: '操作失败：' + err.toString()
 			});
 
-			res.json({
-				success: true,
-				data: items
-			});
+			processMessageResult(messages, res);
 		});
 	}
 };

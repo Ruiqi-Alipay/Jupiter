@@ -5,7 +5,8 @@ MessageSchema = mongoose.Schema({
 	userId: String,
 	date: String,
 	timestamp: Number,
-	content: String,
+	html: String,
+	text: String,
 	tags: [String]
 });
 

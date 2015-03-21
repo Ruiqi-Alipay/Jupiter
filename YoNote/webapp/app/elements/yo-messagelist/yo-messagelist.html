@@ -43,7 +43,10 @@
         <div id="scroller" layout vertical>
           <template repeat="{{msg in messages}}">
             <div class="messageContainer" layout horizontal>
-              <div class="middle avatar" style="background-image: url({{message.header}})"></div>
+              <div layout vertical center style="margin-right: 15px;">
+                <div class="middle avatar" style="background-image: url({{msg.senderHeader}})"></div>
+                <div class="tag-button">{{msg.senderName}}</div>
+              </div>
               <paper-shadow z="1" flex>
                 <yo-messageItem message="{{msg}}"></yo-messageItem>
               </paper-shadow>
@@ -166,43 +169,43 @@
           var editorContainer = document.getElementById('editor-container');
           editorContainer.showEditor(getMsgTags(this), this.group.id, this.userId);
         },
-        onSendFinished: function (event, detail, sender) {
+        onSendFinished: function (messages, updatedGroup) {
           if (messages) {
             messages.reverse();
-            messages.forEach(function (item) {
-              scope.messages.unshift(item);
-            });
+            for (var index in messages) {
+              this.messages.unshift(messages[index]);
+            }
 
-            if (!scope.group.recents) {
-              scope.group.recents = [];
+            if (!this.group.recents) {
+              this.group.recents = [];
             }
 
             if (messages.length == 1) {
-              scope.group.recents.unshift(messages[0]);
+              this.group.recents.unshift(messages[0]);
             } else if (messages.length >= 2) {
-              scope.group.recents.unshift(messages[1]);
-              scope.group.recents.unshift(messages[0]);
+              this.group.recents.unshift(messages[1]);
+              this.group.recents.unshift(messages[0]);
             }
 
-            if (scope.group.recents.length > 2) {
-              scope.group.recents.splice(2);
+            if (this.group.recents.length > 2) {
+              this.group.recents.splice(2);
             }
           }
-          scrollToTop(scope.$.headerPanel.scroller);
+          scrollToTop(this.$.headerPanel.scroller);
 
           if (updatedGroup) {
-            updatedGroup.members = scope.group.members;
-            scope.group = updatedGroup;
+            updatedGroup.members = this.group.members;
+            this.group = updatedGroup;
           }
 
-          scope.newMsgTags = [];
+          this.newMsgTags = [];
           if (updatedGroup.msgTags) {
-            updatedGroup.msgTags.forEach(function (item) {
-              scope.newMsgTags.push({
-                name: item,
+            for (var index in updatedGroup.msgTags) {
+              this.newMsgTags.push({
+                name: updatedGroup.msgTags[index],
                 select: false
               })
-            });
+            }
           }
         },
         loadMore: function (event, detail, sender) {

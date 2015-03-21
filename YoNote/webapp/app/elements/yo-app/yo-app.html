@@ -107,6 +107,9 @@
 			},
 			onTagFilterChange: function (event, detail, sender) {
 				this.$.messageList.refreshList();
+			},
+			onSendFinished: function (messages, updatedGroup) {
+				this.$.messageList.onSendFinished(messages, updatedGroup);
 			}
 		});
 	})();

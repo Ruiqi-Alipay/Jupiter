@@ -6,6 +6,7 @@
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1">
   <title>协同笔记</title>
+  <link rel="shortcut icon" href="app/images/p-logo-32.png">
   <!-- endbuild-->
   <!-- build:js bower_components/webcomponentsjs/webcomponents.min.js -->
   <script src="components/webcomponentsjs/webcomponents.js"></script>
@@ -25,7 +26,7 @@
 
 <body unresolved fullbleed layout vertical>
 
-  <yo-app></yo-app>
+  <yo-app id="yo-app"></yo-app>
 
   <paper-shadow z="2" id="editor-container" layout horizontal>
     <div class="editor-sidebar">
@@ -151,7 +152,9 @@
             <span title="Image" class="ql-format-button ql-image"></span>
           </span>
         </div>
-        <div id="editor" class="editor"></div>      
+        <div id="editor" class="editor">
+          <p>在这里输入..</p>
+        </div>      
       </div>
       <paper-fab mini icon="close" class="editor-close" onclick="toggleEditor(container, false);"></paper-fab>
       <yo-senderbtn class="editFab" flex-end></yo-senderbtn>  
@@ -173,16 +176,27 @@
     };
 
     var toggleEditor = function (targetElement, show) {
+      if (show) {
+        container.style.opacity = '0.0';
+        container.style.top = '0px';
+      }
+
       var player = targetElement.animate([
-        {opacity: show ? "0.7" : "1.0", top: show ? "-1000" : "0"},
-        {opacity: show ? "1.0" : "0.7", top: show ? "0" : "-1000"}
+        {opacity: show ? "0.0" : "1.0"},
+        {opacity: show ? "1.0" : "0.0"}
       ], {
         direction: "alternate", duration: 300, fill: 'forwards'
       });
+
+      player.onfinish = function(e) {
+        if (!show) {
+          container.style.top = '-3000px';
+        }
+      }
     };
 
     var container = document.getElementById('editor-container');
-    container.style.top = '-1000px';
+    container.style.top = '-3000px';
     container.showEditor = function (tags, groupId, userId) {
       toggleEditor(container, true);
       var tagbar = document.getElementById('yo-tagbar');
