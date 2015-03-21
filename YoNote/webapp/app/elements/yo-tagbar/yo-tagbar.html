@@ -1,0 +1,54 @@
+<link rel="import" href="../../../components/polymer/polymer.html">
+<link rel="import" href="../../../components/core-ajax/core-ajax.html">
+<link rel="import" href="../../../components/paper-button/paper-button.html">
+<link rel="import" href="../../../components/paper-input/paper-input-decorator.html">
+<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
+
+<polymer-element name="yo-tagbar">
+	<template>
+	  <link rel="stylesheet" href="yo-tagbar.css">
+      <div layout vertical>
+        <div layout horizontal>
+	        <paper-input-decorator label="添加标签" style="padding: 2px;">
+	          <input is="core-input" value="{{newTag}}">
+	        </paper-input-decorator>
+	        <core-icon-button icon="add" disabled?="{{!newTag}}" on-click="{{createNewTag}}"></core-icon-button>
+        </div>
+        <template repeat="{{tag in newMsgTags}}">
+          <paper-button toggle active?="{{tag.select}}" class="tagToggle"
+              on-click="{{onTagClicked}}" style="margin: 5px 5px 0px 5px;">{{tag.name}}</paper-button>
+        </template>
+      </div>
+	</template>
+	<script>
+	(function () {
+		Polymer({
+			ready: function () {
+				this.newMsgTags = [];
+			},
+			onTagClicked: function (event, detail, sender) {
+	          event.target.templateInstance.model.tag.select = !event.target.templateInstance.model.tag.select;
+	        },
+	        createNewTag: function (event, detail, sender) {
+	          this.newMsgTags.push({
+	            name: this.newTag,
+	            select: true
+	          });
+	          this.newTag = '';
+	        }
+		});
+	})();
+	</script>
+</polymer-element>
+
+
+
+
+
+
+
+
+
+
+
+

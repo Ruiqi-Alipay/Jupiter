@@ -1,0 +1,17 @@
+.title {
+	background: white;
+	height: 20px;
+	padding: 10px;
+}
+
+.content {
+	background: url(../../images/bg_pattern_r1.png);
+	padding: 16px;
+	min-height: 100px;
+	overflow-x: auto; 
+}
+
+.date {
+	font-size: 0.8em;
+	color: gray;
+}

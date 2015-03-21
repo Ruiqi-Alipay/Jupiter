@@ -1,0 +1,90 @@
+<link rel="import" href="../../../components/polymer/polymer.html">
+<link rel="import" href="../../../components/core-ajax/core-ajax.html">
+<link rel="import" href="../../../components/paper-fab/paper-fab.html">
+<link rel="import" href="../../../components/paper-spinner/paper-spinner.html">
+
+<polymer-element name="yo-senderbtn">
+	<template layout horizontal end>
+		<link rel="stylesheet" href="yo-senderbtn.css">
+		<paper-spinner active?="{{sending}}"></paper-spinner>
+		<paper-fab icon="send" class="editFab green" title="发送" on-click="{{sendMessage}}" hidden?="{{sending}}"></paper-fab>
+		<core-ajax id="ajax" handleAs="json"></core-ajax>
+	</template>
+	<script>
+	(function () {
+      var makeRequest = function (scope, callback, url, method, params, body, contentType) {
+        var responseCallback = function (event) {
+          scope.$.ajax.removeEventListener('core-response', responseCallback);
+          scope.$.ajax.removeEventListener('core-error', errorCallback);
+
+          if (event.detail.response.success) {
+            callback(scope, event.detail.response.data, event.detail.response.ext);
+          } else {
+            scope.fire('user-error', event.detail.response.toString());
+            callback(scope);
+          }
+        };
+        var errorCallback = function (event) {
+          scope.$.ajax.removeEventListener('core-response', responseCallback);
+          scope.$.ajax.removeEventListener('core-error', errorCallback);
+
+          scope.fire('user-error', event.detail.response.toString());
+          callback(scope);
+        };
+
+        scope.$.ajax.url = url;
+        if (contentType) {
+          scope.$.ajax.contentType = contentType;
+        } else {
+          scope.$.ajax.contentType = 'application/x-www-form-urlencoded';
+        }
+        
+        scope.$.ajax.method = method;
+        scope.$.ajax.params = params;
+        scope.$.ajax.body = body ? JSON.stringify(body) : undefined;
+        scope.$.ajax.addEventListener('core-response', responseCallback);
+        scope.$.ajax.addEventListener('core-error', errorCallback);
+        scope.$.ajax.go();
+      };
+
+		Polymer({
+			ready: function () {
+				this.sending = false;
+			},
+			sendMessage: function () {
+				this.sending = true;
+				var tagbar = document.getElementById('yo-tagbar');
+				var useTags = [];
+				if (tagbar.newMsgTags) {
+					tagbar.newMsgTags.forEach(function (item) {
+						if (item.select) useTags.push(item.name);
+					});
+				}
+
+				var result = quill.getHTML();
+
+				makeRequest(this, function (scope, messages, updatedGroup) {
+					scope.sending = false;
+
+				}, '/note/api/group/' + tagbar.groupId + '/message', 'POST', undefined, {
+					userid: tagbar.userId,
+					content: result,
+					tags: useTags
+				}, 'application/json');
+			}
+		});
+	})();
+	</script>
+</polymer-element>
+
+
+
+
+
+
+
+
+
+
+
+

@@ -6,9 +6,6 @@
 <link rel="import" href="../../../components/core-animation/core-animation.html">
 <link rel="import" href="../../../components/core-icon-button/core-icon-button.html">
 <link rel="import" href="../../../components/core-scroll-threshold/core-scroll-threshold.html">
-<link rel="import" href="../../../components/paper-shadow/paper-shadow.html">
-<link rel="import" href="../../../components/paper-ripple/paper-ripple.html">
-<link rel="import" href="../../../components/paper-button/paper-button.html">
 <link rel="import" href="../../../components/paper-fab/paper-fab.html">
 <link rel="import" href="../../../components/paper-input/paper-autogrow-textarea.html">
 <link rel="import" href="../../../components/paper-input/paper-input-decorator.html">
@@ -16,7 +13,9 @@
 <link rel="import" href="../../../components/paper-spinner/paper-spinner.html">
 <link rel="import" href="../../../components/paper-item/paper-item.html">
 <link rel="import" href="../../../components/paper-dropdown/paper-dropdown.html">
+<link rel="import" href="../../../components/paper-shadow/paper-shadow.html">
 <link rel="import" href="../yo-groupdialog/yo-groupdialog.html">
+<link rel="import" href="yo-messageItem.html">
 
 <polymer-element name="yo-messagelist" attributes="group userId selectedTags">
   <template>
@@ -44,48 +43,17 @@
         <div id="scroller" layout vertical>
           <template repeat="{{msg in messages}}">
             <div class="messageContainer" layout horizontal>
-              <div class="middle avatar" style="background-image: url({{msg.header}})"></div>
-              <paper-shadow class="card" z="1" layout vertical cross-fade flex on-tap="{{onMessageClicked}}">
-                  <div layout horizontal center class="title">
-                    <template repeat="{{tag in msg.tags}}">
-                      <paper-button class="tag-button">{{tag}}</paper-button>
-                    </template>
-                    <div flex></div>
-                    <div class="date">{{msg.date}}</div>
-                  </div>
-                  <div layout vertical flex class="content">
-                    <pre style="margin: 1em 1em;">{{msg.content}}</pre>
-                  </div>
+              <div class="middle avatar" style="background-image: url({{message.header}})"></div>
+              <paper-shadow z="1" flex>
+                <yo-messageItem message="{{msg}}"></yo-messageItem>
               </paper-shadow>
             </div>
           </template>
           <paper-spinner active?="{{loading}}" style="margin: 20px;" self-center></paper-spinner>
         </div>
       </core-header-panel>
-      <paper-spinner active?="{{refreshing}}" style="position: absolute; right: 20px; bottom: 20px;"></paper-spinner>
-
-      <div id="editorFooter" layout horizontal>
-        <div layout vertical flex>
-          <div layout horizontal wrap center>
-            <template repeat="{{tag in newMsgTags}}">
-              <paper-button toggle active?="{{tag.select}}" class="tagToggle"
-                  on-click="{{onMsgTagClicked}}" style="margin: 5px 5px 0px 5px;">{{tag.name}}</paper-button>
-            </template>
-            <paper-input-decorator label="添加标签" style="padding: 2px;">
-              <input is="core-input" value="{{newTag}}">
-            </paper-input-decorator>
-            <core-icon-button icon="add" disabled?="{{!newTag}}" on-click="{{createNewTag}}"></core-icon-button>
-          </div>
-          <paper-input-decorator id="messageEditor" label="笔记内容" floatingLabel>
-            <paper-autogrow-textarea maxRows="10">
-              <textarea value="{{newMessage}}"></textarea>
-            </paper-autogrow-textarea>
-          </paper-input-decorator>
-        </div>
-        
-        <paper-fab id="sendButton" icon="create" class="blue" title="确认"
-              on-tap="{{sendMessage}}" disabled?="{{!newMessage}}"></paper-fab>
-      </div>
+      <paper-fab id="sendButton" icon="create" class="blue" title="确认"
+            on-tap="{{openEditor}}"></paper-fab>
     </div>
 
     <yo-groupdialog id="editDialog" subject="{{dialogSubject}}" on-action-confirm="{{onActionConfirm}}"></yo-groupdialog>
@@ -166,22 +134,22 @@
         });
       };
 
-      var refreshNewMsgTags = function (scope) {
-        scope.newMsgTags = [];
+      var getMsgTags = function (scope) {
+        var newMsgTags = [];
         if (scope.selectedTags) {
           scope.selectedTags.forEach(function (item) {
-            scope.newMsgTags.push({
+            newMsgTags.push({
               name: item.name,
               select: false
             })
           });
         }
+        return newMsgTags;
       };
 
       Polymer({
         ready: function () {
           this.loading = false;
-          this.refreshing = false;
           this.allLoaded = false;
           this.searchMode = false;
         },
@@ -192,68 +160,50 @@
           if (!oldValue || oldValue.id != newValue.id) {
             this.messages = [];
             refreshMessage(this);
-            refreshNewMsgTags(this);
           }
         },
-        sendMessage: function (event, detail, sender) {
-          this.refreshing = true;
+        openEditor: function (event, detail, sender) {
+          var editorContainer = document.getElementById('editor-container');
+          editorContainer.showEditor(getMsgTags(this), this.group.id, this.userId);
+        },
+        onSendFinished: function (event, detail, sender) {
+          if (messages) {
+            messages.reverse();
+            messages.forEach(function (item) {
+              scope.messages.unshift(item);
+            });
 
-          var useTags = [];
-          if (this.newMsgTags) {
-            this.newMsgTags.forEach(function (item) {
-              if (item.select) useTags.push(item.name);
+            if (!scope.group.recents) {
+              scope.group.recents = [];
+            }
+
+            if (messages.length == 1) {
+              scope.group.recents.unshift(messages[0]);
+            } else if (messages.length >= 2) {
+              scope.group.recents.unshift(messages[1]);
+              scope.group.recents.unshift(messages[0]);
+            }
+
+            if (scope.group.recents.length > 2) {
+              scope.group.recents.splice(2);
+            }
+          }
+          scrollToTop(scope.$.headerPanel.scroller);
+
+          if (updatedGroup) {
+            updatedGroup.members = scope.group.members;
+            scope.group = updatedGroup;
+          }
+
+          scope.newMsgTags = [];
+          if (updatedGroup.msgTags) {
+            updatedGroup.msgTags.forEach(function (item) {
+              scope.newMsgTags.push({
+                name: item,
+                select: false
+              })
             });
           }
-          makeRequest(this, function (scope, messages, updatedGroup) {
-            scope.refreshing = false;
-            if (messages) {
-              messages.reverse();
-              messages.forEach(function (item) {
-                scope.messages.unshift(item);
-              });
-
-              if (!scope.group.recents) {
-                scope.group.recents = [];
-              }
-
-              if (messages.length == 1) {
-                scope.group.recents.unshift(messages[0]);
-              } else if (messages.length >= 2) {
-                scope.group.recents.unshift(messages[1]);
-                scope.group.recents.unshift(messages[0]);
-              }
-
-              if (scope.group.recents.length > 2) {
-                scope.group.recents.splice(2);
-              }
-            }
-            scrollToTop(scope.$.headerPanel.scroller);
-
-            if (updatedGroup) {
-              updatedGroup.members = scope.group.members;
-              scope.group = updatedGroup;
-            }
-
-            scope.newMsgTags = [];
-            if (updatedGroup.msgTags) {
-              updatedGroup.msgTags.forEach(function (item) {
-                scope.newMsgTags.push({
-                  name: item,
-                  select: false
-                })
-              });
-            }
-          }, '/note/api/group/' + this.group.id + '/message', 'POST', undefined, {
-            userid: this.userId,
-            content: this.newMessage,
-            tags: useTags
-          }, 'application/json');
-
-          this.newMessage = undefined;
-        },
-        onMessageClicked: function (event, detail, sender) {
-          testLog(sender);
-          return;
         },
         loadMore: function (event, detail, sender) {
           if (this.allLoaded) return;
@@ -345,19 +295,9 @@
             });
           }
         },
-        createNewTag: function (event, detail, sender) {
-          this.newMsgTags.push({
-            name: this.newTag,
-            select: true
-          });
-          this.newTag = '';
-        },
         refreshList: function () {
           this.messages = [];
           refreshMessage(this);
-        },
-        onMsgTagClicked: function (event, detail, sender) {
-          event.target.templateInstance.model.tag.select = !event.target.templateInstance.model.tag.select;
         }
       });
     })();

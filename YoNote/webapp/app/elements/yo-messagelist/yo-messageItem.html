@@ -1,0 +1,25 @@
+<link rel="import" href="../../../components/polymer/polymer.html">
+<link rel="import" href="../../../components/paper-shadow/paper-shadow.html">
+<link rel="import" href="../../../components/paper-button/paper-button.html">
+
+<polymer-element name="yo-messageItem" attributes="message">
+	<template layout vertical>
+		<link rel="stylesheet" href="yo-messageItem.css">
+
+	      <div layout horizontal center class="title">
+	        <template repeat="{{tag in message.tags}}">
+	          <paper-button class="tag-button">{{tag}}</paper-button>
+	        </template>
+	        <div flex></div>
+	        <div class="date">{{message.date}}</div>
+	      </div>
+	      <div id="rawContent" layout vertical flex class="content"></div>
+	</template>
+	<script>
+		Polymer({
+			ready: function () {
+				this.injectBoundHTML(this.message.content, this.$.rawContent);
+			}
+		});
+	</script>
+</polymer-element>
