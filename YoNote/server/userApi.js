@@ -29,6 +29,13 @@ var prepareUserGroups = function (userId) {
 };
 
 module.exports = {
+	userId: function (req, res, next, id) {
+		User.findById(id, function (err, user) {
+			req.user = user;
+
+			return next();
+		});
+	},
 	getUser: function (req, res, next) {
 		var extid = req.query.extid;
 		if (!extid) return res.json({
@@ -86,6 +93,18 @@ module.exports = {
 			res.json({
 				success: true,
 				data: user ? utils.createClientUser(user) : user
+			});
+		});
+	},
+	deleteUser: function (req, res, next) {
+		if (!req.user) return next(new Error('User not found!'));
+
+		req.user.remove(function (err, removedItem) {
+			if (err) return next(err);
+
+			res.json({
+				success: true,
+				data: utils.createClientUser(removedItem)
 			});
 		});
 	}

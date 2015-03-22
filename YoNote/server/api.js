@@ -5,8 +5,10 @@ var groupApi = require(path.join(__dirname, 'groupApi.js'));
 
 var router = express.Router();
 
+router.param('userid', userApi.userId);
 router.get('/user', userApi.getUser);
 router.get('/user/search', userApi.searchUser);
+router.delete('/user/:userid', userApi.deleteUser);
 
 router.param('groupId', groupApi.groupId);
 router.param('messageId', groupApi.messageId);
