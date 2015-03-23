@@ -8,6 +8,7 @@
 <link rel="import" href="../yo-grouppanel/yo-grouppanel.html">
 <link rel="import" href="../yo-grouplist/yo-grouplist.html">
 <link rel="import" href="../yo-messagelist/yo-messagelist.html">
+<link rel="import" href="../yo-http/yo-http.html">
 
 <polymer-element name="yo-app">
 	<template>
@@ -40,8 +41,7 @@
 			</div>
 		</div>
 
-		<core-ajax id="httpHelper" url="{{request.url}}" method="{{request.method}}" handleAs="json"
-				params="{{request.params}}" on-core-response="{{handleResponse}}" on-core-error="{{handleError}}"></core-ajax>
+		<yo-http id="yoHttp"></yo-http>
 		<paper-toast id="toast" class="capsule" text="{{toastMessage}}" style="padding-right: 60px;"></paper-toast>
 	</template>
 	<script>
@@ -61,14 +61,30 @@
 				var search = window.location.search;
 				if (search && search.indexOf('user=') >= 0 && search.slice(search.indexOf('user=') + 5)) {
 					var user = search.slice(search.indexOf('user=') + 5);
-					this.request = {
-						url: '/note/api/user',
-						method: 'GET',
-						params: {
-							extid: user
+					this.$.yoHttp.makeRequest(this, function (scope, result) {
+						if (result) {
+							scope.user = result;
+							scope.async(function () {
+							  scope.$.mainPage.hidden = false;
+
+						      var player = scope.$.loadingPage.animate([
+						        {opacity: "1.0"},
+						        {opacity: "0.0"}
+						      ], {
+						        direction: "alternate", duration: 600, fill: 'forwards'
+						      });
+
+						      player.onfinish = function(e) {
+						        scope.$.loadingPage.hidden = true;
+						      };
+							}, null, 1500);
+						} else {
+							scope.toastMessage = detail.response.data;
+							scope.$.toast.show();
 						}
-					};
-					this.$.httpHelper.go();
+					}, '/note/api/user', 'GET', {
+						extid: user
+					});
 				}
 			},
 			onSelectGroup: function (event, detail, sender) {
@@ -77,33 +93,6 @@
 			},
 			onback: function (event, detail, sender) {
 				this.curPage = 0;
-			},
-			handleResponse: function (event, detail, sender) {
-				if (detail.response.success) {
-					this.user = detail.response.data;
-					this.async(function () {
-					  var scope = this;
-					  scope.$.mainPage.hidden = false;
-
-				      var player = scope.$.loadingPage.animate([
-				        {opacity: "1.0"},
-				        {opacity: "0.0"}
-				      ], {
-				        direction: "alternate", duration: 600, fill: 'forwards'
-				      });
-
-				      player.onfinish = function(e) {
-				        scope.$.loadingPage.hidden = true;
-				      };
-					}, null, 1500);
-				} else {
-					this.toastMessage = detail.response.data;
-					this.$.toast.show();
-				}
-			},
-			handleError: function (event, detail, sender) {
-				this.toastMessage = detail.toString();
-				this.$.toast.show();
 			},
 			onGroupUpdate: function (event, detail, sender) {
 				var index = findIndex(this.user.groups, detail.id);

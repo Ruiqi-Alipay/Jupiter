@@ -44,15 +44,6 @@
 	padding-bottom: 130px;
 }
 
-.tag-button {
-	font-size: 0.8em;
-	color: gray;
-}
-
-.tag-button:hover {
-  background: #eee;
-}
-
 paper-fab.blue {
   background: #5677fc;
 }

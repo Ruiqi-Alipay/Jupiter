@@ -1,8 +1,13 @@
 <link rel="import" href="../../../components/polymer/polymer.html">
+<link rel="import" href="../../../components/core-icon/core-icon.html">
+<link rel="import" href="../../../components/core-tooltip/core-tooltip.html">
+<link rel="import" href="../../../components/core-icon-button/core-icon-button.html">
 <link rel="import" href="../../../components/paper-shadow/paper-shadow.html">
 <link rel="import" href="../../../components/paper-button/paper-button.html">
+<link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../yo-http/yo-http.html">
 
-<polymer-element name="yo-messageItem" attributes="message">
+<polymer-element name="yo-messageItem" attributes="message userId itemIndex selectIndex">
 	<template layout vertical>
 		<link rel="stylesheet" href="yo-messageItem.css">
 
@@ -12,14 +17,103 @@
 	        </template>
 	        <div flex></div>
 	        <div class="date">{{message.date}}</div>
+	        <paper-icon-button class="{{faveriteClass}}" icon="thumb-up" title="赞" on-click="{{toggleLikeMessage}}"></paper-icon-button>
 	      </div>
 	      <div id="rawContent" layout vertical flex class="content"></div>
+	      <div class="label-container" layout horizontal center wrap>
+	      	<template repeat="{{label in message.labels}}">
+	          <core-tooltip class="fancy">
+			        <paper-button class="message-label" on-click="{{onLabelClicked}}">
+			      		{{label.name + (label.users.length > 0 ? ('(' + label.users.length + ')') : '')}}
+			        </paper-button>
+		            <div tip>
+		            	<div layout horizontal center hidden?="{{label.liked}}">
+		            		<core-icon icon="loyalty"></core-icon>
+		              		有同感，那就赞一下吧！
+		            	</div>
+		            	<div class="likes-popup" layout vertical hidden?="{{!label.liked}}">
+		            		<template repeat="{{user in label.users}}">
+		            			<div layout horizontal center>
+		            				<div class="middle avatar" style="background-image: url({{user.header}})"></div>
+		            				{{user.name}}
+		            			</div>
+		            		</template>
+		            	</div>
+		            </div>
+	          </core-tooltip>
+	      	</template>
+	      	<div layout horizontal center>
+	      		<paper-input value="{{newLabel}}" hidden?="{{itemIndex != selectIndex}}"></paper-input>
+	      		<core-icon-button icon="add" disabled?="{{itemIndex == selectIndex && !newLabel}}" on-click="{{onNewLabelClicked}}"></core-icon-button>
+	      	</div>
+	      </div>
+	      <yo-http id="yoHttp"></yo-http>
 	</template>
 	<script>
-		Polymer({
-			ready: function () {
-				this.injectBoundHTML(this.message.html, this.$.rawContent);
-			}
-		});
+		(function() {
+			var findUser = function (users, targetId) {
+				if (users) {
+					for (var index in users) {
+						if (users[index].id == targetId) return users[index];
+					}
+				}
+			};
+
+			Polymer({
+				ready: function () {
+					this.currentLabelIndex = -1;
+					this.injectBoundHTML(this.message.html, this.$.rawContent);
+					this.faveriteClass = (this.message.likes && this.message.likes.indexOf(this.userId) >= 0) ? 'red' : 'gray';
+				},
+				toggleLikeMessage: function (event) {
+					var like;
+					if (this.faveriteClass == 'red') {
+						this.faveriteClass = 'gray';
+						like = 'fasle';
+					} else {
+						this.faveriteClass = 'red';
+						like = 'true';
+					}
+
+					this.$.yoHttp.makeRequest(this, function (scope, result) {
+						if (result[0]) {
+							scope.message = result[0];
+						}
+					}, '/note/api/message/like/' + this.userId, 'GET', {
+						like: like,
+						msgid: this.message.id
+					})
+				},
+				onNewLabelClicked: function (event, detail, sender) {
+					if (this.selectIndex != this.itemIndex) {
+						this.selectIndex = this.itemIndex
+					} else {
+						this.$.yoHttp.makeRequest(this, function (scope, result) {
+							if (result[0]) {
+								scope.message = result[0];
+							}
+							scope.newLabel = '';
+							scope.selectIndex = -1;
+						}, '/note/api/message/label/' + this.userId, 'GET', {
+							label: this.newLabel,
+							msgid: this.message.id
+						})
+					}
+				},
+				onLabelClicked: function (event, detail, sender) {
+					var label = event.target.templateInstance.model.label;
+					if (!findUser(label.users, this.userId)) {
+						this.$.yoHttp.makeRequest(this, function (scope, result) {
+							if (result[0]) {
+								scope.message = result[0];
+							}
+						}, '/note/api/message/label/' + this.userId, 'GET', {
+							label: label.name,
+							msgid: this.message.id
+						})
+					}
+				}
+			});
+		})();
 	</script>
 </polymer-element>

@@ -2,6 +2,7 @@ var express = require('express');
 var path = require('path');
 var userApi = require(path.join(__dirname, 'userApi.js'));
 var groupApi = require(path.join(__dirname, 'groupApi.js'));
+var messageApi = require(path.join(__dirname, 'messageApi.js'));
 
 var router = express.Router();
 
@@ -23,5 +24,8 @@ router.get('/group/:groupId/members', groupApi.getGroupMembers);
 router.post('/group/:groupId/message', groupApi.createMessage);
 router.get('/group/:groupId/message', groupApi.getMessages);
 router.get('/group/:groupId/message/contentsearch', groupApi.searchContent);
+
+router.get('/message/like/:userid', messageApi.likeMessage);
+router.get('/message/label/:userid', messageApi.labelMessage);
 
 module.exports = router;

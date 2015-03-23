@@ -17,10 +17,12 @@ var prepareUserGroups = function (userId) {
 		groups.forEach(function (group) {
 			Message.find({'groupId': group._id}).sort('-timestamp').limit(2).exec(function (err, messages) {
 				var clientGroup = utils.createClientGroup(group);
-				clientGroup.recents = utils.createClientMessageBatch(messages);
-				clientGroups.push(clientGroup);
-					
-				if (clientGroups.length == groups.length) defered.resolve(clientGroups);
+				utils.createClientMessageBatch(messages, userId, function(clientMessages) {
+					clientGroup.recents = clientMessages;
+					clientGroups.push(clientGroup);
+						
+					if (clientGroups.length == groups.length) defered.resolve(clientGroups);
+				});
 			});
 		});
 	});

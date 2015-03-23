@@ -47,17 +47,12 @@ var messageOperateCheck = function (req, res) {
 	return true;
 }
 
-var processMessageResult = function (messages, res, ext) {
-	var userIds = [];
+var processMessageResult = function (messages, userId, res, ext) {
 	if (messages) {
-		messages.forEach(function (item) {
-			if (userIds.indexOf(item.userId) < 0) userIds.push(item.userId);
-		});
-
-		User.find({'_id': {$in: userIds}}, function (err, users) {
+		utils.createClientMessageBatch(messages, userId, function (clientMessages) {
 			res.json({
 				success: true,
-				data: utils.createClientMessageBatch(messages, users),
+				data: clientMessages,
 				ext: ext
 			});
 		});
@@ -308,10 +303,10 @@ module.exports = {
 							data: '操作失败：' + err.toString()
 						});
 
-						processMessageResult(messages, res, groupModified ? utils.createClientGroup(req.group) : undefined);
+						processMessageResult(messages, req.user._id, res, groupModified ? utils.createClientGroup(req.group) : undefined);
 					});
 				} else {
-					processMessageResult([message], res, groupModified ? utils.createClientGroup(req.group) : undefined);
+					processMessageResult([message], req.user._id, res, groupModified ? utils.createClientGroup(req.group) : undefined);
 				}
 			});
 		});
@@ -343,7 +338,7 @@ module.exports = {
 				data: '操作失败：' + err.toString()
 			});
 
-			processMessageResult(messages, res);
+			processMessageResult(messages, req.query.userid, res);
 		});
 	},
 	searchContent: function (req, res, next) {
@@ -361,7 +356,7 @@ module.exports = {
 				data: '操作失败：' + err.toString()
 			});
 
-			processMessageResult(messages, res);
+			processMessageResult(messages, req.user._id, res);
 		});
 	}
 };

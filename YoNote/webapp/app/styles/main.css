@@ -7,6 +7,7 @@ html, body {
   height: 100%;
   background: url(../images/bg_pattern_r1.png);
   padding: 25px;
+  margin: 40px 80px;
 }
 
 .editor-sidebar {

@@ -1,3 +1,6 @@
+var path = require('path');
+var User = require(path.join(__dirname, '..', 'mongo', 'user.js'));
+
 var createClientUser = function (user) {
 	return {
 		id: user._id.toString(),
@@ -13,7 +16,9 @@ var createClientMessage = function (message) {
 		timestamp: message.timestamp,
 		text: message.text,
 		html: message.html,
-		tags: message.tags
+		tags: message.tags,
+		likes: message.likes,
+		labels: message.labels
 	}
 };
 var createClientGroup = function (group) {
@@ -68,12 +73,27 @@ module.exports = {
 		}
 		return result;
 	},
-	createClientMessage: function (message) {
-		return createClientMessage(message);
-	},
-	createClientMessageBatch: function (messages, users) {
+	createClientMessageBatch: function (messages, userId, callback) {
 		var result = [];
-		if (messages) {
+		if (!messages) {
+			return callback(result);
+		}
+
+		var userIds = [];
+		messages.forEach(function (item) {
+			if (userIds.indexOf(item.userId) < 0) userIds.push(item.userId);
+			if (item.labels) {
+				item.labels.forEach(function (label) {
+					if (label.users) {
+						label.users.forEach(function (user) {
+							if (userIds.indexOf(user) < 0) userIds.push(user);
+						});
+					}
+				});
+			}
+		});
+
+		User.find({'_id': {$in: userIds}}, function (err, users) {
 			messages.forEach(function (item) {
 				var client = createClientMessage(item);
 				var sender = findUser(users, item.userId);
@@ -81,10 +101,37 @@ module.exports = {
 					client.senderName = sender.name;
 					client.senderHeader = sender.header;
 				}
+
+				if (client.labels) {
+					var labels = [];
+					client.labels.forEach(function (label) {
+						var clientUsers = [];
+						if (label.users) {
+							label.users.forEach(function (user) {
+								var sender = findUser(users, user);
+								if (sender) {
+									clientUsers.push({
+										id: user,
+										name: sender.name,
+										header: sender.header
+									})
+								}
+							});
+						}
+
+						labels.push({
+							name: label.name,
+							users: clientUsers,
+							liked: label.users && label.users.indexOf(userId) >= 0
+						})
+					});
+					client.labels = labels;
+				}
 				
 				result.push(client);
 			});
-		}
-		return result;
+
+			callback(result);
+		});
 	},
 };

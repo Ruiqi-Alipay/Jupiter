@@ -16,6 +16,7 @@
 <link rel="import" href="../../../components/paper-shadow/paper-shadow.html">
 <link rel="import" href="../yo-groupdialog/yo-groupdialog.html">
 <link rel="import" href="yo-messageItem.html">
+<link rel="import" href="../yo-http/yo-http.html">
 
 <polymer-element name="yo-messagelist" attributes="group userId selectedTags">
   <template>
@@ -41,14 +42,14 @@
         </core-toolbar>
 
         <div id="scroller" layout vertical>
-          <template repeat="{{msg in messages}}">
+          <template repeat="{{msg, index in messages}}">
             <div class="messageContainer" layout horizontal>
               <div layout vertical center style="margin-right: 15px;">
                 <div class="middle avatar" style="background-image: url({{msg.senderHeader}})"></div>
                 <div class="tag-button">{{msg.senderName}}</div>
               </div>
               <paper-shadow z="1" flex>
-                <yo-messageItem message="{{msg}}"></yo-messageItem>
+                <yo-messageItem message="{{msg}}" userId="{{userId}}" itemIndex="{{index}}" selectIndex="{{selectIndex}}"></yo-messageItem>
               </paper-shadow>
             </div>
           </template>
@@ -61,45 +62,10 @@
 
     <yo-groupdialog id="editDialog" subject="{{dialogSubject}}" on-action-confirm="{{onActionConfirm}}"></yo-groupdialog>
 
-    <core-ajax id="ajax" handleAs="json"></core-ajax>
+    <yo-http id="yoHttp"></yo-http>
   </template>
   <script>
     (function () {
-      var makeRequest = function (scope, callback, url, method, params, body, contentType) {
-        var responseCallback = function (event) {
-          scope.$.ajax.removeEventListener('core-response', responseCallback);
-          scope.$.ajax.removeEventListener('core-error', errorCallback);
-
-          if (event.detail.response.success) {
-            callback(scope, event.detail.response.data, event.detail.response.ext);
-          } else {
-            scope.fire('user-error', event.detail.response.toString());
-            callback(scope);
-          }
-        };
-        var errorCallback = function (event) {
-          scope.$.ajax.removeEventListener('core-response', responseCallback);
-          scope.$.ajax.removeEventListener('core-error', errorCallback);
-
-          scope.fire('user-error', event.detail.response.toString());
-          callback(scope);
-        };
-
-        scope.$.ajax.url = url;
-        if (contentType) {
-          scope.$.ajax.contentType = contentType;
-        } else {
-          scope.$.ajax.contentType = 'application/x-www-form-urlencoded';
-        }
-        
-        scope.$.ajax.method = method;
-        scope.$.ajax.params = params;
-        scope.$.ajax.body = body ? JSON.stringify(body) : undefined;
-        scope.$.ajax.addEventListener('core-response', responseCallback);
-        scope.$.ajax.addEventListener('core-error', errorCallback);
-        scope.$.ajax.go();
-      };
-
       var scrollToTop = function (targetElement) {
         var animation = new CoreAnimation();
         animation.duration = 300;
@@ -127,7 +93,7 @@
 
       var refreshMessage = function (scope) {
         scope.loading = true;
-        makeRequest(scope, function (scope, messages) {
+        scope.$.yoHttp.makeRequest(scope, function (scope, messages) {
           scope.messages = messages;
           scope.loading = false;
         }, '/note/api/group/' + scope.group.id + '/message', 'GET', {
@@ -152,6 +118,7 @@
 
       Polymer({
         ready: function () {
+          this.selectIndex = -1;
           this.loading = false;
           this.allLoaded = false;
           this.searchMode = false;
@@ -213,7 +180,7 @@
 
           this.loading = true;
           this.async(function () {
-            makeRequest(this, function (scope, messages) {
+            this.$.yoHttp.makeRequest(this, function (scope, messages) {
               if (messages) {
                 if (messages.length > 0) {
                   messages.forEach(function (item) {
@@ -243,7 +210,7 @@
 
             this.searchHandler = this.async(function() {
               var encoded = encodeURIComponent(newValue);
-              makeRequest(this, function (scope, messages) {
+              this.$.yoHttp.makeRequest(this, function (scope, messages) {
                 if (messages) {
                   scope.messages = messages;
                 }
@@ -278,7 +245,7 @@
         },
         onActionConfirm: function (event, detail, sender) {
           if (detail.editor) {
-            makeRequest(this, function (scope, group) {
+            this.$.yoHttp.makeRequest(this, function (scope, group) {
               if (group) {
                 scope.fire('group-updated', group);
               }
@@ -288,7 +255,7 @@
               name: detail.name
             }, 'application/json');
           } else {
-            makeRequest(this, function (scope, group) {
+            this.$.yoHttp.makeRequest(this, function (scope, group) {
               if (group) {
                 scope.fire('group-deleted', group);
               }
