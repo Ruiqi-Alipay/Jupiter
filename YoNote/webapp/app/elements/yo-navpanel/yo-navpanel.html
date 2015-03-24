@@ -18,12 +18,21 @@
 	    		</div>
 		    </core-toolbar>
 		    <div layout vertical>
-		   		<template repeat="{{menu in menuList}}">
-			      <paper-item>
-			        <core-icon icon="{{menu.image}}"></core-icon>
-			        <div class="navbarItem">{{menu.name}}</div>
-			      </paper-item>
-		   		</template>
+		        <paper-item on-click="{{onNavLikesClicked}}">
+		        	<core-icon icon="thumb-up"></core-icon>
+		        	<div class="navbarItem" flex>我赞过的</div>
+		        	{{user.likeCount}}
+		        </paper-item>
+		        <paper-item on-click="{{onNavLabledClicked}}">
+		        	<core-icon icon="loyalty"></core-icon>
+		        	<div class="navbarItem" flex>我标记过的</div>
+		        	{{user.labledCount}}
+		        </paper-item>
+		        <paper-item on-click="{{onNavDraftClicked}}">
+		        	<core-icon icon="drafts"></core-icon>
+		        	<div class="navbarItem" flex>草稿</div>
+		        	{{user.draftCount}}
+		        </paper-item>
 		   		<p class="navbarItem">加入的群组：</p>
 		   		<template repeat="{{group in user.groups}}">
 			      <paper-item on-tap="{{selectGroup}}">
@@ -38,16 +47,21 @@
 	(function() {
 		Polymer({
 			ready: function () {
-				this.menuList = [
-					{name: '我赞过的', image: 'thumb-up'},
-					{name: '我标记过的', image: 'loyalty'},
-					{name: '草稿', image: 'drafts'}
-				];
+				this.navSelection;
 			},
 			selectGroup: function (event, detail, sender) {
 				this.selectedGroup = event.target.templateInstance.model.group;
 				this.fire('select-group', this.selectedGroup);
 			},
+			onNavLikesClicked: function (event, detail, sender) {
+				this.fire('nav-likesclicked');
+			},
+			onNavLabledClicked: function (evnet, detail, sender) {
+				this.fire('nav-labledclicked');
+			},
+			onNavDraftClicked: function (event, detail, sender) {
+				this.fire('nav-driftclicked');
+			}
 		});
 	})();
 	</script>

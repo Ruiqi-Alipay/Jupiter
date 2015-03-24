@@ -4,10 +4,11 @@
 <link rel="import" href="../../../components/core-icon-button/core-icon-button.html">
 <link rel="import" href="../../../components/paper-shadow/paper-shadow.html">
 <link rel="import" href="../../../components/paper-button/paper-button.html">
+<link rel="import" href="../../../components/paper-ripple/paper-ripple.html">
 <link rel="import" href="../../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../yo-http/yo-http.html">
 
-<polymer-element name="yo-messageItem" attributes="message userId itemIndex selectIndex">
+<polymer-element name="yo-messageItem" attributes="message userId itemIndex selectIndex specialGroup">
 	<template layout vertical>
 		<link rel="stylesheet" href="yo-messageItem.css">
 
@@ -17,10 +18,15 @@
 	        </template>
 	        <div flex></div>
 	        <div class="date">{{message.date}}</div>
-	        <paper-icon-button class="{{faveriteClass}}" icon="thumb-up" title="赞" on-click="{{toggleLikeMessage}}"></paper-icon-button>
+	        <paper-icon-button class="{{faveriteClass}}" icon="thumb-up" title="赞"
+	        	on-click="{{toggleLikeMessage}}" hidden?="{{specialGroup}}"></paper-icon-button>
+	        <paper-icon-button icon="clear" title="删除草稿"
+	        	on-click="{{deleteDraft}}" hidden?="{{!specialGroup}}"></paper-icon-button>
 	      </div>
-	      <div id="rawContent" layout vertical flex class="content"></div>
-	      <div class="label-container" layout horizontal center wrap>
+	      <div id="rawContent" layout vertical flex class="content" on-click="{{messageClicked}}">
+	      	
+	      </div>
+	      <div class="label-container" layout horizontal center wrap hidden?="{{specialGroup}}">
 	      	<template repeat="{{label in message.labels}}">
 	          <core-tooltip class="fancy">
 			        <paper-button class="message-label" on-click="{{onLabelClicked}}">
@@ -58,6 +64,18 @@
 					}
 				}
 			};
+		      var getMsgTags = function (scope) {
+		        var newMsgTags = [];
+		        if (scope.selectedTags) {
+		          scope.selectedTags.forEach(function (item) {
+		            newMsgTags.push({
+		              name: item.name,
+		              select: false
+		            })
+		          });
+		        }
+		        return newMsgTags;
+		      };
 
 			Polymer({
 				ready: function () {
@@ -112,6 +130,17 @@
 							msgid: this.message.id
 						})
 					}
+				},
+				messageClicked: function (event, detail, sender) {
+					var editorContainer = document.getElementById('editor-container');
+        			editorContainer.showEditor(getMsgTags(this), this.message);
+				},
+				deleteDraft: function (event, detail, sender) {
+					this.$.yoHttp.makeRequest(this, function (scope, result) {
+						if (result) {
+							scope.fire('message-delete', result);
+						}
+					}, '/note/api/user/' + this.userId + '/draft/' + this.message.id, 'DELETE');
 				}
 			});
 		})();

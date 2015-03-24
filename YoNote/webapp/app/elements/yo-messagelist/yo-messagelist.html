@@ -30,8 +30,9 @@
           <div flex></div>
           <paper-input label="笔记查询" value="{{searchText}}" style="font-size: 16px;" hidden?="{{!searchMode}}"></paper-input>
           <core-icon-button icon="close" on-tap="{{exitSearchMode}}" title="关闭查询模式" hidden?="{{!searchMode}}"></core-icon-button>
-          <core-icon-button icon="search" on-tap="{{enterSearchMode}}" title="进入查询模式" hidden?="{{searchMode}}"></core-icon-button>
-          <core-icon-button icon="more-vert" on-tap="{{menuClicked}}">
+          <core-icon-button icon="search" on-tap="{{enterSearchMode}}" title="进入查询模式" hidden?="{{searchMode || group.id == 'DRAFT'}}"></core-icon-button>
+          <core-icon-button icon="more-vert" on-tap="{{menuClicked}}"
+            hidden?="{{specialGroup}}">
             <paper-dropdown id="groupMenu" class="no-padding" halign="right">
               <div class="menu">
                 <paper-item on-click="{{showEditDialog}}"><core-icon icon="input"></core-icon>编辑群组</paper-item>
@@ -49,7 +50,7 @@
                 <div class="tag-button">{{msg.senderName}}</div>
               </div>
               <paper-shadow z="1" flex>
-                <yo-messageItem message="{{msg}}" userId="{{userId}}" itemIndex="{{index}}" selectIndex="{{selectIndex}}"></yo-messageItem>
+                <yo-messageItem message="{{msg}}" userId="{{userId}}" itemIndex="{{index}}" specialGroup="{{specialGroup}}" selectIndex="{{selectIndex}}" on-message-delete="{{onMessageDeleted}}" selectedTags="{{selectedTags}}"></yo-messageItem>
               </paper-shadow>
             </div>
           </template>
@@ -57,7 +58,7 @@
         </div>
       </core-header-panel>
       <paper-fab id="sendButton" icon="create" class="blue" title="确认"
-            on-tap="{{openEditor}}"></paper-fab>
+            on-tap="{{openEditor}}" hidden?="{{specialGroup}}"></paper-fab>
     </div>
 
     <yo-groupdialog id="editDialog" subject="{{dialogSubject}}" on-action-confirm="{{onActionConfirm}}"></yo-groupdialog>
@@ -91,16 +92,83 @@
         if (tags.length > 0) return encodeURIComponent(tags.join(','));
       };
 
-      var refreshMessage = function (scope) {
+      var searchMessages = function (scope, searchText) {
         scope.loading = true;
-        scope.$.yoHttp.makeRequest(scope, function (scope, messages) {
-          scope.messages = messages;
-          scope.loading = false;
-        }, '/note/api/group/' + scope.group.id + '/message', 'GET', {
-          userid: scope.userId,
-          last: scope.messages.length > 0 ? scope.messages[0].timestamp : undefined,
-          tags: encodeQueyTags(scope.selectedTags)
-        });
+        if (scope.searchHandler) {
+          scope.cancelAsync(scope.searchHandler);
+          scope.searchHandler = undefined;
+        }
+
+        scope.searchHandler = scope.async(function() {
+          var encoded = encodeURIComponent(searchText);
+          var request = {
+            method: 'GET',
+            params: {
+              q: encoded
+            }
+          };
+
+          if (scope.group.id == 'LIKES') {
+            request.url = '/note/api/user/' + scope.userId + '/likes';
+          } else if (scope.group.id == 'LABLED') {
+            request.url = '/note/api/user/' + scope.userId + '/labels';
+          } else {
+            request.url = '/note/api/group/' + scope.group.id + '/message/contentsearch';
+            request.params.userid = scope.userId;
+          }
+
+          scope.$.yoHttp.makeRequest(scope, function (scope, messages) {
+            if (messages) {
+              scope.messages = messages;
+
+              if (messages.length == 10) {
+                scope.fire('user-error', '查询结果过多，按时间顺序显示前10个');
+              }
+            } else {
+              scope.fire('user-error', '没有找到内容包含 "' + searchText + '" 的笔记');
+            }
+            scope.loading = false;
+          }, request.url, request.method, request.params);
+        }, null, 1000);
+      };
+
+      var loadMessages = function (scope) {
+        scope.loading = true;
+
+        scope.async(function () {
+          var request = {
+            method: 'GET',
+            params: {
+              last: scope.messages.length > 0 ? scope.messages[scope.messages.length - 1].timestamp : undefined
+            }
+          };
+          if (scope.group.id == 'LIKES') {
+            request.url = '/note/api/user/' + scope.userId + '/likes';
+          } else if (scope.group.id == 'LABLED') {
+            request.url = '/note/api/user/' + scope.userId + '/labels';
+          } else if (scope.group.id == 'DRAFT') {
+            request.url = '/note/api/user/' + scope.userId + '/draft';
+          } else {
+            request.url = '/note/api/group/' + scope.group.id + '/message';
+            request.params.userid = scope.userId;
+            request.params.tags = encodeQueyTags(scope.selectedTags);
+          }
+
+          scope.$.yoHttp.makeRequest(scope, function (scope, messages) {
+            if (messages) {
+              if (messages.length > 0) {
+                messages.forEach(function (item) {
+                  scope.messages.push(item);
+                });
+              } else {
+                scope.allLoaded = true;
+                scope.fire('user-error', '已加载全部历史记录');
+              }
+            }
+            scope.loading = false;
+            scope.$.threshold.clearLower();
+          }, request.url, request.method, request.params);
+        }, null, 1000);
       };
 
       var getMsgTags = function (scope) {
@@ -116,6 +184,12 @@
         return newMsgTags;
       };
 
+      var findMessageInex = function (messages, target) {
+        for (var index in messages) {
+          if (messages[index].id == target.id) return index;
+        }
+      };
+
       Polymer({
         ready: function () {
           this.selectIndex = -1;
@@ -128,13 +202,17 @@
         },
         groupChanged: function (oldValue, newValue) {
           if (!oldValue || oldValue.id != newValue.id) {
+            this.specialGroup = (this.group.id == 'LIKES' || this.group.id == 'LABLED' || this.group.id == 'DRAFT');
             this.messages = [];
-            refreshMessage(this);
+            loadMessages(this);
           }
         },
         openEditor: function (event, detail, sender) {
           var editorContainer = document.getElementById('editor-container');
-          editorContainer.showEditor(getMsgTags(this), this.group.id, this.userId);
+          editorContainer.showEditor(getMsgTags(this), {
+            groupId: this.group.id,
+            userId: this.userId
+          });
         },
         onSendFinished: function (messages, updatedGroup) {
           if (messages) {
@@ -178,48 +256,11 @@
         loadMore: function (event, detail, sender) {
           if (this.allLoaded) return;
 
-          this.loading = true;
-          this.async(function () {
-            this.$.yoHttp.makeRequest(this, function (scope, messages) {
-              if (messages) {
-                if (messages.length > 0) {
-                  messages.forEach(function (item) {
-                    scope.messages.push(item);
-                  });
-                } else {
-                  scope.allLoaded = true;
-                  scope.fire('user-error', '已加载全部历史记录');
-                }
-              }
-              scope.loading = false;
-              scope.$.threshold.clearLower();
-            }, '/note/api/group/' + this.group.id + '/message', 'GET', {
-              userid: this.userId,
-              tags: encodeQueyTags(this.selectedTags),
-              last: this.messages.length > 0 ? this.messages[this.messages.length - 1].timestamp : undefined
-            });
-          }, null, 1000);
+          loadMessages(this);
         },
         searchTextChanged: function (oldValue, newValue) {
           if (newValue && oldValue != newValue) {
-            this.loading = true;
-            if (this.searchHandler) {
-              this.cancelAsync(this.searchHandler);
-              this.searchHandler = undefined;
-            }
-
-            this.searchHandler = this.async(function() {
-              var encoded = encodeURIComponent(newValue);
-              this.$.yoHttp.makeRequest(this, function (scope, messages) {
-                if (messages) {
-                  scope.messages = messages;
-                }
-                scope.loading = false;
-              }, '/note/api/group/' + this.group.id + '/message/contentsearch', 'GET', {
-                userid: this.userId,
-                q: encoded
-              });
-            }, null, 1000);
+            searchMessages(this, newValue);
           }
         },
         enterSearchMode: function (event, detail, sender) {
@@ -267,7 +308,13 @@
         },
         refreshList: function () {
           this.messages = [];
-          refreshMessage(this);
+          loadMessages(this);
+        },
+        onMessageDeleted: function (event, detail, sender) {
+          var index = findMessageInex(this.messages, detail);
+          if (index >= 0) {
+            this.messages.splice(index, 1);
+          }
         }
       });
     })();

@@ -35,6 +35,15 @@
 	            select: true
 	          });
 	          this.newTag = '';
+	        },
+	        getSelectedTags: function() {
+				var useTags = [];
+				if (this.newMsgTags) {
+					this.newMsgTags.forEach(function (item) {
+						if (item.select) useTags.push(item.name);
+					});
+				}
+				return useTags;
 	        }
 		});
 	})();

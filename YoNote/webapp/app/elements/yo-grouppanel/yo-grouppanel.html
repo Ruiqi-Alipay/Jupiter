@@ -20,7 +20,7 @@
 	    			<p style="margin-top: 5px; font-size: 16px;">共{{group.counts}}篇笔记</p>
 	    		</div>
 		    </core-toolbar>
-		    <div layout vertical>
+		    <div layout vertical hidden?="{{group.id == 'LIKES' || group.id == 'LABLED' || group.id == 'DRAFT'}}">
 				<paper-tabs selected="{{groupTabSelection}}" style="margin-bottom: 5px;">
 					<paper-tab>显示标签</paper-tab>
 					<paper-tab>群组成员</paper-tab>

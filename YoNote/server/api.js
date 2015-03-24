@@ -10,6 +10,14 @@ router.param('userid', userApi.userId);
 router.get('/user', userApi.getUser);
 router.get('/user/search', userApi.searchUser);
 router.delete('/user/:userid', userApi.deleteUser);
+router.get('/user/:userid/likes', userApi.getUserLikesMessage);
+router.get('/user/:userid/labels', userApi.getUserLabledMessage);
+
+router.param('draftId', userApi.draftId);
+router.post('/user/:userid/draft', userApi.createDraft);
+router.post('/user/:userid/draft/:draftId', userApi.updateDraft);
+router.get('/user/:userid/draft', userApi.getDrafts);
+router.delete('/user/:userid/draft/:draftId', userApi.deleteDraft);
 
 router.param('groupId', groupApi.groupId);
 router.param('messageId', groupApi.messageId);

@@ -21,6 +21,18 @@ var createClientMessage = function (message) {
 		labels: message.labels
 	}
 };
+var createClientDraft = function (draft) {
+	return {
+		id: draft._id.toString(),
+		groupId: draft.groupId,
+		userId: draft.userId,
+		date: draft.date,
+		timestamp: draft.timestamp,
+		html: draft.html,
+		text: draft.text,
+		tags: draft.tags,
+	}
+};
 var createClientGroup = function (group) {
 	return {
 		id: group._id.toString(),
@@ -48,6 +60,18 @@ module.exports = {
 			});
 		}
 		return messages;
+	},
+	createClientDraft: function (draft) {
+		return createClientDraft(draft);
+	},
+	createClientDraftBatch: function (drafts) {
+		var result = [];
+		if (drafts) {
+			drafts.forEach(function (item) {
+				result.push(createClientDraft(item));
+			});
+		}
+		return result;
 	},
 	createClientUser: function (user) {
 		return createClientUser(user);

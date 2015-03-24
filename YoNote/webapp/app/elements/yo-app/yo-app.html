@@ -17,7 +17,9 @@
 		<core-drawer-panel id="mainPage" cross-fade hidden>
 
 			<core-animated-pages drawer selected="{{curPage}}" transitions="cross-fade-all" flex>
-				<yo-navpanel user="{{user}}" on-select-group="{{onSelectGroup}}"></yo-navpanel>
+				<yo-navpanel user="{{user}}" on-select-group="{{onSelectGroup}}"
+					on-nav-likesclicked="{{onNavLikesClicked}}" on-nav-labledclicked="{{onNavLabledClicked}}"
+					on-nav-driftclicked="{{onNavDraftClicked}}"></yo-navpanel>
 				<yo-grouppanel group="{{selectedGroup}}" selectedTags="{{selectedTags}}"
 					userId="{{user.id}}" on-tag-change="{{onTagFilterChange}}"></yo-grouppanel>
 			</core-animated-pages>
@@ -112,6 +114,27 @@
 			},
 			onSendFinished: function (messages, updatedGroup) {
 				this.$.messageList.onSendFinished(messages, updatedGroup);
+			},
+			onNavLikesClicked: function (event, detail, sender) {
+				this.selectedGroup = {
+					id: 'LIKES',
+					name: '我赞过的'
+				};
+				this.curPage = 1;
+			},
+			onNavLabledClicked: function (event, detail, sender) {
+				this.selectedGroup = {
+					id: 'LABLED',
+					name: '我标记过的'
+				};
+				this.curPage = 1;
+			},
+			onNavDraftClicked: function (event ,detail, sender) {
+				this.selectedGroup = {
+					id: 'DRAFT',
+					name: '草稿箱'
+				};
+				this.curPage = 1;
 			}
 		});
 	})();

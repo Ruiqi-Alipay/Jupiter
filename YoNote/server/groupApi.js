@@ -48,20 +48,13 @@ var messageOperateCheck = function (req, res) {
 }
 
 var processMessageResult = function (messages, userId, res, ext) {
-	if (messages) {
-		utils.createClientMessageBatch(messages, userId, function (clientMessages) {
-			res.json({
-				success: true,
-				data: clientMessages,
-				ext: ext
-			});
-		});
-	} else {
+	utils.createClientMessageBatch(messages, userId, function (clientMessages) {
 		res.json({
 			success: true,
-			data: []
+			data: clientMessages,
+			ext: ext
 		});
-	}
+	});
 };
 
 module.exports = {
@@ -303,10 +296,10 @@ module.exports = {
 							data: '操作失败：' + err.toString()
 						});
 
-						processMessageResult(messages, req.user._id, res, groupModified ? utils.createClientGroup(req.group) : undefined);
+						processMessageResult(messages, req.body.userid, res, groupModified ? utils.createClientGroup(req.group) : undefined);
 					});
 				} else {
-					processMessageResult([message], req.user._id, res, groupModified ? utils.createClientGroup(req.group) : undefined);
+					processMessageResult([message], req.body.userid, res, groupModified ? utils.createClientGroup(req.group) : undefined);
 				}
 			});
 		});
@@ -320,7 +313,6 @@ module.exports = {
 		if (req.query.tags) {
 			var tags = decodeURIComponent(req.query.tags).split(',');
 			if (tags && tags.length > 0) {
-				console.log(tags);
 				find.tags = {
 					$elemMatch: { $in: tags }
 				};

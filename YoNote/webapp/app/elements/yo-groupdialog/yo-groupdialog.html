@@ -14,7 +14,7 @@
 			  	<input is="core-input" value="{{groupName}}" disabled?="{{busy}}" required>
 			</paper-input-decorator>
 
-			<div layout horizontal flex end-justified>
+			<div layout horizontal flex end-justified center>
 				<paper-spinner active?="{{busy}}"></paper-spinner>
 				<paper-button on-click="{{cancelDialog}}" disabled?="{{busy}}">取消</paper-button>
 				<paper-button autofocus disabled?="{{(editor && !groupName) || busy}}" on-click="{{onConfirm}}">确定</paper-button>
@@ -48,6 +48,7 @@
 			cancelDialog: function (event, detail, sender) {
 				this.busy = false;
 				this.$.dialog.close();
+				this.fire('action-cancel');
 			}
 		});
 	})();

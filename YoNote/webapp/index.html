@@ -155,12 +155,15 @@
         <div id="editor" class="editor">
         </div>      
       </div>
-      <paper-fab mini icon="close" class="editor-close" onclick="toggleEditor(container, false);"></paper-fab>
-      <yo-senderbtn class="editFab" flex-end></yo-senderbtn>  
+      <paper-fab mini icon="close" class="editor-close" onclick="onEditorCloseClicked();"></paper-fab>
+      <yo-senderbtn id="sendbtn" class="editFab" flex-end></yo-senderbtn>
     </div>
   </paper-shadow>
 
   <script>
+    var container = document.getElementById('editor-container');
+    container.style.top = '-3000px';
+
     var quill = new Quill('#editor', {
       modules: {
         'toolbar': { container: '#toolbar' },
@@ -170,17 +173,21 @@
       theme: 'snow'
     });
 
-    var coloseEditor = function (event) {
-      toggleEditor(container, false);
+    var onEditorCloseClicked = function () {
+      if (quill.getText().length < 2) {
+        toggleEditor(false);
+      } else {
+        document.getElementById('sendbtn').createDrift(quill.getText(), quill.getHTML());
+      }
     };
 
-    var toggleEditor = function (targetElement, show) {
+    var toggleEditor = function (show) {
       if (show) {
         container.style.opacity = '0.0';
         container.style.top = '0px';
       }
 
-      var player = targetElement.animate([
+      var player = container.animate([
         {opacity: show ? "0.0" : "1.0"},
         {opacity: show ? "1.0" : "0.0"}
       ], {
@@ -194,15 +201,18 @@
       }
     };
 
-    var container = document.getElementById('editor-container');
-    container.style.top = '-3000px';
-    container.showEditor = function (tags, groupId, userId) {
-      quill.setText('');
-      toggleEditor(container, true);
+    container.showEditor = function (tags, draft) {
+      if (draft.html) {
+        quill.setHTML(draft.html);
+      } else {
+        quill.setText('');
+      }
+
+      toggleEditor(true);
       var tagbar = document.getElementById('yo-tagbar');
+      var sendBtn = document.getElementById('sendbtn');
       tagbar.newMsgTags = tags;
-      tagbar.groupId = groupId;
-      tagbar.userId = userId;
+      sendBtn.draft = draft;
     };
   </script>
 </body>

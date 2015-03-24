@@ -1,54 +1,21 @@
 <link rel="import" href="../../../components/polymer/polymer.html">
-<link rel="import" href="../../../components/core-ajax/core-ajax.html">
 <link rel="import" href="../../../components/paper-fab/paper-fab.html">
 <link rel="import" href="../../../components/paper-spinner/paper-spinner.html">
 <link rel="import" href="../../../components/paper-toast/paper-toast.html">
+<link rel="import" href="../yo-http/yo-http.html">
+<link rel="import" href="../yo-groupdialog/yo-groupdialog.html">
 
 <polymer-element name="yo-senderbtn">
 	<template layout horizontal end>
 		<link rel="stylesheet" href="yo-senderbtn.css">
 		<paper-spinner active?="{{sending}}"></paper-spinner>
 		<paper-fab icon="send" class="editFab green" title="发送" on-click="{{sendMessage}}" hidden?="{{sending}}"></paper-fab>
-		<core-ajax id="ajax" handleAs="json"></core-ajax>
+		<yo-http id="yoHttp"></yo-http>
 		<paper-toast id="toast" class="capsule" text="日志内容不可为空" style="padding-right: 60px;"></paper-toast>
+        <yo-groupdialog id="confirmDialog" on-action-cancel="{{onActionCanceled}}" on-action-confirm="{{onActionConfirm}}"></yo-groupdialog>
 	</template>
 	<script>
 	(function () {
-      var makeRequest = function (scope, callback, url, method, params, body, contentType) {
-        var responseCallback = function (event) {
-          scope.$.ajax.removeEventListener('core-response', responseCallback);
-          scope.$.ajax.removeEventListener('core-error', errorCallback);
-
-          if (event.detail.response.success) {
-            callback(scope, event.detail.response.data, event.detail.response.ext);
-          } else {
-            scope.fire('user-error', event.detail.response.toString());
-            callback(scope);
-          }
-        };
-        var errorCallback = function (event) {
-          scope.$.ajax.removeEventListener('core-response', responseCallback);
-          scope.$.ajax.removeEventListener('core-error', errorCallback);
-
-          scope.fire('user-error', event.detail.response.toString());
-          callback(scope);
-        };
-
-        scope.$.ajax.url = url;
-        if (contentType) {
-          scope.$.ajax.contentType = contentType;
-        } else {
-          scope.$.ajax.contentType = 'application/x-www-form-urlencoded';
-        }
-        
-        scope.$.ajax.method = method;
-        scope.$.ajax.params = params;
-        scope.$.ajax.body = body ? JSON.stringify(body) : undefined;
-        scope.$.ajax.addEventListener('core-response', responseCallback);
-        scope.$.ajax.addEventListener('core-error', errorCallback);
-        scope.$.ajax.go();
-      };
-
 		Polymer({
 			ready: function () {
 				this.sending = false;
@@ -56,12 +23,7 @@
 			sendMessage: function () {
 				this.sending = true;
 				var tagbar = document.getElementById('yo-tagbar');
-				var useTags = [];
-				if (tagbar.newMsgTags) {
-					tagbar.newMsgTags.forEach(function (item) {
-						if (item.select) useTags.push(item.name);
-					});
-				}
+				var useTags = tagbar.getSelectedTags();
 
 				var html = quill.getHTML();
 				var text = quill.getText();
@@ -72,17 +34,44 @@
 					return;
 				}
 
-				makeRequest(this, function (scope, messages, updatedGroup) {
+				this.$.yoHttp.makeRequest(this, function (scope, messages, updatedGroup) {
 					scope.sending = false;
-					toggleEditor(document.getElementById('editor-container'), false);
+					toggleEditor(false);
 					document.getElementById('yo-app').onSendFinished(messages, updatedGroup);
-				}, '/note/api/group/' + tagbar.groupId + '/message', 'POST', undefined, {
-					userid: tagbar.userId,
+				}, '/note/api/group/' + this.draft.groupId + '/message', 'POST', undefined, {
+					userid: this.draft.userId,
 					text: text,
 					html: html,
 					tags: useTags
 				}, 'application/json');
-			}
+			},
+			createDrift: function (text, html) {
+				this.driftText = text;
+				this.driftHtml = html;
+				if (this.draft.id) {
+					this.$.confirmDialog.subject = '更新草稿？';
+				} else {
+					this.$.confirmDialog.subject = '是否保存到草稿？';
+				}
+				this.$.confirmDialog.showDialog(false);
+			},
+    		onActionConfirm: function () {
+				var tagbar = document.getElementById('yo-tagbar');
+				var useTags = tagbar.getSelectedTags();
+
+				this.$.yoHttp.makeRequest(this, function (scope, draft) {
+					scope.$.confirmDialog.closeDialog();
+					toggleEditor(false);
+				}, '/note/api/user/' + this.draft.userId + '/draft' + (this.draft.id ? '/' + this.draft.id : ''), 'POST', undefined, {
+					text: this.driftText,
+					html: this.driftHtml,
+					groupId: this.draft.groupId,
+					tags: useTags
+				}, 'application/json');      
+    		},
+    		onActionCanceled: function () {
+      			toggleEditor(false);
+    		}
 		});
 	})();
 	</script>
