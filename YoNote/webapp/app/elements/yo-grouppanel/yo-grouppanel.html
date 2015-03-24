@@ -17,7 +17,8 @@
 		    <core-toolbar id="drawerTitle" class="tall" mode="standard" layout horizontal center>
 	    		<div layout vertical>
 	    			<h3 style="margin-bottom: 5px;">{{group.name}}</h3>
-	    			<p style="margin-top: 5px; font-size: 16px;">共{{group.counts}}篇笔记</p>
+	    			<p style="margin-top: 5px; font-size: 16px;"
+	    				hidden?="{{group.id == 'DRAFT' || group.id == 'LIKES' || group.id == 'LABLED'}}">共{{group.counts}}篇笔记</p>
 	    		</div>
 		    </core-toolbar>
 		    <div layout vertical hidden?="{{group.id == 'LIKES' || group.id == 'LABLED' || group.id == 'DRAFT'}}">

@@ -4,6 +4,7 @@ var utils = require('./utils.js');
 var Group = require(path.join(__dirname, '..', 'mongo', 'group.js'));
 var User = require(path.join(__dirname, '..', 'mongo', 'user.js'));
 var Message = require(path.join(__dirname, '..', 'mongo', 'message.js'));
+var Draft  =require(path.join(__dirname, '..', 'mongo', 'draft.js'));
 
 var groupOperateParamCheck = function (req, res) {
 	if (!req.group) {
@@ -265,6 +266,14 @@ module.exports = {
 				data: '操作失败：' + err.toString()
 			});
 
+			if (req.body.draftId) {
+				console.log('remove: ' + req.body.draftId);
+				Draft.findById(req.body.draftId).remove(function (err, remove) {
+					console.log(err);
+					console.log(remove);
+				});
+			}
+
 			Message.count({'groupId': req.group._id}, function (err, counts) {
 				var groupModified = false;
 				if (req.group.counts != counts) {
@@ -348,7 +357,7 @@ module.exports = {
 				data: '操作失败：' + err.toString()
 			});
 
-			processMessageResult(messages, req.user._id, res);
+			processMessageResult(messages, req.query.userid, res);
 		});
 	}
 };

@@ -37,12 +37,13 @@
 				this.$.yoHttp.makeRequest(this, function (scope, messages, updatedGroup) {
 					scope.sending = false;
 					toggleEditor(false);
-					document.getElementById('yo-app').onSendFinished(messages, updatedGroup);
+					document.getElementById('yo-app').onSendFinished(scope.draft, messages, updatedGroup);
 				}, '/note/api/group/' + this.draft.groupId + '/message', 'POST', undefined, {
 					userid: this.draft.userId,
 					text: text,
 					html: html,
-					tags: useTags
+					tags: useTags,
+					draftId: this.draft.id
 				}, 'application/json');
 			},
 			createDrift: function (text, html) {
@@ -62,6 +63,7 @@
 				this.$.yoHttp.makeRequest(this, function (scope, draft) {
 					scope.$.confirmDialog.closeDialog();
 					toggleEditor(false);
+					document.getElementById('yo-app').onSaveDraftFinished(draft);
 				}, '/note/api/user/' + this.draft.userId + '/draft' + (this.draft.id ? '/' + this.draft.id : ''), 'POST', undefined, {
 					text: this.driftText,
 					html: this.driftHtml,

@@ -43,6 +43,8 @@
         </core-toolbar>
 
         <div id="scroller" layout vertical>
+          <div hidden?="{{loading || messages.length > 0}}" style="color: gray; font-size: 16px;" self-center>
+          {{searchMode ? '没有搜索到内容包含 "' + searchText + '" 的笔记' : emptyMessage}}</div>
           <template repeat="{{msg, index in messages}}">
             <div class="messageContainer" layout horizontal>
               <div layout vertical center style="margin-right: 15px;">
@@ -50,7 +52,7 @@
                 <div class="tag-button">{{msg.senderName}}</div>
               </div>
               <paper-shadow z="1" flex>
-                <yo-messageItem message="{{msg}}" userId="{{userId}}" itemIndex="{{index}}" specialGroup="{{specialGroup}}" selectIndex="{{selectIndex}}" on-message-delete="{{onMessageDeleted}}" selectedTags="{{selectedTags}}"></yo-messageItem>
+                <yo-messageItem message="{{msg}}" userId="{{userId}}" itemIndex="{{index}}" draftItem="{{group.id == 'DRAFT'}}" selectIndex="{{selectIndex}}" selectedTags="{{selectedTags}}"></yo-messageItem>
               </paper-shadow>
             </div>
           </template>
@@ -168,20 +170,7 @@
             scope.loading = false;
             scope.$.threshold.clearLower();
           }, request.url, request.method, request.params);
-        }, null, 1000);
-      };
-
-      var getMsgTags = function (scope) {
-        var newMsgTags = [];
-        if (scope.selectedTags) {
-          scope.selectedTags.forEach(function (item) {
-            newMsgTags.push({
-              name: item.name,
-              select: false
-            })
-          });
-        }
-        return newMsgTags;
+        }, null, 300);
       };
 
       var findMessageInex = function (messages, target) {
@@ -205,51 +194,68 @@
             this.specialGroup = (this.group.id == 'LIKES' || this.group.id == 'LABLED' || this.group.id == 'DRAFT');
             this.messages = [];
             loadMessages(this);
+
+            if (this.group.id == 'LIKES') {
+              this.emptyMessage = '你还没有赞过任何笔记哦，快去赞一下小伙伴的优秀笔记吧';
+            } else if (this.group.id == 'LABLED') {
+              this.emptyMessage = '你还没有标记过任何笔记哦，快去标记一下小伙伴的优秀笔记吧';
+            } else if (this.group.id == 'DRAFT') {
+              this.emptyMessage = '没有草稿';
+            } else {
+              this.emptyMessage = '这个群组还没有笔记哦，记些什么吧';
+            }
           }
         },
         openEditor: function (event, detail, sender) {
           var editorContainer = document.getElementById('editor-container');
-          editorContainer.showEditor(getMsgTags(this), {
+          editorContainer.showEditor({
             groupId: this.group.id,
             userId: this.userId
           });
         },
-        onSendFinished: function (messages, updatedGroup) {
-          if (messages) {
-            messages.reverse();
-            for (var index in messages) {
-              this.messages.unshift(messages[index]);
+        onSendFinished: function (drift, messages, updatedGroup) {
+          if (drift.id && this.specialGroup) {
+            var index = findMessageInex(this.messages, drift);
+            if (index >= 0) {
+              this.messages.splice(index, 1);
+            }
+          } else if (!this.specialGroup) {
+            if (messages) {
+              messages.reverse();
+              for (var index in messages) {
+                this.messages.unshift(messages[index]);
+              }
+
+              if (!this.group.recents) {
+                this.group.recents = [];
+              }
+
+              if (messages.length == 1) {
+                this.group.recents.unshift(messages[0]);
+              } else if (messages.length >= 2) {
+                this.group.recents.unshift(messages[1]);
+                this.group.recents.unshift(messages[0]);
+              }
+
+              if (this.group.recents.length > 2) {
+                this.group.recents.splice(2);
+              }
+            }
+            scrollToTop(this.$.headerPanel.scroller);
+
+            if (updatedGroup) {
+              updatedGroup.members = this.group.members;
+              this.group = updatedGroup;
             }
 
-            if (!this.group.recents) {
-              this.group.recents = [];
-            }
-
-            if (messages.length == 1) {
-              this.group.recents.unshift(messages[0]);
-            } else if (messages.length >= 2) {
-              this.group.recents.unshift(messages[1]);
-              this.group.recents.unshift(messages[0]);
-            }
-
-            if (this.group.recents.length > 2) {
-              this.group.recents.splice(2);
-            }
-          }
-          scrollToTop(this.$.headerPanel.scroller);
-
-          if (updatedGroup) {
-            updatedGroup.members = this.group.members;
-            this.group = updatedGroup;
-          }
-
-          this.newMsgTags = [];
-          if (updatedGroup.msgTags) {
-            for (var index in updatedGroup.msgTags) {
-              this.newMsgTags.push({
-                name: updatedGroup.msgTags[index],
-                select: false
-              })
+            this.newMsgTags = [];
+            if (updatedGroup.msgTags) {
+              for (var index in updatedGroup.msgTags) {
+                this.newMsgTags.push({
+                  name: updatedGroup.msgTags[index],
+                  select: false
+                })
+              }
             }
           }
         },
@@ -314,7 +320,11 @@
           var index = findMessageInex(this.messages, detail);
           if (index >= 0) {
             this.messages.splice(index, 1);
+            this.fire('draft-deleted', index);
           }
+        },
+        getMessages: function () {
+          return this.messages;
         }
       });
     })();

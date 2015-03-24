@@ -8,11 +8,9 @@
 	<template>
 	  <link rel="stylesheet" href="yo-tagbar.css">
       <div layout vertical>
-        <div layout horizontal>
-	        <paper-input-decorator label="添加标签" style="padding: 2px;">
-	          <input is="core-input" value="{{newTag}}">
-	        </paper-input-decorator>
-	        <core-icon-button icon="add" disabled?="{{!newTag}}" on-click="{{createNewTag}}"></core-icon-button>
+        <div layout horizontal center style="min-height: 40px;">
+        	<paper-input label="新标签" value="{{newTag}}"></paper-input>
+	        <core-icon-button icon="add" disabled?="{{!newTag}}" on-click="{{createNewTag}}" style="min-width: 38px; min-height: 38px;"></core-icon-button>
         </div>
         <template repeat="{{tag in newMsgTags}}">
           <paper-button toggle active?="{{tag.select}}" class="tagToggle"
@@ -22,6 +20,12 @@
 	</template>
 	<script>
 	(function () {
+		var findTagIndex = function (tags, targetName) {
+			for (var index in tags) {
+				if (tags[index].name == targetName) return index;
+			}
+		};
+
 		Polymer({
 			ready: function () {
 				this.newMsgTags = [];
@@ -30,11 +34,13 @@
 	          event.target.templateInstance.model.tag.select = !event.target.templateInstance.model.tag.select;
 	        },
 	        createNewTag: function (event, detail, sender) {
-	          this.newMsgTags.push({
-	            name: this.newTag,
-	            select: true
-	          });
-	          this.newTag = '';
+	        	if (!findTagIndex(this.newMsgTags, this.newTag)) {
+		          this.newMsgTags.push({
+		            name: this.newTag,
+		            select: true
+		          });
+	        	}
+	            this.newTag = '';
 	        },
 	        getSelectedTags: function() {
 				var useTags = [];

@@ -21,17 +21,17 @@
 		        <paper-item on-click="{{onNavLikesClicked}}">
 		        	<core-icon icon="thumb-up"></core-icon>
 		        	<div class="navbarItem" flex>我赞过的</div>
-		        	{{user.likeCount}}
+		        	{{user.likeCount > 0 ? user.likeCount : ''}}
 		        </paper-item>
 		        <paper-item on-click="{{onNavLabledClicked}}">
 		        	<core-icon icon="loyalty"></core-icon>
 		        	<div class="navbarItem" flex>我标记过的</div>
-		        	{{user.labledCount}}
+		        	{{user.labledCount > 0 ? user.labledCount : ''}}
 		        </paper-item>
 		        <paper-item on-click="{{onNavDraftClicked}}">
 		        	<core-icon icon="drafts"></core-icon>
 		        	<div class="navbarItem" flex>草稿</div>
-		        	{{user.draftCount}}
+		        	{{user.draftCount > 0 ? user.draftCount : ''}}
 		        </paper-item>
 		   		<p class="navbarItem">加入的群组：</p>
 		   		<template repeat="{{group in user.groups}}">

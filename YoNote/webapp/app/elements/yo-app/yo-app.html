@@ -30,7 +30,9 @@
 
 				<yo-messagelist id="messageList" group="{{selectedGroup}}" userId="{{user.id}}" on-back="{{onback}}"
 					on-user-error="{{handleError}}" on-group-updated="{{onGroupUpdate}}"
-					on-group-deleted="{{onGroupDelete}}" selectedTags="{{selectedTags}}"></yo-messagelist>
+					on-group-deleted="{{onGroupDelete}}" selectedTags="{{selectedTags}}"
+					on-like-changed="{{onLikeChanged}}" on-message-newlabel="{{onNewLabel}}"
+					on-message-delete="{{onMessageDeleted}}"></yo-messagelist>
 
 		    </core-animated-pages>
 
@@ -48,6 +50,12 @@
 	</template>
 	<script>
 	(function () {
+      var findMessageInex = function (messages, target) {
+        for (var index in messages) {
+          if (messages[index].id == target.id) return index;
+        }
+      };
+
 		var findIndex = function (groups, targetId) {
 			for (var index in groups) {
 				var group = groups[index];
@@ -112,8 +120,24 @@
 			onTagFilterChange: function (event, detail, sender) {
 				this.$.messageList.refreshList();
 			},
-			onSendFinished: function (messages, updatedGroup) {
-				this.$.messageList.onSendFinished(messages, updatedGroup);
+			onMessageDeleted: function (event, detail, sender) {
+				  var targetMessages = this.$.messageList.getMessages();
+		          var index = findMessageInex(targetMessages, detail);
+		          if (index >= 0) {
+		            targetMessages.splice(index, 1);
+		          }
+				this.user.draftCount--;
+			},
+			onSendFinished: function (drift, messages, updatedGroup) {
+				if (drift.id) {
+					this.user.draftCount--;
+				}
+				this.$.messageList.onSendFinished(drift, messages, updatedGroup);
+			},
+			onSaveDraftFinished: function (draft) {
+				if (draft) {
+					this.user.draftCount++;
+				}
 			},
 			onNavLikesClicked: function (event, detail, sender) {
 				this.selectedGroup = {
@@ -135,6 +159,24 @@
 					name: '草稿箱'
 				};
 				this.curPage = 1;
+			},
+			onLikeChanged: function (event, detail ,sender) {
+				if (detail == 'true') {
+					this.user.likeCount++;
+				} else if (detail == 'false') {
+					this.user.likeCount--;
+				}
+			},
+			onNewLabel: function (event, detail ,sender) {
+				this.user.labledCount++;
+			},
+			getGroup: function (grouId) {
+				for (var index in this.user.groups) {
+					var group = this.user.groups[index];
+					if (group.id == grouId) {
+						return group;
+					}
+				}
 			}
 		});
 	})();
