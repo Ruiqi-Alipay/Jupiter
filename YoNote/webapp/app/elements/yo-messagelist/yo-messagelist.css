@@ -54,6 +54,12 @@ paper-fab.blue {
 	margin-top: 20px;
 }
 
+.message-sender {
+	color: gray;
+	font-size: 14px;
+	word-wrap: break-word;
+}
+
 /* Avatar */
 .avatar {
 	margin-bottom: 5px;

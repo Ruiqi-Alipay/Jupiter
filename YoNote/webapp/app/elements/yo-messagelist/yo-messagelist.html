@@ -47,9 +47,9 @@
           {{searchMode ? '没有搜索到内容包含 "' + searchText + '" 的笔记' : emptyMessage}}</div>
           <template repeat="{{msg, index in messages}}">
             <div class="messageContainer" layout horizontal>
-              <div layout vertical center style="margin-right: 15px;">
+              <div layout vertical center style="margin-right: 15px; max-width: 50px;">
                 <div class="middle avatar" style="background-image: url({{msg.senderHeader}})"></div>
-                <div class="tag-button">{{msg.senderName}}</div>
+                <div class="message-sender">{{msg.senderName}}</div>
               </div>
               <paper-shadow z="1" flex>
                 <yo-messageItem message="{{msg}}" userId="{{userId}}" itemIndex="{{index}}" draftItem="{{group.id == 'DRAFT'}}" selectIndex="{{selectIndex}}" selectedTags="{{selectedTags}}"></yo-messageItem>
