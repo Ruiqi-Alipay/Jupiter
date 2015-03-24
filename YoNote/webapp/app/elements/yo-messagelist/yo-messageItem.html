@@ -85,11 +85,13 @@
 					this.faveriteClass = (this.message.likes && this.message.likes.indexOf(this.userId) >= 0) ? 'red' : 'gray';
 				},
 				domReady: function () {
-					if (this.$.rawContent.clientHeight != this.$.rawContent.scrollHeight) {
-						this.showMoreBtn = true;
-					} else {
-						this.showMoreBtn = false;
-					}
+					this.async(function () {
+						if (this.$.rawContent.clientHeight != this.$.rawContent.scrollHeight) {
+							this.showMoreBtn = true;
+						} else {
+							this.showMoreBtn = false;
+						}
+					}, null, 200);
 				},
 				messageChanged: function (oldValue, newValue) {
 					if (newValue && (!oldValue || oldValue.likes != newValue.likes)) {
