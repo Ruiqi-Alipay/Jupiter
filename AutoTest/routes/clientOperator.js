@@ -40,7 +40,7 @@ if (clcd && ccck) {break;}
 var out="Couldn't find any valid number for given pattern";
 if (clcd && ccck) {
 var cn=chkCard(cdi);
-var ccnspc=" ";
+var ccnspc="";
 
 var cdif="";
 for (var i=1;i<=cdi.length;i++) {
