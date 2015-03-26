@@ -11,6 +11,7 @@ router.get('/sysconfiglist', clientOperator.getSystemConfigs);
 router.get('/environment/checkversion', clientOperator.getVersion);
 router.get('/scriptlist', clientOperator.getScriptsMeun);
 router.get('/getscripts', clientOperator.getScriptById);
+router.get('/creditcard', clientOperator.generateCreditCard);
 
 router.param('appId', appOperator.appId);
 router.post('/testapp', appOperator.newApp);
