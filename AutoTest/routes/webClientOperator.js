@@ -8,7 +8,7 @@ module.exports = {
 	  });
 	},
 	getScriptsByFolder: function (req, res, next) {
-	  TestScript.find({'folder': req.params.folder_id}).sort('title').exec(function(err, scripts){
+	  TestScript.find({'folder': req.params.folder_id}, {title: 1, date: 1, type: 1}).sort('title').exec(function(err, scripts){
 	    res.json(scripts ? scripts : []);
 	  });
 	}
