@@ -9,4 +9,4 @@ var TestScriptSchema = new mongoose.Schema({
   count: {type: Number, default: 0}
 });
 
-mongoose.model('TestScript', TestScriptSchema);
+module.exports = mongoose.model('TestScript', TestScriptSchema);

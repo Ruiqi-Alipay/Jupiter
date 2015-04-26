@@ -4,4 +4,4 @@ var TestScriptFolderSchema = new mongoose.Schema({
   title: String,
 });
 
-mongoose.model('TestScriptFolder', TestScriptFolderSchema);
+module.exports = mongoose.model('TestScriptFolder', TestScriptFolderSchema);

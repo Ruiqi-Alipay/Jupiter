@@ -6,6 +6,7 @@ var prameterOperator = require('./prameterOperator.js');
 var appOperator = require('./appOperator.js');
 var reportOperator = require('./reportOperator.js');
 var clientOperator = require('./clientOperator.js');
+var webClientOperator = require('./webClientOperator.js');
 
 router.get('/sysconfiglist', clientOperator.getSystemConfigs);
 router.get('/environment/checkversion', clientOperator.getVersion);
@@ -42,5 +43,8 @@ router.post('/report', reportOperator.newReport);
 router.get('/testreport', reportOperator.getReports);
 router.delete('/testreport/:reportId', reportOperator.deleteReport);
 router.get('/api/reportdata', reportOperator.getReportData);
+
+router.get('/webclient/scriptfolder', webClientOperator.getScriptFolders);
+router.get('/webclient/testscript/:folder_id', webClientOperator.getScriptsByFolder);
 
 module.exports = router;
