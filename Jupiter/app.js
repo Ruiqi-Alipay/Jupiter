@@ -4,7 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 
 var root = require('./routes/rootIndex')
-var autoTest = require('../AutoTest/app.js');
+var autoTest = require('../AutoTestNew/app.js');
 var adkEditor = require('../SDKEditor/app.js');
 var autoPack = require('../AutoPack/app.js').app;
 var feedbackCenter = require('../FeedbackCenter/app.js');
