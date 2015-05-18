@@ -5,7 +5,8 @@
   "main": "js/app.js",
   "scripts": {
     "start": "watchify -o js/bundle.js -v -d js/app.js",
-    "build": "browserify . -t [envify --NODE_ENV production] | uglifyjs -cm > js/bundle.min.js"
+    "build": "browserify . -t [envify --NODE_ENV production] | uglifyjs -cm > js/bundle.min.js",
+    "min": "browserify js/app.js | uglifyjs -c > js/bundle.min.js"
   },
   "author": "ruiqi",
   "license": "ISC",
@@ -24,10 +25,11 @@
     "react-tap-event-plugin": "^0.1.6"
   },
   "devDependencies": {
-    "browserify": "^9.0.8",
+    "browserify": "^10.2.0",
     "envify": "^3.4.0",
     "reactify": "^1.1.0",
-    "watchify": "^3.1.2"
+    "uglify-js": "^2.4.21",
+    "watchify": "^3.2.1"
   },
   "browserify": {
     "transform": [
