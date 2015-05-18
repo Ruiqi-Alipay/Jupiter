@@ -10,6 +10,7 @@ router.delete('/report/:report_id', require('./api-report-delete'));
 router.post('/package', require('./api-package-create'));
 router.get('/package', require('./api-package-list'));
 router.delete('/package/:package_id', require('./api-package-delete'));
+router.get('/testapp', require('./api-client-app'));
 
 router.post('/parameter', require('./api-parameter-create'));
 router.put('/parameter/:parameter_id', require('./api-parameter-update'));
