@@ -21,6 +21,7 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use('/api', require(path.join(__dirname, 'server')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/reports', express.static(path.join(__dirname, 'reports')));
 app.use('/reporter', express.static(path.join(__dirname, 'reporter')));
 app.use('/', express.static(path.join(__dirname, 'web')));
