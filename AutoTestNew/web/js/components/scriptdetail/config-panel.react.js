@@ -30,6 +30,8 @@ module.exports = React.createClass({
 		if (scripts) {
 			if (select) {
 				selectTitle = findScriptTitle(scripts, select);
+			} else {
+				selectTitle = '(无)';
 			}
 			configScriptViews = scripts.map(function (script, index) {
 				return (
@@ -38,6 +40,11 @@ module.exports = React.createClass({
 					</li>
 				);
 			}, this)
+			configScriptViews.unshift(
+				<li key='-1' onClick={this._onSelectScript.bind(this, '')}>
+					<a>(无)</a>
+				</li>
+			);
 		}
 
 		return (

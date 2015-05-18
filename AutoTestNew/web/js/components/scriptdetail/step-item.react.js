@@ -90,6 +90,8 @@ module.exports = React.createClass({
 			targets = ['多选框'];
 		} else if (action.type == '点击') {
 			paramView = (<input className="form-control" type="text" value={action.target} onChange={this._onTargetInputChange}/>);
+		} else if (action.type == '文案校验') {
+			paramView = (<input className="form-control" type="text" value={action.target} onChange={this._onTargetInputChange}/>);
 		}
 
 		if (targets) {

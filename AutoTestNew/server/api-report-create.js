@@ -2,6 +2,7 @@ var targz = require('tar.gz'),
     fs = require('fs-extra'),
     path = require('path'),
     ApiUtils = require('./api-utils'),
+    moment = require('moment'),
     Report = require(path.join(__dirname, '..', 'mongodb', 'report'));
 
 module.exports = function (req, res, next) {
