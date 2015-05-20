@@ -7,7 +7,8 @@ module.exports = function (req, res, next) {
 		});
 	}
 
-	if (body.username == 'yuhe' && body.password == 'yuhe123') {
+	if ((body.username == 'yuhe' && body.password == 'yuhe123')
+		|| (body.username == 'wb-zhongc' && body.password == '123')) {
 		return res.json({
 			success: true,
 			token: 'FRAKETOKEN'
