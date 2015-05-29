@@ -503,7 +503,7 @@ module.exports = {
 	          var clientScripts = [];
 	          scripts.forEach(function(script) {
 	            var item = JSON.parse(script.content);
-	            item.title = item.title + '-' + folderNameMap[script.folder];
+	            item.title = script.title + '-' + folderNameMap[script.folder];
 	            clientScripts.push(item);
 	          });
 
