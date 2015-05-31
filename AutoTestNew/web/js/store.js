@@ -52,10 +52,7 @@ var CentralStore = assign({}, EventEmitter.prototype, {
 			if (!currentScript || currentScript.id || currentScript.folder != folder) {
 				_scriptDetailDatas.script = {
 					folder: folder,
-					type: 'Script',
-					content: {
-						order: {}
-					}
+					type: 'Script'
 				};
 			}
 		} else {
@@ -183,7 +180,6 @@ CentralStore.dispatchToken = Dispatcher.register(function (action) {
 			serverApi.loadScript(action.data, function (response) {
 				if (response.success) {
 					var data = response.data;
-					data.script.content = JSON.parse(data.script.content);
 					_scriptDetailDatas = data;
 					if (_responseMessage && _responseMessage.target != data.script.id) {
 						_responseMessage = undefined;
@@ -204,7 +200,13 @@ CentralStore.dispatchToken = Dispatcher.register(function (action) {
 			break;
 		case Actions.SAVE_SCRIPT:
 			var script = _scriptDetailDatas.script;
-			script.content = JSON.stringify(script.content);
+			if (script.actions) {
+				script.actions = JSON.stringify(script.actions);
+			}
+			if (script.parameters) {
+				script.parameters = JSON.stringify(script.parameters);
+			}
+
 			if (!script.id) {
 				serverApi.createScript(script, function (response) {
 					if (response.success) {
@@ -228,9 +230,7 @@ CentralStore.dispatchToken = Dispatcher.register(function (action) {
 			} else {
 				serverApi.updateScript(script, function (response) {
 					if (response.success) {
-						var data = response.data;
-						data.content = JSON.parse(data.content);
-						_scriptDetailDatas.script = data;
+						_scriptDetailDatas.script = response.data;
 						_responseMessage = {
 							target: script.id,
 							message: 'Update script success'
@@ -248,7 +248,6 @@ CentralStore.dispatchToken = Dispatcher.register(function (action) {
 		case Actions.SAVE_SCRIPT_AS:
 			var script = {};
 			$.extend(script, _scriptDetailDatas.script);
-			script.content = JSON.stringify(script.content);
 			script.folder = action.data;
 			serverApi.createScript(script, function (response) {
 				if (response.success) {
@@ -306,21 +305,15 @@ CentralStore.dispatchToken = Dispatcher.register(function (action) {
 		case Actions.DETAIL_BASICINFO_UPDATE:
 			var script = _scriptDetailDatas.script;
 			for (var key in action.data) {
-				if (key == 'title') {
-					script.title = action.data.title;
-				} else if (key == 'type') {
-					script.type = action.data.type;
-				} else {
-					script.content.order[key] = action.data[key];
-				}
+				script[key] = action.data[key];
 			}
 			CentralStore.emit(DASHBOARD_DATA_WATCHER);
 			break;
 		case Actions.DETAIL_PARAMETER_CREATE:
-			if (!_scriptDetailDatas.script.content.parameters) {
-				_scriptDetailDatas.script.content.parameters = [];
+			if (!_scriptDetailDatas.script.parameters) {
+				_scriptDetailDatas.script.parameters = [];
 			}
-			_scriptDetailDatas.script.content.parameters.push({
+			_scriptDetailDatas.script.parameters.push({
 				name: '',
 				value: ''
 			});
@@ -328,11 +321,11 @@ CentralStore.dispatchToken = Dispatcher.register(function (action) {
 			break;
 		case Actions.DETAIL_CONFIG_UPDATE:
 			var script = _scriptDetailDatas.script;
-			script.content.configRef = action.data;
+			script.config = action.data;
 			CentralStore.emit(DASHBOARD_DATA_WATCHER);
 			break;
 		case Actions.DETAIL_PARAMETER_UPDATE:
-			var targetParameter = _scriptDetailDatas.script.content.parameters[action.data.index];
+			var targetParameter = _scriptDetailDatas.script.parameters[action.data.index];
 			delete action.data.index;
 			for (var key in action.data) {
 				targetParameter[key] = action.data[key];
@@ -340,18 +333,21 @@ CentralStore.dispatchToken = Dispatcher.register(function (action) {
 			CentralStore.emit(DASHBOARD_DATA_WATCHER);
 			break;
 		case Actions.DETAIL_PARAMETER_DELETE:
-			_scriptDetailDatas.script.content.parameters.splice(action.data.index, 1);
+			_scriptDetailDatas.script.parameters.splice(action.data.index, 1);
 			CentralStore.emit(DASHBOARD_DATA_WATCHER);
 			break;
 		case Actions.DETAIL_ACTION_CREATE:
-			_scriptDetailDatas.script.content.actions.splice(action.data.index, 0, {
+			if (!_scriptDetailDatas.script.actions) {
+				_scriptDetailDatas.script.actions = [];
+			}
+			_scriptDetailDatas.script.actions.splice(action.data.index, 0, {
 				type: '点击',
 				target: ''
 			});
 			CentralStore.emit(DASHBOARD_DATA_WATCHER);
 			break;
 		case Actions.DETAIL_ACTION_UPDATE:
-			var targetAction = _scriptDetailDatas.script.content.actions[action.data.index];
+			var targetAction = _scriptDetailDatas.script.actions[action.data.index];
 			delete action.data.index;
 			for (var key in action.data) {
 				targetAction[key] = action.data[key];
@@ -359,7 +355,7 @@ CentralStore.dispatchToken = Dispatcher.register(function (action) {
 			CentralStore.emit(DASHBOARD_DATA_WATCHER);
 			break;
 		case Actions.DETAIL_ACTION_DELETE:
-			_scriptDetailDatas.script.content.actions.splice(action.data.index, 1);
+			_scriptDetailDatas.script.actions.splice(action.data.index, 1);
 			CentralStore.emit(DASHBOARD_DATA_WATCHER);
 			break;
 

@@ -1,6 +1,6 @@
 var path = require('path'),
 	ApiUtils = require('./api-utils'),
-    Script = require(path.join(__dirname, '..', 'mongodb', 'script')),
+    Script = require(path.join(__dirname, '..', 'mongodb', 'new-script')),
     Folder = require(path.join(__dirname, '..', 'mongodb', 'folder'));
 
 module.exports = function (req, res, next) {

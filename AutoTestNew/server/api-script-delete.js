@@ -1,6 +1,6 @@
 var path = require('path'),
 	ApiUtils = require('./api-utils'),
-    Script = require(path.join(__dirname, '..', 'mongodb', 'script'));
+    Script = require(path.join(__dirname, '..', 'mongodb', 'new-script'));
 
 module.exports = function (req, res, next) {
 	Script.findOneAndRemove({ _id: req.params.script_id }, function(err, script){

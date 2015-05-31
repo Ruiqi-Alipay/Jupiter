@@ -1,5 +1,5 @@
 var path = require('path'),
-	Script = require(path.join(__dirname, '..', 'mongodb', 'script')),
+	Script = require(path.join(__dirname, '..', 'mongodb', 'new-script')),
 	apiUtils = require('./api-utils');
 
 module.exports = function (req, res, next) {

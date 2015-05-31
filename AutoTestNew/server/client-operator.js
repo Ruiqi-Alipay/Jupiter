@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var path = require('path');
 var fs = require('fs');
-var TestScript = require('../mongodb/script');
+var TestScript = require('../mongodb/new-script');
 var TestScriptFolder = require('../mongodb/folder');
 var ScriptParameter = require('../mongodb/parameter');
 
@@ -489,6 +489,7 @@ module.exports = {
 	  if (ids) {
 	    ScriptParameter.find(function(err, params){
 	      var idArray = ids.split(',');
+
 	      TestScript.find({'_id': {'$in' : idArray}}, function(err, scripts) {
 	        if(err){ return next(err); }
 
@@ -502,27 +503,24 @@ module.exports = {
 
 	          var clientScripts = [];
 	          scripts.forEach(function(script) {
-	            var item = JSON.parse(script.content);
-	            item.title = script.title + '-' + folderNameMap[script.folder];
-	            clientScripts.push(item);
+	            script.title = script.title + '-' + folderNameMap[script.folder];
+	            clientScripts.push(script);
 	          });
 
 	          var configIds = [];
 	          clientScripts.forEach(function(script) {
-	            if (script.configRef) {
-	              configIds.push(script.configRef);
+	            if (script.config) {
+	              configIds.push(script.config);
 	            }
 	          });
 
-
-	          TestScript.find({$or: [{'_id': {'$in' : configIds}}, {'title': 'ROLLBACK_ACTIONS'}]}, function(err, configs) {
+	          TestScript.find({'_id': {'$in' : configIds}}, function(err, configs) {
 	              if(err){ return next(err); }
 
 	              var clientConfigs = [];
 	              configs.forEach(function(config) {
-	                var item = JSON.parse(config.content);
-	                item.id = config._id;
-	                clientConfigs.push(item);
+	                config.id = config._id;
+	                clientConfigs.push(config);
 	              });
 
 	              res.json({

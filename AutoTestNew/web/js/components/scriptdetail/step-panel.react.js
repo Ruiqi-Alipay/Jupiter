@@ -10,7 +10,7 @@ module.exports = React.createClass({
 
 	_onAppendClicked: function (event) {
 		Dispatcher.detailCreateAction({
-			index: this.props.actions.length
+			index: this.props.actions ? this.props.actions.length : 0
 		});
 	},
 

@@ -1,5 +1,5 @@
 var path = require('path'),
-	Script = require(path.join(__dirname, '..', 'mongodb', 'script')),
+	Script = require(path.join(__dirname, '..', 'mongodb', 'new-script')),
 	Folder = require(path.join(__dirname, '..', 'mongodb', 'folder')),
 	apiUtils = require('./api-utils');
 

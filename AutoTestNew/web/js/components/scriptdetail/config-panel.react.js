@@ -2,13 +2,6 @@ var React = require('react'),
 	ReactPropTypes = React.PropTypes,
 	Dispatcher = require('../../dispatcher').utils;
 
-function findScriptTitle (scripts, targetId) {
-	for (var index in scripts) {
-		if (scripts[index].id == targetId) {
-			return scripts[index].title;
-		}
-	}
-}
 
 module.exports = React.createClass({
 
@@ -17,35 +10,8 @@ module.exports = React.createClass({
 		select: ReactPropTypes.string
 	},
 
-	_onSelectScript: function (scriptId) {
-		Dispatcher.detailConfigScriptUpdate(scriptId);
-	},
-
 	render: function () {
-		var scripts = this.props.scripts,
-			select = this.props.select,
-			selectTitle,
-			configScriptViews;
 
-		if (scripts) {
-			if (select) {
-				selectTitle = findScriptTitle(scripts, select);
-			} else {
-				selectTitle = '(无)';
-			}
-			configScriptViews = scripts.map(function (script, index) {
-				return (
-					<li key={index} onClick={this._onSelectScript.bind(this, script.id)}>
-						<a>{script.title}</a>
-					</li>
-				);
-			}, this)
-			configScriptViews.unshift(
-				<li key='-1' onClick={this._onSelectScript.bind(this, '')}>
-					<a>(无)</a>
-				</li>
-			);
-		}
 
 		return (
 			<div className="panel panel-default">
@@ -53,16 +19,7 @@ module.exports = React.createClass({
 			  	<b>脚本预配置</b>
 			  </div>
 			  <div className="panel-body">
-				<div className="btn-group" role="group">
-					<button id='actionType' type="button" className="btn btn-default btn-sm dropdown-toggle"
-						data-toggle="dropdown" aria-expanded='false'>
-						{selectTitle}
-						<span className="caret"></span>
-					</button>
-					<ul className="dropdown-menu" role="menu" aria-labelledby="actionType">
-						{configScriptViews}
-					</ul>
-				</div>
+
 			  </div>
 			</div>
 		);

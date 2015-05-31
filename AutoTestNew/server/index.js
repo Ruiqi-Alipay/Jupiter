@@ -38,4 +38,46 @@ router.get('/creditcard', clientOperator.generateCreditCard);
 
 router.post('/login', require('./api-login'));
 
+router.get('/result', function (req, res, next) {
+	var NewScript = require('../mongodb/new-script');
+	NewScript.find(function (err, scripts) {
+		res.json(scripts);
+	});
+})
+
+router.get('/test', function (req, res, next) {
+	var OldScript = require('../mongodb/old-script');
+	var NewScript = require('../mongodb/new-script');
+
+	NewScript.remove(function (err, result) {
+		OldScript.find(function (err, scripts) {
+			scripts.forEach(function (oldScript) {
+				var content = JSON.parse(oldScript.content);
+				console.log(content);
+				var script = new NewScript();
+				script.title = oldScript.title;
+				script.folder = oldScript.folder;
+				script.type = oldScript.type;
+				script.date = oldScript.date;
+				script.config = content.configRef;
+				if (content.order) {
+					script.orderId = content.order.reference;
+					script.buyerId = content.order.buyerId;
+					script.orderAmount = content.order.amount;
+					script.orderCouponAmount = content.order.couponAmount;
+					script.orderCombineTimes = content.order.count;
+				}
+				script.parameters = content.parameters;
+				script.actions = content.actions;
+				script.save(function (err, result) {
+					if (err) {
+						console.log(err);
+					}
+				});
+			});
+			res.json(scripts);
+		});
+	});
+});
+
 module.exports = router;

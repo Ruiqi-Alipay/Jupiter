@@ -36,9 +36,16 @@ function clientScript (script) {
 		id: script._id,
 		title: script.title,
 		type: script.type,
-		content: script.content,
 		folder: script.folder,
-		date: convertDate(script.date)
+		date: convertDate(script.date),
+		orderId: script.orderId,
+		config: script.config,
+		buyerId: script.buyerId,
+		orderAmount: script.orderAmount,
+		orderCouponAmount: script.orderCouponAmount,
+		orderCombineTimes: script.orderCombineTimes,
+		parameters: script.parameters,
+		actions: script.actions
 	};
 }
 

@@ -1,10 +1,18 @@
 var path = require('path'),
 	moment = require('moment'),
 	ApiUtils = require('./api-utils'),
-    Script = require(path.join(__dirname, '..', 'mongodb', 'script'));
+    Script = require(path.join(__dirname, '..', 'mongodb', 'new-script'));
 
 module.exports = function (req, res, next) {
-    var script = new Script(req.body);
+	var data = req.body;
+	if (data.actions) {
+		data.actions = JSON.parse(data.actions);
+	}
+	if (data.parameters) {
+		data.parameters = JSON.parse(data.parameters);
+	}
+
+    var script = new Script(data);
     script.date = moment();
 
     script.save(function(err, script){

@@ -3,7 +3,6 @@ var React = require('react'),
 	ControlPanel = require('../components/scriptdetail/control-panel.react'),
 	BasicPanel = require('../components/scriptdetail/basic-panel.react'),
 	ParameterPanel = require('../components/scriptdetail/parameter-panel.react'),
-	ConfigPanel = require('../components/scriptdetail/config-panel.react'),
 	StepPanel = require('../components/scriptdetail/step-panel.react');
 
 function findArrayIndex (items, id) {
@@ -61,12 +60,11 @@ module.exports = React.createClass({
 					{messagePanel}
 					<div className='row'>
 						<div className='col-sm-5'>
-							<BasicPanel script={script}/>
-							<ParameterPanel parameters={script ? script.content.parameters : undefined}/>
+							<BasicPanel script={script} scripts={configScripts} select={script ? script.config : undefined}/>
+							<ParameterPanel parameters={script ? script.parameters : undefined}/>
 						</div>
 						<div className='col-sm-7'>
-							<ConfigPanel scripts={configScripts} select={script ? script.content.configRef : undefined}/>
-							<StepPanel actions={script ? script.content.actions : undefined}/>
+							<StepPanel actions={script ? script.actions : undefined}/>
 						</div>
 					</div>
 				</div>
