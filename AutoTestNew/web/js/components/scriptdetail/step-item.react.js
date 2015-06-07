@@ -81,7 +81,7 @@ module.exports = React.createClass({
 
 		if (action.type == '点击位置') {
 			targets = ['按钮', '图片'];
-		} else if (action.type == '输入' || action.type == '阿里键盘输入' || action.type == '阿里数字键盘输入') {
+		} else if (action.type == '清除' || action.type == '输入' || action.type == '阿里键盘输入' || action.type == '阿里数字键盘输入') {
 			targets = ['编辑框'];
 			paramView = (<input className="form-control" type="text" value={action.param} onChange={this._onPramInputChange}/>);
 		} else if (action.type == '单选位置') {
