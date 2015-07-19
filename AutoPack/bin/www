@@ -1,8 +1,0 @@
-#!/usr/bin/env node
-var debug = require('debug')('autopack-server');
-var app = require('../app');
-var channel = require('../routes/channel.js');
-
-app.set('port', process.env.PORT || 80);
-
-channel.start(app.get('port'));

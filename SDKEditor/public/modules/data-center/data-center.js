@@ -1,1 +1,0 @@
-var dataCenter = angular.module('data-center', []);
