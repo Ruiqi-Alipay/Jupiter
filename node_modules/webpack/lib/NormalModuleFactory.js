@@ -114,6 +114,7 @@ function NormalModuleFactory(context, resolvers, parser, options) {
 						onDoneResolving.call(this);
 					}.bind(this));
 				}
+
 				function onDoneResolving() {
 					callback(null, {
 						context: context,
@@ -132,6 +133,8 @@ function NormalModuleFactory(context, resolvers, parser, options) {
 module.exports = NormalModuleFactory;
 
 NormalModuleFactory.prototype = Object.create(Tapable.prototype);
+NormalModuleFactory.prototype.constructor = NormalModuleFactory;
+
 NormalModuleFactory.prototype.create = function(context, dependency, callback) {
 	context = context || this.context;
 	var request = dependency.request;

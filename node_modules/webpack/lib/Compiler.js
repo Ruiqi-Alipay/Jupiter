@@ -110,7 +110,7 @@ Watching.prototype.invalidate = function() {
 };
 
 Watching.prototype.close = function(callback) {
-	if(callback === undefined) callback = function(){};
+	if(callback === undefined) callback = function() {};
 
 	if(this.watcher) {
 		this.watcher.close();
@@ -152,6 +152,7 @@ function Compiler() {
 module.exports = Compiler;
 
 Compiler.prototype = Object.create(Tapable.prototype);
+Compiler.prototype.constructor = Compiler;
 
 Compiler.Watching = Watching;
 Compiler.prototype.watch = function(watchOptions, handler) {
@@ -243,6 +244,7 @@ Compiler.prototype.emitAssets = function(compilation, callback) {
 				var dir = path.dirname(targetFile);
 				this.outputFileSystem.mkdirp(this.outputFileSystem.join(outputPath, dir), writeOut.bind(this));
 			} else writeOut.call(this);
+
 			function writeOut(err) {
 				if(err) return callback(err);
 				var targetPath = this.outputFileSystem.join(outputPath, targetFile);

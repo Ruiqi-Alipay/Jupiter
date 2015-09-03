@@ -73,7 +73,11 @@ Chunk.prototype.addBlock = function(block) {
 };
 
 Chunk.prototype.addOrigin = function(module, loc) {
-	this.origins.push({module: module, loc: loc, name: this.name});
+	this.origins.push({
+		module: module,
+		loc: loc,
+		name: this.name
+	});
 };
 
 Chunk.prototype.remove = function(reason) {
@@ -123,6 +127,7 @@ Chunk.prototype.integrate = function(other, reason) {
 		m.rewriteChunkInReasons(other, [this]);
 	}, this);
 	other.modules.length = 0;
+
 	function moveChunks(chunks, kind, onChunk) {
 		chunks.forEach(function(c) {
 			var idx = c[kind].indexOf(other);
@@ -164,7 +169,7 @@ Chunk.prototype.integrate = function(other, reason) {
 };
 
 Chunk.prototype.isEmpty = function() {
-	return (this.modules.length === 0);
+	return this.modules.length === 0;
 };
 
 Chunk.prototype.updateHash = function(hash) {
@@ -222,7 +227,7 @@ Chunk.prototype.integratedSize = function(other, options) {
 	return modulesSize * (this.initial || other.initial ? ENTRY_CHUNK_MULTIPLICATOR : 1) + CHUNK_OVERHEAD;
 };
 
-Chunk.prototype.getChunkMaps = function(includeEntries) {
+Chunk.prototype.getChunkMaps = function(includeEntries, realHash) {
 	var chunksProcessed = [];
 	var chunkHashMap = {};
 	var chunkNameMap = {};
@@ -230,7 +235,7 @@ Chunk.prototype.getChunkMaps = function(includeEntries) {
 		if(chunksProcessed.indexOf(c) >= 0) return;
 		chunksProcessed.push(c);
 		if(!c.entry || includeEntries) {
-			chunkHashMap[c.id] = c.renderedHash;
+			chunkHashMap[c.id] = realHash ? c.hash : c.renderedHash;
 			if(c.name)
 				chunkNameMap[c.id] = c.name;
 		}

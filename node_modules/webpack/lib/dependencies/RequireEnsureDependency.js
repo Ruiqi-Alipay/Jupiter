@@ -20,7 +20,7 @@ RequireEnsureDependency.Template = function RequireEnsureDependencyTemplate() {}
 
 RequireEnsureDependency.Template.prototype.apply = function(dep, source, outputOptions, requestShortener) {
 	var depBlock = dep.block;
-	var wrapper = DepBlockHelpers.getLoadDepBlockWrapper(depBlock, outputOptions, requestShortener, /*require.e*/"nsure");
+	var wrapper = DepBlockHelpers.getLoadDepBlockWrapper(depBlock, outputOptions, requestShortener, /*require.e*/ "nsure");
 	if(!wrapper) wrapper = [
 		"!/* require.ensure */(",
 		"(__webpack_require__))"
@@ -28,4 +28,3 @@ RequireEnsureDependency.Template.prototype.apply = function(dep, source, outputO
 	source.replace(depBlock.expr.range[0], depBlock.expr.arguments[1].range[0] - 1, wrapper[0]);
 	source.replace(depBlock.expr.arguments[1].range[1], depBlock.expr.range[1] - 1, wrapper[1]);
 };
-

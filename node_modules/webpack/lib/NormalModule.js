@@ -69,6 +69,7 @@ NormalModule.prototype.fillLoaderContext = function fillLoaderContext(loaderCont
 	loaderContext._module = this;
 	loaderContext._compilation = compilation;
 	loaderContext._compiler = compilation.compiler;
+	loaderContext.fs = compilation.compiler.inputFileSystem;
 	compilation.applyPlugins("normal-module-loader", loaderContext, this);
 };
 
@@ -89,13 +90,13 @@ NormalModule.prototype.build = function build(options, compilation, resolver, fs
 		if(options.module && options.module.noParse) {
 			if(Array.isArray(options.module.noParse)) {
 				if(options.module.noParse.some(function(regExp) {
-					return typeof regExp === "string" ?
-						this.request.indexOf(regExp) === 0 :
-						regExp.test(this.request);
-				}, this)) return callback();
+						return typeof regExp === "string" ?
+							this.request.indexOf(regExp) === 0 :
+							regExp.test(this.request);
+					}, this)) return callback();
 			} else if(typeof options.module.noParse === "string" ?
-					this.request.indexOf(options.module.noParse) === 0 :
-					options.module.noParse.test(this.request)) {
+				this.request.indexOf(options.module.noParse) === 0 :
+				options.module.noParse.test(this.request)) {
 				return callback();
 			}
 		}
@@ -125,18 +126,27 @@ NormalModule.prototype.source = function(dependencyTemplates, outputOptions, req
 	var _source = this._source;
 	if(!_source) return new RawSource("throw new Error('No source available');");
 	var source = new ReplaceSource(_source);
-	this._cachedSource = { source: source, hash: hash };
+	this._cachedSource = {
+		source: source,
+		hash: hash
+	};
 	var topLevelBlock = this;
+
 	function doDep(dep) {
 		var template = dependencyTemplates.get(dep.Class);
 		if(!template) throw new Error("No template for dependency: " + dep.Class.name);
 		template.apply(dep, source, outputOptions, requestShortener, dependencyTemplates);
 	}
+
 	function doVariable(vars, variable) {
 		var name = variable.name;
 		var expr = variable.expressionSource(dependencyTemplates, outputOptions, requestShortener);
-		vars.push({name: name, expression: expr});
+		vars.push({
+			name: name,
+			expression: expr
+		});
 	}
+
 	function doBlock(block) {
 		block.dependencies.forEach(doDep);
 		block.blocks.forEach(doBlock);
@@ -147,6 +157,7 @@ NormalModule.prototype.source = function(dependencyTemplates, outputOptions, req
 			var varExpressions = [];
 			var varStartCode = "";
 			var varEndCode = "";
+
 			function emitFunction() {
 				if(varNames.length === 0) return;
 
@@ -215,13 +226,16 @@ NormalModule.prototype.getSourceHash = function() {
 
 NormalModule.prototype.getAllModuleDependencies = function() {
 	var list = [];
+
 	function doDep(dep) {
 		if(dep.module && list.indexOf(dep.module) < 0)
 			list.push(dep.module);
 	}
+
 	function doVariable(variable) {
 		variable.dependencies.forEach(doDep);
 	}
+
 	function doBlock(block) {
 		block.variables.forEach(doVariable);
 		block.dependencies.forEach(doDep);
@@ -257,6 +271,7 @@ NormalModule.prototype.createTemplate = function(keepModules, roots) {
 		return array.join("|");
 	};
 	var args = template.arguments = [];
+
 	function doDeps(deps) {
 		return deps.map(function(dep) {
 			if(dep.module && keepModules.indexOf(dep.module) < 0) {
@@ -268,6 +283,7 @@ NormalModule.prototype.createTemplate = function(keepModules, roots) {
 			}
 		});
 	}
+
 	function doBlock(block, newBlock) {
 		block.variables.forEach(function(variable) {
 			var newDependencies = doDeps(variable.dependencies);
@@ -286,13 +302,16 @@ NormalModule.prototype.createTemplate = function(keepModules, roots) {
 
 NormalModule.prototype.getTemplateArguments = function(keepModules) {
 	var list = [];
+
 	function doDep(dep) {
 		if(dep.module && keepModules.indexOf(dep.module) < 0)
 			list.push(dep.module);
 	}
+
 	function doVariable(variable) {
 		variable.dependencies.forEach(doDep);
 	}
+
 	function doBlock(block) {
 		block.variables.forEach(doVariable);
 		block.dependencies.forEach(doDep);

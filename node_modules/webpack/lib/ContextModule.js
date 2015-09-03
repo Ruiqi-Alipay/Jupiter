@@ -125,5 +125,7 @@ ContextModule.prototype.source = function() {
 ContextModule.prototype.size = function() {
 	return this.dependencies.map(function(dep) {
 		return dep.userRequest.length + 5;
-	}).reduce(function(a, b) { return a + b; }, 160);
+	}).reduce(function(a, b) {
+		return a + b;
+	}, 160);
 };

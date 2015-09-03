@@ -7,8 +7,7 @@ var BasicEvaluatedExpression = require("./BasicEvaluatedExpression");
 
 var NullFactory = require("./NullFactory");
 
-function ConstPlugin() {
-}
+function ConstPlugin() {}
 module.exports = ConstPlugin;
 
 ConstPlugin.prototype.apply = function(compiler) {
@@ -33,7 +32,7 @@ ConstPlugin.prototype.apply = function(compiler) {
 		var bool = param.asBool();
 		if(typeof bool === "boolean") {
 			if(expression.test.type !== "Literal") {
-				var dep = new ConstDependency(bool + "", param.range);
+				var dep = new ConstDependency(" " + bool + "", param.range);
 				dep.loc = expression.loc;
 				this.state.current.addDependency(dep);
 			}

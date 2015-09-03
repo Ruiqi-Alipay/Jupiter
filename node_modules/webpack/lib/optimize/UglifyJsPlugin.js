@@ -92,7 +92,7 @@ UglifyJsPlugin.prototype.apply = function(compiler) {
 						ast.mangle_names(options.mangle || {});
 					}
 					var output = {};
-					output.comments = options.comments || /^\**!|@preserve|@license/;
+					output.comments = Object.prototype.hasOwnProperty.call(options, "comments") ? options.comments : /^\**!|@preserve|@license/;
 					output.beautify = options.beautify;
 					for(var k in options.output) {
 						output[k] = options.output[k];
@@ -125,7 +125,7 @@ UglifyJsPlugin.prototype.apply = function(compiler) {
 						} else {
 							compilation.errors.push(new Error(file + " from UglifyJs\n" + err.message + " [" + file + ":" + err.line + "," + err.col + "]"));
 						}
-					} else if (err.msg) {
+					} else if(err.msg) {
 						compilation.errors.push(new Error(file + " from UglifyJs\n" + err.msg));
 					} else
 						compilation.errors.push(new Error(file + " from UglifyJs\n" + err.stack));

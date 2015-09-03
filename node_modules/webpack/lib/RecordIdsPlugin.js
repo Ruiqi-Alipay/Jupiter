@@ -4,8 +4,7 @@
 */
 var path = require("path");
 
-function RecordIdsPlugin() {
-}
+function RecordIdsPlugin() {}
 module.exports = RecordIdsPlugin;
 
 function makeRelative(compiler, identifier) {
@@ -30,7 +29,9 @@ RecordIdsPlugin.prototype.apply = function(compiler) {
 			if(records.nextFreeModuleId)
 				compilation.nextFreeModuleId = records.nextFreeModuleId;
 			if(!records.modules || !records.modules.byIdentifier) return;
-			var usedIds = {0: true};
+			var usedIds = {
+				0: true
+			};
 			modules.forEach(function(module) {
 				if(module.id !== null) return;
 				var identifier = makeRelative(compiler, module.identifier());

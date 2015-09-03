@@ -1,9 +1,0 @@
-var mongoose = require('mongoose');
-
-var UserSchema = new mongoose.Schema({
-	username: { type: String, unique: true, required: true },
-	password: { type: String, unique: true, required: true },
-	sessionId: { type: String }
-});
-
-module.exports = mongoose.model('TestUser', UserSchema);

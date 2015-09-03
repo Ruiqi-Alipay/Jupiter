@@ -10,8 +10,7 @@ var RawSource = require("webpack-core/lib/RawSource");
 var ConstDependency = require("./dependencies/ConstDependency");
 var NullFactory = require("./NullFactory");
 
-function HotModuleReplacementPlugin() {
-}
+function HotModuleReplacementPlugin() {}
 module.exports = HotModuleReplacementPlugin;
 
 HotModuleReplacementPlugin.prototype.apply = function(compiler) {
@@ -48,7 +47,9 @@ HotModuleReplacementPlugin.prototype.apply = function(compiler) {
 			});
 			records.chunkModuleIds = {};
 			this.chunks.forEach(function(chunk) {
-				records.chunkModuleIds[chunk.id] = chunk.modules.map(function(m) { return m.id; });
+				records.chunkModuleIds[chunk.id] = chunk.modules.map(function(m) {
+					return m.id;
+				});
 			});
 		});
 		compilation.plugin("after-hash", function() {
@@ -131,9 +132,9 @@ HotModuleReplacementPlugin.prototype.apply = function(compiler) {
 				source,
 				"",
 				hotInitCode
-					.replace(/\$require\$/g, this.requireFn)
-					.replace(/\$hash\$/g, JSON.stringify(hash))
-					.replace(/\/\*foreachInstalledChunks\*\//g, chunk.chunks.length > 0 ? "for(var chunkId in installedChunks)" : "var chunkId = " + chunk.id + ";")
+				.replace(/\$require\$/g, this.requireFn)
+				.replace(/\$hash\$/g, JSON.stringify(hash))
+				.replace(/\/\*foreachInstalledChunks\*\//g, chunk.chunks.length > 0 ? "for(var chunkId in installedChunks)" : "var chunkId = " + chunk.id + ";")
 			]);
 		});
 
