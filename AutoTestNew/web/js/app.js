@@ -4,6 +4,7 @@ var React = require('react'),
 	Route = Router.Route,
 	RouteHandler = Router.RouteHandler,
 	LoginPage = require('./pages/loginpage.react'),
+	RegisterPage = require('./pages/registerpage.react'),
 	Dashboard = require('./pages/dashboard.react');
 
 var App = React.createClass({
@@ -17,6 +18,7 @@ var App = React.createClass({
 var routes = (
 	<Route handler={App}>
 		<Route name='login' path='login' handler={LoginPage}/>
+		<Route name='register' path='register' handler={RegisterPage}/>
 		<Route name='dashboard' path='dashboard/:section_id' handler={Dashboard}/>
 		<DefaultRoute handler={LoginPage}/>
 	</Route>

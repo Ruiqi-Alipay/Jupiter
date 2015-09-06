@@ -4,8 +4,7 @@ var React = require('react'),
 
 var scriptTypes = [
 	{ code: 'Script', name: '执行脚本' },
-	{ code: 'Config', name: '配置脚本' },
-	{ code: 'SysConfig', name: '全局配置脚本' }
+	{ code: 'SysConfig', name: '配置脚本' }
 ];
 
 function findScriptTitle (scripts, targetId) {
@@ -62,12 +61,18 @@ module.exports = React.createClass({
 	_onSelectScript: function (scriptId) {
 		Dispatcher.detailConfigScriptUpdate(scriptId);
 	},
+	_onSelectEnv: function (env, event) {
+		Dispatcher.detailBasicUpdate({
+			config: env
+		});
+	},
 
 	render: function () {
 		var script = this.props.script,
 			select = this.props.select,
 			scripts = this.props.scripts,
 			selectTitle = '(无)',
+			orderConfigView,
 			configScriptViews;
 
 		var typeDisplay,
@@ -105,67 +110,88 @@ module.exports = React.createClass({
 					</li>
 				);
 			}
-		}
 
-		return (
-			<div className="panel panel-default">
-			  <div className="panel-heading">
-			  	<b>脚本基本信息</b>
-			  </div>
-			  <div className="panel-body">
-				<div>
-					<div className="row" style={{paddingLeft: '32px', paddingBottom: '10px'}}>
-						Script Type:
-						<div className="btn-group" role="group" style={{marginLeft: '10px'}}>
-							<button id='saveAs' type="button" className="btn btn-default btn-sm dropdown-toggle"
-								data-toggle="dropdown" aria-expanded='false'>
-								{typeDisplay}
-								<span className="caret"></span>
-							</button>
-							<ul className="dropdown-menu" role="menu" aria-labelledby="saveAs">
-								{typeViews}
-							</ul>
-						</div>
-					</div>
+			if (script.type == 'SysConfig') {
+				orderConfigView = (
 					<div className="row" style={{paddingLeft: '32px'}}>
-						Config Script:
+						Test Env:
 						<div className="btn-group" role="group" style={{marginLeft: '10px'}}>
 							<button id='actionType' type="button" className="btn btn-default btn-sm dropdown-toggle"
 								data-toggle="dropdown" aria-expanded='false'>
-								{selectTitle}
+								{script.config}
 								<span className="caret"></span>
 							</button>
 							<ul className="dropdown-menu" role="menu" aria-labelledby="actionType">
-								{configScriptViews}
+								<li onClick={this._onSelectEnv.bind(this, 'sit')}><a>SIT</a></li>
+								<li onClick={this._onSelectEnv.bind(this, 'stable')}><a>STABLE</a></li>
 							</ul>
 						</div>
 					</div>
-					<div className="input-group">
-						<span className="input-group-addon" id="script-name">Name</span>
-						<input type="text" className="form-control" placeholder="script name" aria-describedby="script-name" value={script ? script.title : ''} onChange={this._onNameChanged}/>
+				);
+			} else {
+				orderConfigView = (
+					<div>
+						<div className="input-group">
+							<span className="input-group-addon" id="order-id">Order ID</span>
+							<input type="text" className="form-control" placeholder="order id" aria-describedby="order-id" value={script ? script.orderId : ''} onChange={this._onOrderIdChanged}/>
+						</div>
+						<div className="input-group">
+							<span className="input-group-addon" id="buyer-id">Buyer ID</span>
+							<input type="text" className="form-control" placeholder="buyer id" aria-describedby="buyer-id" value={script ? script.buyerId : ''} onChange={this._onBuyerIdChanged}/>
+						</div>
+						<div className="input-group">
+							<span className="input-group-addon" id="amount">Order Amount</span>
+							<input type="text" className="form-control" placeholder="order amount" aria-describedby="amount" value={script ? script.orderAmount : ''} onChange={this._onAmountChanged}/>
+						</div>
+						<div className="input-group">
+							<span className="input-group-addon" id="coupon-amount">Coupon Amount</span>
+							<input type="text" className="form-control" placeholder="order coupon amount" aria-describedby="coupon-amount" value={script ? script.orderCouponAmount : ''} onChange={this._onCouponAmountChanged}/>
+						</div>
+						<div className="input-group">
+							<span className="input-group-addon" id="count">Combine Times</span>
+							<input type="text" className="form-control" placeholder="combine order times" aria-describedby="count" value={script ? script.orderCombineTimes : ''} onChange={this._onCountChanged}/>
+						</div>
 					</div>
-					<div className="input-group">
-						<span className="input-group-addon" id="order-id">Order ID</span>
-						<input type="text" className="form-control" placeholder="order id" aria-describedby="order-id" value={script ? script.orderId : ''} onChange={this._onOrderIdChanged}/>
+				);
+			}
+		}
+
+		return (
+			<div>
+				<div className="panel panel-default">
+				  <div className="panel-heading">
+				  	<b>脚本基本信息</b>
+				  </div>
+				  <div className="panel-body">
+					<div>
+						<div className="row" style={{paddingLeft: '32px', paddingBottom: '10px'}}>
+							Script Type:
+							<div className="btn-group" role="group" style={{marginLeft: '10px'}}>
+								<button id='saveAs' type="button" className="btn btn-default btn-sm dropdown-toggle"
+									data-toggle="dropdown" aria-expanded='false'>
+									{typeDisplay}
+									<span className="caret"></span>
+								</button>
+								<ul className="dropdown-menu" role="menu" aria-labelledby="saveAs">
+									{typeViews}
+								</ul>
+							</div>
+						</div>
+						<div className="input-group">
+							<span className="input-group-addon" id="script-name">Name</span>
+							<input type="text" className="form-control" placeholder="script name" aria-describedby="script-name" value={script ? script.title : ''} onChange={this._onNameChanged}/>
+						</div>
 					</div>
-					<div className="input-group">
-						<span className="input-group-addon" id="buyer-id">Buyer ID</span>
-						<input type="text" className="form-control" placeholder="buyer id" aria-describedby="buyer-id" value={script ? script.buyerId : ''} onChange={this._onBuyerIdChanged}/>
-					</div>
-					<div className="input-group">
-						<span className="input-group-addon" id="amount">Order Amount</span>
-						<input type="text" className="form-control" placeholder="order amount" aria-describedby="amount" value={script ? script.orderAmount : ''} onChange={this._onAmountChanged}/>
-					</div>
-					<div className="input-group">
-						<span className="input-group-addon" id="coupon-amount">Coupon Amount</span>
-						<input type="text" className="form-control" placeholder="order coupon amount" aria-describedby="coupon-amount" value={script ? script.orderCouponAmount : ''} onChange={this._onCouponAmountChanged}/>
-					</div>
-					<div className="input-group">
-						<span className="input-group-addon" id="count">Combine Times</span>
-						<input type="text" className="form-control" placeholder="combine order times" aria-describedby="count" value={script ? script.orderCombineTimes : ''} onChange={this._onCountChanged}/>
-					</div>
+				  </div>
 				</div>
-			  </div>
+				<div className="panel panel-default">
+				  <div className="panel-heading">
+				  	<b>订单创建（订单无关测试不许要编辑该部分）</b>
+				  </div>
+				  <div className="panel-body">
+				  	{orderConfigView}
+				  </div>
+				</div>
 			</div>
 		);
 	}

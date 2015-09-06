@@ -1,0 +1,8 @@
+[
+	{ "name": "Android", "ready": true},
+	{ "name": "iOS", "ready": false},
+	{ "name": "Chrome", "ready": false},
+	{ "name": "Firefox", "ready": false},
+	{ "name": "IE", "ready": false},
+	{ "name": "Safari", "ready": false}
+]

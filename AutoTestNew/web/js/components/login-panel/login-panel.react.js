@@ -4,6 +4,9 @@ var React = require('react'),
 
 module.exports = React.createClass({
 
+	contextTypes: {
+		router: React.PropTypes.func
+	},
 	propTypes: {
 		username: ReactPropTypes.string,
 		password: ReactPropTypes.string,
@@ -20,26 +23,24 @@ module.exports = React.createClass({
 	_onLogin: function () {
 		Dispatcher.login();
 	},
+	_onRegister: function () {
+		this.context.router.transitionTo('register');
+	},
 
 	render: function () {
 		var styles = {
 			content: {
 				'maxWidth': '400px',
-				'minHeight': '160px',
+				'minHeight': '180px',
 				'margin': '0px 10px'
 			},
 			icon: {
 				'fontSize': '16px'
 			},
-			bottombar: {
-				'display': 'flex',
-				'flexdirection': 'row',
-				'justifyContent': 'space-between',
-				'paddingTop': '15px'
-			},
 			errorMsg: {
 				'color': 'red',
-				'paddingLeft': '50px'
+				'paddingLeft': '50px',
+				'minHeight': '30px'
 			}
 		};
 
@@ -58,9 +59,12 @@ module.exports = React.createClass({
 					  	<input type="password" className="form-control" placeholder="password"
 					  		aria-describedby="password" value={props.password} onChange={this._onPasswordChanged} disabled={props.loading}/>
 					</div>
-		            <div style={styles.bottombar}>
-		            	<div style={styles.errorMsg}>{props.errorMsg}</div>
-		            	<button type="button" className="btn btn-default right" disabled={!props.username || !props.password || props.loading} onClick={this._onLogin}>Signin</button>
+					<div style={styles.errorMsg}>{props.errorMsg}</div>
+		            <div className="row">
+		            	<button type="button" className="btn btn-default col-sm-3 col-sm-offset-5" disabled={props.loading}
+		            		onClick={this._onRegister}>Register</button>
+		            	<button type="button" className="btn btn-default col-sm-3" style={{marginLeft: '10px'}}
+		            		disabled={!props.username || !props.password || props.loading} onClick={this._onLogin}>Signin</button>
 		            </div>
 			    </div>
 			</div>

@@ -4,17 +4,24 @@ var path = require('path'),
 	Package = require(path.join(__dirname, '..', 'mongodb', 'package'));
 
 module.exports = function (req, res, next) {
-	Package.findOneAndRemove({ _id: req.params.package_id }, function(err, deletePackage){
+	ApiUtils.sessionCheck(req, function (err, user) {
 		if (err) {
-			return res.json({
-				success: false,
-				data: err.toString()
-			});
+			return res.json(err);
 		}
-		fs.remove(path.join(__dirname, '..', 'public', deletePackage.name));
-		res.json({
-			success: true,
-			data: ApiUtils.toClientPackageSingle(deletePackage)
+
+		Package.findOneAndRemove({ _id: req.params.package_id, username: req.query.username }, function(err, deletePackage){
+			if (err || !deletePackage) {
+				return res.json({
+					success: false,
+					data: err.toString()
+				});
+			}
+
+			fs.remove(path.join(__dirname, '..', 'uploads', req.query.username, deletePackage.name));
+			res.json({
+				success: true,
+				data: ApiUtils.toClientPackageSingle(deletePackage)
+			});
 		});
 	});
 };

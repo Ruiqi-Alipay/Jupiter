@@ -1,5 +1,6 @@
 var React = require('react'),
 	Link = require('react-router').Link,
+	Store = require('../store'),
 	classNames = require('classNames');
 
 module.exports = React.createClass({
@@ -12,7 +13,8 @@ module.exports = React.createClass({
 	},
 
 	_onLogoutClicked: function (event) {
-		delete localStorage.loginToken;
+		localStorage.removeItem('session');
+		Store.logOut();
 		this.context.router.transitionTo('login');
 	},
 
@@ -30,6 +32,12 @@ module.exports = React.createClass({
 			});
 			return (<li key={tab.id} className={actionClass}><Link to={tab.to} params={{section_id: tab.id}}>{tab.label}</Link></li>);
 		}, this.props);
+
+		var session = localStorage.getItem('session');
+		var username;
+		if (session) {
+			username = JSON.parse(session).username;
+		}
 
 		return (
 			<nav className="navbar navbar-default navbar-fixed-top">
@@ -49,7 +57,7 @@ module.exports = React.createClass({
 			        {actionTabs}
 			      </ul>
 			      <ul className="nav navbar-nav navbar-right">
-			        <li onClick={this._onLogoutClicked}><a>Logout</a></li>
+			        <li onClick={this._onLogoutClicked}><a>(<span>{username}</span>) Logout</a></li>
 			      </ul>
 			    </div>
 			  </div>

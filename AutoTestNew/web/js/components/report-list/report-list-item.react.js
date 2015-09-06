@@ -6,9 +6,14 @@ module.exports = React.createClass({
 	propTypes: {
 		report: ReactPropTypes.object.isRequired
 	},
+	contextTypes: {
+		router: React.PropTypes.func
+	},
 
 	_openExecutionReport: function () {
-		window.open(location.pathname + 'reports/' + encodeURIComponent(this.props.report.title) + '/index.html', '_blank');
+		var report = this.props.report;
+		this.context.router.transitionTo('dashboard', {section_id: 'report'},
+			{select_report: report.title});
 	},
 	_openMemoryReport: function () {
 		window.open(location.pathname + 'reporter#?title=' + encodeURIComponent(this.props.report.title) + '&type=memory', '_blank');
@@ -52,9 +57,9 @@ module.exports = React.createClass({
 				<div style={styles.bottomBar}>
 					<div className="btn-group" role="group" aria-label="...">
 						<button type="button" className="btn btn-default btn-sm" onClick={this._openExecutionReport}>Execution Report</button>
-						<button type="button" className="btn btn-default btn-sm" onClick={this._openMemoryReport}>Memory Report</button>
-						<button type="button" className="btn btn-default btn-sm" onClick={this._openNetworkingReport}>Networking Report</button>
-						<button type="button" className="btn btn-default btn-sm" onClick={this._openCPUReport}>CPU Report</button>
+						<button type="button" className="btn btn-default btn-sm" disabled onClick={this._openMemoryReport}>Memory Report</button>
+						<button type="button" className="btn btn-default btn-sm" disabled onClick={this._openNetworkingReport}>Networking Report</button>
+						<button type="button" className="btn btn-default btn-sm" disabled onClick={this._openCPUReport}>CPU Report</button>
 					</div>
 				</div>
 			</a>

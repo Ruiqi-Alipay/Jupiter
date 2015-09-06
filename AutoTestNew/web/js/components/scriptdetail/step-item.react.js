@@ -11,10 +11,25 @@ module.exports = React.createClass({
 	},
 
 	_onSelectType: function (event) {
-		Dispatcher.detailUpdateAction({
+		var action = {
 			index: this.props.index - 1,
 			type: event.target.text
-		});
+		};
+
+		if (action.type == '输入'
+			|| action.type == '清除') {
+			action.target = '编辑框[1]';
+		} else if (action.type == '点击位置') {
+			action.target = '按钮[1]';
+		} else if (action.type == '单选位置') {
+			action.target = '单选框[1]';
+		} else if (action.type == '多选位置') {
+			action.target = '多选框[1]';
+		} else {
+			action.target = '';
+		}
+
+		Dispatcher.detailUpdateAction(action);
 	},
 	_onSelectTarget: function (event) {
 		Dispatcher.detailUpdateAction({
@@ -81,16 +96,17 @@ module.exports = React.createClass({
 
 		if (action.type == '点击位置') {
 			targets = ['按钮', '图片'];
-		} else if (action.type == '清除' || action.type == '输入' || action.type == '阿里键盘输入' || action.type == '阿里数字键盘输入') {
+		} else if (action.type == '清除') {
+			targets = ['编辑框'];
+		} else if (action.type == '输入') {
 			targets = ['编辑框'];
 			paramView = (<input className="form-control" type="text" value={action.param} onChange={this._onPramInputChange}/>);
 		} else if (action.type == '单选位置') {
 			targets = ['单选框'];
 		} else if (action.type == '多选位置') {
 			targets = ['多选框'];
-		} else if (action.type == '点击') {
-			paramView = (<input className="form-control" type="text" value={action.target} onChange={this._onTargetInputChange}/>);
-		} else if (action.type == '文案校验') {
+		} else if (action.type == '点击' || action.type == '选择' || action.type == '文案校验'
+				|| action.type == '阿里键盘输入' || action.type == '阿里密码输入' || action.type == '快速选择') {
 			paramView = (<input className="form-control" type="text" value={action.target} onChange={this._onTargetInputChange}/>);
 		}
 

@@ -3,17 +3,23 @@ var path = require('path'),
 	Package = require(path.join(__dirname, '..', 'mongodb', 'package'));
 
 module.exports = function (req, res, next) {
-	Package.find(function(err, packages){
+	ApiUtils.sessionCheck(req, function (err, user) {
 		if (err) {
-			return res.json({
-				success: false,
-				data: err.toString()
-			});
+			return res.json(err);
 		}
 
-		res.json({
-			success: true,
-			data: ApiUtils.toClientPackage(packages)
+		Package.find({ username: user.username }, function(err, packages){
+			if (err) {
+				return res.json({
+					success: false,
+					data: err.toString()
+				});
+			}
+
+			res.json({
+				success: true,
+				data: ApiUtils.toClientPackage(packages)
+			});
 		});
 	});
 };

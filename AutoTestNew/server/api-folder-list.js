@@ -1,19 +1,26 @@
 var path = require('path'),
-    Folder = require(path.join(__dirname, '..', 'mongodb', 'folder')),
+	User = require('../mongodb/user'),
+    Folder = require('../mongodb/folder'),
     ApiUtils = require('./api-utils');
 
 module.exports = function (req, res, next) {
-	Folder.find().sort('title').exec(function(err, folders){
+	ApiUtils.sessionCheck(req, function (err, user) {
 		if (err) {
-			return res.json({
-				success: false,
-				data: err.toString()
-			});
+			return res.json(err);
 		}
 
-		res.json({
-			success: true,
-			data: ApiUtils.toClientFolder(folders)
+		Folder.find({ username: user.username }).sort('title').exec(function(err, folders){
+			if (err) {
+				return res.json({
+					success: false,
+					data: 'list folder failed'
+				});
+			}
+
+			res.json({
+				success: true,
+				data: ApiUtils.toClientFolder(folders)
+			});
 		});
 	});
 };

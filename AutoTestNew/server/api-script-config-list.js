@@ -1,27 +1,32 @@
 var path = require('path'),
-	Script = require(path.join(__dirname, '..', 'mongodb', 'new-script')),
+	Script = require(path.join(__dirname, '..', 'mongodb', 'script')),
 	Folder = require(path.join(__dirname, '..', 'mongodb', 'folder')),
-	apiUtils = require('./api-utils');
+	ApiUtils = require('./api-utils');
 
 module.exports = function (req, res, next) {
-
-	Folder.find(function (err, folders) {
+	ApiUtils.sessionCheck(req, function (err, user) {
 		if (err) {
-			return res.json({ success: false });
+			return res.json(err);
 		}
 
-		Script.find({ type: 'Config' }, {title: 1, type: 1, date: 1})
-				.sort('-date').exec(function (err, scripts) {
+		Folder.find({ username: user.username }, function (err, folders) {
 			if (err) {
 				return res.json({ success: false });
 			}
 
-			res.json({
-				success: true,
-				data: {
-					configScripts: apiUtils.toClientScript(scripts),
-					folders: apiUtils.toClientFolder(folders)
+			Script.find({ type: 'Config' }, {title: 1, type: 1, date: 1})
+					.sort('-date').exec(function (err, scripts) {
+				if (err) {
+					return res.json({ success: false });
 				}
+
+				res.json({
+					success: true,
+					data: {
+						configScripts: ApiUtils.toClientScript(scripts),
+						folders: ApiUtils.toClientFolder(folders)
+					}
+				});
 			});
 		});
 	});

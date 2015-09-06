@@ -1,198 +1,228 @@
-var prefix = '/autotest';
+var prefix = 'http://android.t8129aqcn.alipay.net/autotest',
+	request = require('request');
 
 module.exports = {
 
 	// Login
 	login: function (username, password, callback) {
-		$.ajax({
-			url: prefix + '/api/login',
+		request({
+			url: prefix + '/api/user/signin',
 			method: 'POST',
-			data: {
+			json: {
 				username: username,
 				password: password
-			},
-			success: callback
-		});
+			}
+		}, callback);
+	},
+	register: function (username, password, callback) {
+		request({
+			url: prefix + '/api/user',
+			method: 'POST',
+			json: {
+				username: username,
+				password: password
+			}
+		}, callback);
 	},
 
 	// Folder related API
 	loadFolders: function (callback) {
-		$.ajax({
+		request({
 			url: prefix + '/api/folder',
+			qs: JSON.parse(localStorage.getItem('session')),
 			method: 'GET',
-			success: callback
-		});
+			json: true
+		}, callback);
 	},
 	createFolder: function (title, callback) {
-		$.ajax({
+		request({
 			url: prefix + '/api/folder',
+			qs: JSON.parse(localStorage.getItem('session')),
 			method: 'POST',
-			data: {
+			json: {
 				title: title
-			},
-			success: callback
-		});
+			}
+		}, callback);
 	},
 	updateFolder: function (id, title, callback) {
-		$.ajax({
+		request({
 			url: prefix + '/api/folder/' + id,
+			qs: JSON.parse(localStorage.getItem('session')),
 			method: 'PUT',
 			data: { title: title },
-			success: callback
-		});
+			json: true
+		}, callback);
 	},
 	deleteFolder: function (id, callback) {
-		$.ajax({
+		request({
 			url: prefix + '/api/folder/' + id,
+			qs: JSON.parse(localStorage.getItem('session')),
 			method: 'DELETE',
-			success: callback
-		});
+			json: true
+		}, callback);
 	},
 
 	// Script related API
 	loadScripts: function (folder, callback) {
-		$.ajax({
+		request({
 			url: prefix + '/api/script/folder/' + folder,
+			qs: JSON.parse(localStorage.getItem('session')),
 			method: 'GET',
-			success: callback
-		});
+			json: true
+		}, callback);
 	},
 	loadConfigScripts: function (callback) {
-		$.ajax({
+		request({
 			url: prefix + '/api/script/config',
+			qs: JSON.parse(localStorage.getItem('session')),
 			method: 'GET',
-			success: callback
-		});
+			json: true
+		}, callback);
 	},
 	loadScript: function (scriptId, callback) {
-		$.ajax({
+		request({
 			url: prefix + '/api/script/detail/' + scriptId,
+			qs: JSON.parse(localStorage.getItem('session')),
 			method: 'GET',
-			success: callback
-		});
+			json: true
+		}, callback);
 	},
 	updateScript: function (script, callback) {
-		$.ajax({
+		request({
 			url: prefix + '/api/script/' + script.id,
+			qs: JSON.parse(localStorage.getItem('session')),
 			method: 'PUT',
-			data: script,
-			success: callback
-		});
+			json: script
+		}, callback);
 	},
 	createScript: function (script, callback) {
-		$.ajax({
+		request({
 			url: prefix + '/api/script',
+			qs: JSON.parse(localStorage.getItem('session')),
 			method: 'POST',
-			data: script,
-			success: callback
-		});
+			json: script
+		}, callback);
 	},
 	deleteScript: function (scriptId, callback) {
-		$.ajax({
+		request({
 			url: prefix + '/api/script/' + scriptId,
+			qs: JSON.parse(localStorage.getItem('session')),
 			method: 'DELETE',
-			success: callback
-		});
+			json: true
+		}, callback);
 	},
 
 	// Parameter realated API
 	loadParameters: function (callback) {
-		$.ajax({
+		request({
 			url: prefix + '/api/parameter',
+			qs: JSON.parse(localStorage.getItem('session')),
 			method: 'GET',
-			success: callback
-		});
+			json: true
+		}, callback);
 	},
 	createParameter: function (name, value, callback) {
-		$.ajax({
+		request({
 			url: prefix + '/api/parameter',
+			qs: JSON.parse(localStorage.getItem('session')),
 			method: 'POST',
-			data: {
+			json: {
 				name: name,
 				value: value
-			},
-			success: callback
-		});
+			}
+		}, callback);
 	},
 	updateParameter: function (id, value, callback) {
-		$.ajax({
+		request({
 			url: prefix + '/api/parameter/' + id,
-			data: {
+			qs: JSON.parse(localStorage.getItem('session')),
+			json: {
 				value: value
 			},
-			method: 'PUT',
-			success: callback
-		});
+			method: 'PUT'
+		}, callback);
 	},
 	deleteParameter: function (id, callback) {
-		$.ajax({
+		request({
 			url: prefix + '/api/parameter/' + id,
+			qs: JSON.parse(localStorage.getItem('session')),
 			method: 'DELETE',
-			success: callback
-		});
+			json: true
+		}, callback);
 	},
 	searchParameter: function (searchText, callback) {
-		$.ajax({
+		var query = JSON.parse(localStorage.getItem('session'));
+		query.search = searchText;
+		request({
 			url: prefix + '/api/parameter/search',
+			qs: query,
 			type: 'GET',
-			data: {
-				search: searchText
-			},
-			success: function (response) {
-				if (response.success) {
-					_parameters = response.data;
-					this.emit(EVENT_PARAMETER_LIST_CHANGES);
-				}
-			}.bind(this),
 			json: true
-		});
+		}, callback);
 	},
 
 	// Package
 	loadPackages: function (callback) {
-		$.ajax({
+		request({
 			url: prefix + '/api/package',
+			qs: JSON.parse(localStorage.getItem('session')),
 			method: 'GET',
-			success: callback
-		});
+			json: true
+		}, callback);
 	},
 	uploadPackage: function (file, description, callback) {
+		var session = JSON.parse(localStorage.getItem('session'));
+
 		var formData = new FormData();
 		formData.append('file', file);
-
 		var xhr = new XMLHttpRequest();
-		xhr.open('POST', prefix + '/api/package?type=Android&description=' + encodeURIComponent(description), true);
+		xhr.open('POST', prefix + '/api/package?'
+				+ 'type=Android'
+				+ '&description=' + encodeURIComponent(description)
+				+ '&username=' + session.username
+				+ '&sessionId=' + session.sessionId, true);
 		xhr.onload = callback;
 		xhr.send(formData);
 	},
 	deletePackage: function (id, callback) {
-		$.ajax({
+		request({
 			url: prefix + '/api/package/' + id,
+			qs: JSON.parse(localStorage.getItem('session')),
 			method: 'DELETE',
-			success: callback
-		});
+			json: true
+		}, callback);
 	},
 
 	// Report realted API
 	loadReports: function (page, callback) {
-		$.ajax({
+		var query = JSON.parse(localStorage.getItem('session'));
+		query.page = page;
+		request({
 			url: prefix + '/api/report',
+			qs: query,
 			type: 'GET',
-			data: {
-				page: page
-			},
-			success: callback
-		});
+			json: true
+		}, callback);
 	},
 	searchReport: function (searchText, callback) {
-		$.ajax({
+		var query = JSON.parse(localStorage.getItem('session'));
+		query.search = searchText;
+		request({
 			url: prefix + '/api/report/search',
+			qs: query,
 			type: 'GET',
-			data: {
-				search: searchText
-			},
-			success: callback
-		});
+			json: true
+		}, callback);
+	},
+	loadReport: function (title, callback) {
+		var query = JSON.parse(localStorage.getItem('session'));
+		query.title = title;
+		request({
+			url: prefix + '/api/report',
+			qs: query,
+			type: 'GET',
+			json: true
+		}, callback);
 	}
 };
 

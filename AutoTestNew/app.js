@@ -11,12 +11,11 @@ mongoose.connect('mongodb://localhost/news');
 var app = express();
 
 app.use(multer({
-	dest: path.join(__dirname, 'public'),
+	dest: path.join(__dirname, 'uploads'),
     rename: function(fieldname, filename) {
         return filename;
     }
 }));
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -27,8 +26,8 @@ app.use('/reporter', express.static(path.join(__dirname, 'reporter')));
 app.use('/', express.static(path.join(__dirname, 'web')));
 
 if (require.main == module) {
-	app.listen(80, function () {
-		console.log('Automation server now listen on port: ' + 80);
+	app.listen(9090, function () {
+		console.log('Automation server now listen on port: ' + 9090);
 	})
 } else {
 	module.exports = app;

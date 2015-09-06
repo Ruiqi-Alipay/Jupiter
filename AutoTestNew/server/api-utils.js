@@ -1,3 +1,5 @@
+User = require('../mongodb/user');
+
 function convertDate (date) {
 	if (!date) {
 		return '';
@@ -49,15 +51,40 @@ function clientScript (script) {
 	};
 }
 
-function clientReport (report) {
+function clientReport (report, full) {
 	return {
 		id: report._id,
 		title: report.title,
-		date: convertDate(report.date)
+		date: convertDate(report.date),
+		content: full ? JSON.parse(report.content) : undefined,
+		username: full ? report.username : undefined
 	};
 }
 
 module.exports = {
+
+	sessionCheck: function (req, callback) {
+		var error = {
+			success: false,
+			requireSignIn: true,
+			data: 'session expired'
+		};
+		var query = req.query;
+		if (!query || !query.username || !query.sessionId) {
+			return callback(error);
+		}
+
+		User.findOne({ username: query.username, sessionId: query.sessionId }, function (err, user) {
+			if (err || !user) {
+				callback(error);
+			} else {
+				callback(undefined, user);
+			}
+		});
+	},
+	parseParameters: function (scripts) {
+		// body...
+	},
 
 	toClientFolder: function (folders) {
 		var result = [];
@@ -89,13 +116,13 @@ module.exports = {
 		var result = [];
 		if (reports) {
 			reports.forEach(function (report) {
-				result.push(clientReport(report));
+				result.push(clientReport(report, false));
 			})
 		}
 		return result;
 	},
 	toClientReportSingle: function (report) {
-		return clientReport(report);
+		return clientReport(report, true);
 	},
 
 	toClientPackage: function (packages) {

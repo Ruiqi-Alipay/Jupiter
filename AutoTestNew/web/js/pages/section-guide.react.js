@@ -5,125 +5,103 @@ module.exports = React.createClass({
         return (
             <div className='row'>
               <div className="col-md-8 col-md-offset-2 col-sm-8 col-sm-offset-2" style={{paddingBottom: '200px'}}>
+
+
                 <div className="page-header">
                   <h3>运行环境下载<small>Windows/Mac</small></h3>
                 </div>
                 <div className="row step">
-                  <div className="col-sm-4 col-sm-offset-2">
-                    <button type="button" className="btn btn-sm btn-primary" ng-click="downloadEnv('win-env')">下载工程（Windows）</button>
+                  <div className="col-md-1 col-sm-1">
+                    <span className="label label-success">安装Git</span>
                   </div>
-                  <div className="col-sm-4">
-                    <button type="button" className="btn btn-sm btn-primary" ng-click="downloadEnv('mac-env')">下载工程（Mac）</button>
+                  <div className="col-md-8 col-sm-8">
+                    <span>如果没有安装Git，请 </span><a href="https://git-scm.com/downloads" target="_blank">下载Git</a><span> 并安装</span>
+                  </div>
+                </div>
+                <div className="row step">
+                  <div className="col-md-1 col-sm-1">
+                    <span className="label label-success">执行</span>
+                  </div>
+                  <div className="col-md-8 col-sm-8">
+                    <p>git clone http://gitlab.alibaba-inc.com/test-automation/AutomationEnv.git</p>
                   </div>
                 </div>
 
+
                 <div className="page-header">
-                  <h3>执行测试<small>Windows</small></h3>
+                  <h3>执行测试<small>Windows/Mac</small></h3>
+                </div>
+                <h6>Git clone执行结束后进入AuthmationEnv文件夹即可看到下述文件结构</h6>
+                <img src="res/guide_img_1.png" style={{width: '100%'}}/>
+                <div className="row step">
+                  <div className="col-md-1 col-sm-1">
+                    <span className="label label-success">Windows</span>
+                  </div>
+                  <div className="col-md-8 col-sm-8">
+                    <p>双击run.bat</p>
+                  </div>
                 </div>
                 <div className="row step">
                   <div className="col-md-1 col-sm-1">
-                    <span className="label label-success">Step 1</span>
+                    <span className="label label-success">Mac OS X</span>
                   </div>
                   <div className="col-md-8 col-sm-8">
-                    <p>链接手机，打开手机USB调试，确保手机驱动程序已安装</p>
-                  </div>
-                </div>
-                <div className="row step">
-                  <div className="col-md-1 col-sm-1">
-                    <span className="label label-success">Step 2</span>
-                  </div>
-                  <div className="col-md-8 col-sm-8">
-                    <p>双击run.bat开始执行测试</p>
+                    <p>双击run.command</p>
                   </div>
                 </div>
 
-                <div className="page-header">
-                  <h3>查看报告<small>性能与脚本执行报告</small></h3>
-                </div>
-                <div className="row step">
-                  <div className="col-md-1 col-sm-1">
-                    <span className="label label-success">性能报告</span>
-                  </div>
-                  <div className="col-md-8 col-sm-8">
-                    <p>测试执行结束后，会在工程跟目录下生成proference_currentdate.report文件，在‘性能报告’选项卡中导入该文件即可查看</p>
-                  </div>
-                </div>
-                <div className="row step">
-                  <div className="col-md-1 col-sm-1">
-                    <span className="label label-success">执行报告</span>
-                  </div>
-                  <div className="col-md-8 col-sm-8">
-                    <p>测试执行结束后，会在工程跟目录下生成test_report文件夹，双击文件夹中index.html即可</p>
-                  </div>
-                </div>
 
                 <div className="page-header">
                   <h3>脚本编辑<small>测试脚本制作</small></h3>
                 </div>
+
                 <div className="row step">
-                  <div className="col-md-1 col-sm-1">
-                    <span className="label label-success">Step 1</span>
+                  <div className="col-sm-2">
+                    <span className="label label-success">脚本基本信息编辑</span>
                   </div>
-                  <div className="col-md-8 col-sm-8">
-                    <p>配置脚本初始化行为：该部分行为仅在脚本第一次执行时执行一次，后续的脚本迭代将跳过该部分动作。（具体动作说明见Step 2）</p>
-                  </div>
-                </div>
-                <div className="row step">
-                  <div className="col-md-1 col-sm-1">
-                    <span className="label label-success">Step 2</span>
-                  </div>
-                  <div className="col-md-8 col-sm-8">
-                    <p>编写测试动作，测试时将按编号先后顺序执行，每个动作格式如下</p>
-                    <p><strong>动作类型：</strong>执行动作类型</p>
-                    <p><strong>动作对象：</strong>执行动作目标控件的查找方式</p>
-                    <p><strong>动作参数：</strong>该动作相关参数，如动作类型为'输入'时，该值为要输入的内容</p>
-                    <p>其中，动作对象的查找方式支持'按内容查找'和'按类型和位置查找'两种模式</p>
-                    <p><strong>按内容查找：</strong>按控件的显示内容查找，如要查找下图中按钮，可'动作对象'中输入'Pay Now'</p>
-                    <img src="res/element_search_content.png"/>
-                    <p><strong>按类型和位置查找：</strong>目前仅支持编辑框，相同类型控件的位置排序规则为自上而下，从左到右</p>
-                    <img src="res/element_search_image.png"/>
-                  </div>
-                </div>
-                <div className="row step">
-                  <div className="col-md-1 col-sm-1">
-                    <span className="label label-success">Step 3</span>
-                  </div>
-                  <div className="col-md-8 col-sm-8">
-                    <p>配置判断脚本执行是否成功的评判标准，当有多个时，需全部成功</p>
-                    <p><strong>判定类型：</strong>支持 单元/界面 两种， 单元比对控件显示内容是否一致； 界面比对当前截图与指定图片的像素相似度</p>
-                    <p><strong>判定对象：</strong>类型为单元时，该值为控件内显示类容； 类型为界面时，该值为对比图片的名称（存放于verify_images目录下）</p>
-                    <p><strong>判定参数：</strong>仅用于界面判定时，指定成功判定的像素相似度阀值</p>
-                    <img src="res/script_create_step_3.png"/>
-                  </div>
-                </div>
-                <div className="row step">
-                  <div className="col-md-1 col-sm-1">
-                    <span className="label label-success">Step 4</span>
-                  </div>
-                  <div className="col-md-8 col-sm-8">
-                    <p>配置要返回起始页时可能需要执行的动作，程序会在每个页面依次尝试下述动作（按顺序），直到回到起始页（Step 5判定为成功）</p>
-                    <p>动作规则格式见 Step 2</p>
+                  <div className="col-sm-10">
+                    <p><b>Script Type: </b>脚本类型，脚本分执行脚本和配置脚本2中，其中配置脚本用于在每个执行脚本执行前执行，一般可抽象一些脚本共同的操作到配置脚本</p>
+                    <p><b>Name: </b>脚本标题，该名称会用于执行脚本时的脚本显示，对于不同脚本最好不要重复标题</p>
+                    <img src="res/guide_img_2.png" style={{width: '90%'}}/>
                   </div>
                 </div>
 
                 <div className="row step">
-                  <div className="col-md-1 col-sm-1">
-                    <span className="label label-success">Step 5</span>
+                  <div className="col-sm-2">
+                    <span className="label label-success">订单创建编辑</span>
                   </div>
-                  <div className="col-md-8 col-sm-8">
-                    <p>配置Step 4执行是否回到了起始页的评判标准</p>
-                    <p>判定规则格式见 Step 3</p>
+                  <div className="col-sm-10">
+                    <h6><span className="label label-warning">该部分内容仅针对收银台订单创建，订单无关测试可忽略改部分内容</span></h6>
+                    <p><b>Order ID: </b>订单创建成功后将使用这里配置的值为KEY将订单号配置在脚本参数中，即如在这里填写 tradeNo，然后在执行脚本的行为参数中填写tradeNo，执行时tradeNo将被替换为实际的订单号</p>
+                    <p><b>Buyer ID: </b>用于创建订单的买家ID，必填</p>
+                    <p><b>Order Amount: </b>订单金额，默认为随机</p>
+                    <p><b>Coupon Amount: </b>订单红包金额，默认为随机</p>
+                    <p><b>Combine Times: </b>创建笔数，默认为1</p>
+                    <img src="res/guide_img_3.png" style={{width: '90%'}}/>
                   </div>
                 </div>
+
                 <div className="row step">
-                  <div className="col-md-1 col-sm-1">
-                    <span className="label label-warning">参数配置</span>
+                  <div className="col-sm-2">
+                    <span className="label label-success">脚本参数配置</span>
                   </div>
-                  <div className="col-md-8 col-sm-8">
-                    <p>配置脚本中用到的参数数据，顺序无关</p>
-                    <img src="res/config_parameters.png"/>
+                  <div className="col-sm-10">
+                    <p>若脚本行为中需要输入多次相同的参数，为避免输入多次，可以将值配置为脚本参数，然后将参数KEY值写入到脚本行为中，方便修改</p>
+                    <h6><span className="label label-warning">注意：脚本参数的优先级高于全局参数，即如果脚本参数和全局参数定义了相同KEY值的参数，全局参数将被覆盖</span></h6>
+                    <img src="res/guide_img_4.png" style={{width: '90%'}}/>
                   </div>
                 </div>
+
+                <div className="row step">
+                  <div className="col-sm-2">
+                    <span className="label label-success">脚本行为配置</span>
+                  </div>
+                  <div className="col-sm-10">
+                    <p>脚本行为配置，脚本执行时，将按照编号逐个执行，全部执行成功时，视为脚本执行成功，期间任意行为执行失败时会中断剩余步骤的执行并视为执行失败</p>
+                    <img src="res/guide_img_5.png" style={{width: '90%'}}/>
+                  </div>
+                </div>
+
               </div>
             </div>
         );

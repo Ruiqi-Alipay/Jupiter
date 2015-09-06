@@ -9,7 +9,7 @@ module.exports = React.createClass({
 	},
 	statics: {
 		willTransitionTo: function (transition, params, query) {
-			if (localStorage.loginToken) {
+			if (localStorage.getItem('session')) {
 				transition.redirect('dashboard', {section_id: 'script'});
 			}
 		}
@@ -23,7 +23,7 @@ module.exports = React.createClass({
 	},
 
 	_onAuthChanged: function () {
-		if (localStorage.loginToken) {
+		if (localStorage.getItem('session')) {
 			this.context.router.transitionTo('dashboard', {section_id: 'script'});
 		} else {
 			this.forceUpdate();

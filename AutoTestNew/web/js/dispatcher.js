@@ -132,6 +132,12 @@ module.exports = {
 				data: data
 			});
 		},
+		register: function (user) {
+			dispatcher.dispatch({
+				type: Actions.REGISTER,
+				data: user
+			});
+		},
 
 		// Parameter
 		loadParameters: function () {
@@ -181,6 +187,12 @@ module.exports = {
 		loadReports: function (data) {
 			dispatcher.dispatch({
 				type: Actions.LOAD_REPORTS,
+				data: data
+			});
+		},
+		loadReport: function (data) {
+			dispatcher.dispatch({
+				type: Actions.LOAD_REPORT,
 				data: data
 			});
 		},

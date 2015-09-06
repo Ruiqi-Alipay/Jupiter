@@ -3,10 +3,11 @@ var React = require('react'),
 	Navbar = require('./navbar.react'),
 	Dispatcher = require('../dispatcher').utils,
 	ScriptSection = require('./section-script.react'),
-	ScriptDetail = require('./section-detail.react'),
+	ScriptDetail = require('./section-script-detail.react'),
 	ParameterSection = require('./section-parameter.react'),
 	PackageSection = require('./section-package.react'),
 	ReportSection = require('./section-report.react'),
+	ReportDetail = require('./section-report-detail.react'),
 	GuideSection = require('./section-guide.react');
 
 module.exports = React.createClass({
@@ -16,7 +17,7 @@ module.exports = React.createClass({
 	},
 	statics: {
 		willTransitionTo: function (transition, params, query) {
-			if (!localStorage.loginToken) {
+			if (!localStorage.getItem('session')) {
 				transition.redirect('/login', {}, {'nextPath' : transition.path});
 				return;
 			}
@@ -55,9 +56,16 @@ module.exports = React.createClass({
 					}
 					break;
 				case 'report':
-					var data = Store.getReportData();
-					if (!data.reports) {
-						Dispatcher.loadReports(query.page);
+					if (query.select_report) {
+						var report = Store.getReportDetailData(query.select_report);
+						if (!report) {
+							Dispatcher.loadReport(query.select_report);
+						}
+					} else {
+						var data = Store.getReportData();
+						if (!data.reports) {
+							Dispatcher.loadReports(query.page);
+						}
 					}
 					break;
 			}
@@ -129,11 +137,16 @@ module.exports = React.createClass({
 									packages={data.packages}/>);
 				break;
 			case 'report':
-				var data = Store.getReportData();
-				sectionView = (<ReportSection
-									reports={data.reports}
-									totalPage={data.totalPage > 0 ? parseInt(data.totalPage) : 0}
-									currentPage={data.currentPage >= 0 ? parseInt(data.currentPage) : 0}/>);
+				if (query.select_report) {
+					var report = Store.getReportDetailData(query.select_report);
+					sectionView = (<ReportDetail report={report}/>);
+				} else {
+					var data = Store.getReportData();
+					sectionView = (<ReportSection
+										reports={data.reports}
+										totalPage={data.totalPage > 0 ? parseInt(data.totalPage) : 0}
+										currentPage={data.currentPage >= 0 ? parseInt(data.currentPage) : 0}/>);
+				}
 				break;
 			case 'guide':
 				sectionView = (<GuideSection/>);
